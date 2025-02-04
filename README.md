@@ -1,4 +1,4 @@
-# LendeeFi - A Web3 development platform
+# Ignite Market Application
 
 This repository contains source code for the Dashboard frontend.
 
