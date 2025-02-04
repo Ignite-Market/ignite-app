@@ -66,7 +66,14 @@ declare global {
     authToken: string;
   }
   interface WalletMsgResponse extends GeneralResponse<WalletMsgInterface> {}
+
   interface WalletLoginResponse extends GeneralResponse<WalletLoginInterface> {}
+
+  interface WalletMessageResponse
+    extends GeneralResponse<{
+      message: string;
+      timestamp: number;
+    }> {}
 
   type AuthInterface = LoginInterface | UserInterface | WalletLoginInterface;
 

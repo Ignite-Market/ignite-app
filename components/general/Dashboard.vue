@@ -63,7 +63,7 @@ const props = defineProps({
 /** Heading height */
 const headerRef = useTemplateRef('headerRef');
 
-const calcHeaderHeight = () => (headerRef.value?.$el?.clientHeight || 86) + 60 + 16;
+const calcHeaderHeight = () => (headerRef.value?.$el?.clientHeight || 86) + 60;
 const headerHeight = ref<number>(calcHeaderHeight());
 
 const scrollScreen = computed(() => ({

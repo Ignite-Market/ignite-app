@@ -1,6 +1,6 @@
 <template>
   <Dashboard>
-    <MarketsListing :category="'top'"></MarketsListing>
+    <PredictionSetListing :category="'top'"></PredictionSetListing>
   </Dashboard>
 </template>
 

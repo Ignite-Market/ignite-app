@@ -3,7 +3,10 @@ import type { Address } from 'viem';
 const Endpoints = {
   /** User */
   me: '/users/me',
+  walletMessage: '/users/wallet-message',
   walletLogin: '/users/wallet-login',
+
+  // NOT USED
   changeMail: '/users/change-email',
   changeMailRequest: '/users/change-email-request',
   notification: '/notification',
@@ -27,6 +30,9 @@ const Endpoints = {
   /** Transaction */
   transactions: (txHash?: string) => (txHash ? `/transactions/${txHash}` : '/transactions'),
   transactionLoan: (loanHash: string) => `/transaction/loan/${loanHash}`,
+
+  /** Prediction Sets */
+  predictionSets: '/prediction-sets',
 };
 
 export default Endpoints;

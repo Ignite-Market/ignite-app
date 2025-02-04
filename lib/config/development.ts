@@ -2,11 +2,8 @@ import packageConfig from '../../package.json';
 
 const config: ConfigInterface = {
   VERSION: packageConfig.version || '1.0.0',
-  url: 'https://app-dev.lendeefi.com',
-  apiUrl: 'https://api-dev.lendeefi.com',
-  // tokenAddress: '0xa9e3fb862EDD7F537d1E180f3A78320178615235',
-  // lendeeFiAddress: '0x2e24C524d0358b23Aa189764246F596596416A90',
-  // nftCollectionAddress: '0x9BeED2a1de623325eFe606eEaD0842a6F11A6867',
+  url: 'https://app-dev.ignitemarket.xyz/',
+  apiUrl: 'https://api-dev.ignitemarket.xyz',
   lendeeFi: {
     base: '0x5FFc3666a83AdD188837A890b5111891C66CA5EA',
     bsc: '0xa37DbFB8c71aF9E2A0b3B9851646888b4E438e42',

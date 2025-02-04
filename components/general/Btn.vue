@@ -51,9 +51,9 @@ const btnClass = computed(() => {
       'pointer-events-none pointer-default': props.disabled || props.loading,
       [sizeClass.value]: props.type !== 'link',
       'font-heading uppercase font-semibold transition-colors duration-200': props.type !== 'link',
-      'bg-gradientPurple text-white  hover:bg-none hover:bg-purple-dark transition-none':
+      'bg-gradientPurple text-white  hover:bg-none hover:bg-primary-dark transition-none':
         props.type === 'primary' && !props.disabled,
-      'g-transparent text-purple border border-purple hover:bg-purple hover:text-white':
+      'g-transparent text-primary border border-primary hover:bg-primary hover:text-white':
         props.type === 'secondary' && !props.disabled,
       'bg-gradientGreen bg-clip-text text-transparent': props.type === 'gradient',
       'text-center rounded-xl': props.type !== 'link',

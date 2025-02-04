@@ -5,7 +5,7 @@
     </div>
 
     <div>
-      <n-input placeholder="Search markets" size="large">
+      <n-input placeholder="Search markets" size="large" class="min-w-[30vw]">
         <template #prefix>
           <NuxtIcon name="icon/search" />
         </template>

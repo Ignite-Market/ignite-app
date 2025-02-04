@@ -6,15 +6,14 @@ defineProps({
 });
 
 const { connect, connectors } = useConnect();
-console.log(connectors);
 </script>
 
 <template>
-  <n-space :size="24" vertical>
+  <n-space :size="22" vertical>
     <Btn
       v-for="(connector, key) in connectors"
       :key="key"
-      class="flex-cc"
+      class="flex-cc w-full"
       :class="{
         'relative card flex items-center py-3 pl-2 pr-4 pointer-events-none': !connector,
       }"
@@ -26,16 +25,6 @@ console.log(connectors);
         <NuxtIcon :name="`wallet/${connector.type}`" filled />
         {{ connector.name }}
       </span>
-
-      <!-- <Btn
-        v-if="!isAuthorized"
-        class="inline-block relative pointer-events-auto z-1"
-        type="link"
-        :href="`https://metamask.app.link/dapp/${config.public.url}${fullPath}`"
-        target="_blank"
-      >
-        {{ $t('general.install') }}
-      </Btn> -->
     </Btn>
   </n-space>
 </template>

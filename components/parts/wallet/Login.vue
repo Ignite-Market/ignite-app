@@ -5,8 +5,9 @@
     </span>
     <span v-else>{{ $t('wallet.connect') }}</span>
   </Btn>
+
   <!-- Modal - Wallet select -->
-  <modal v-model:show="modalWalletSelectVisible" :title="$t('wallet.info')">
+  <modal v-model:show="modalWalletSelectVisible" class="w-auto" :title="$t('wallet.info')">
     <WalletEvm :loading="loadingWallet" />
   </modal>
 </template>
@@ -43,6 +44,7 @@ onBeforeMount(() => {
       console.error(e);
     }
   }
+
   if (!userStore.loggedIn) {
     disconnect();
     resetContracts();
@@ -81,14 +83,16 @@ async function evmWalletLogin(data: Record<string, any>) {
   }
 
   loadingWallet.value = true;
-
   try {
-    const message = `Login with wallet ${address.value}`;
+    const resMessage = await $api.get<WalletMessageResponse>(Endpoints.walletMessage);
+    const message = resMessage.data.message;
+    const timestamp = resMessage.data.timestamp;
     const signature = await signMessage($wagmiConfig as Config, { message });
 
     const res = await $api.post<WalletLoginResponse>(Endpoints.walletLogin, {
       address: data?.address || address.value,
       signature,
+      timestamp,
     });
 
     userStore.saveUser(res.data);
