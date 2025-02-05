@@ -6,7 +6,7 @@ import { PredictionSetStatus } from '../types/prediction-set';
  * @param endTime
  * @returns
  */
-export function getStatusName(status: PredictionSetStatus, endTime: Date) {
+export function getStatusName(status: PredictionSetStatus, endTime: string) {
   switch (status) {
     case PredictionSetStatus.ACTIVE:
       if (Number(new Date()) > Number(new Date(endTime))) {
@@ -22,14 +22,14 @@ export function getStatusName(status: PredictionSetStatus, endTime: Date) {
       return 'Resolving...';
 
     case PredictionSetStatus.FINALIZED:
-      return 'Closed...';
+      return 'Closed';
 
     default:
       break;
   }
 }
 
-export function getStatusClass(status: PredictionSetStatus, endTime: Date) {
+export function getStatusClass(status: PredictionSetStatus, endTime: string) {
   switch (status) {
     case PredictionSetStatus.ACTIVE:
       if (Number(new Date()) > Number(new Date(endTime))) {
@@ -46,6 +46,29 @@ export function getStatusClass(status: PredictionSetStatus, endTime: Date) {
 
     case PredictionSetStatus.FINALIZED:
       return 'bg-white/24 text-white';
+
+    default:
+      break;
+  }
+}
+
+export function getDisplayDate(status: PredictionSetStatus, endTime: string, resolutionTime: string) {
+  switch (status) {
+    case PredictionSetStatus.ACTIVE:
+      if (Number(new Date()) > Number(new Date(endTime))) {
+        return `Till ${toMonthAndYear(resolutionTime)}`;
+      }
+
+      return diffToDaysInDaysHoursMinutes(endTime);
+
+    case PredictionSetStatus.FUNDING:
+      return diffToDaysInDaysHoursMinutes(endTime);
+
+    case PredictionSetStatus.VOTING:
+      return `Till ${toMonthAndYear(resolutionTime)}`;
+
+    case PredictionSetStatus.FINALIZED:
+      return '';
 
     default:
       break;

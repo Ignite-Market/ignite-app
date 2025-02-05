@@ -15,7 +15,7 @@ export const themeOverrides: GlobalThemeOverrides = {
     primaryColorPressed: colors.primary.light,
     borderColor: colors.bg.DEFAULT,
     borderRadius: '8px',
-    textColorBase: colors.body.light,
+    textColorBase: colors.white,
   },
   DataTable: {
     tdColor: colors.bg.box,

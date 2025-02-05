@@ -1,6 +1,9 @@
 <template>
-  <n-card class="max-w-[360px] max-h-[220px] bg-grey-light" :content-class="'!p-3'">
-    <div class="flex border-b border-white/10 pb-3 cursor-pointer">
+  <n-card
+    class="max-w-[360px] max-h-[220px] bg-grey-light border-1 !border-grey-light hover:!border-primary"
+    :content-class="'!p-3 !pb-2 !rounded-[8px]'"
+  >
+    <div class="flex border-b border-white/10 pb-3 cursor-pointer" @click="openDetails()">
       <div class="w-[38px] h-[38px] flex-shrink-0">
         <img
           class="rounded-[8px] w-full h-full object-cover"
@@ -15,18 +18,32 @@
     <div class="relative">
       <div class="flex flex-col border-b border-white/10 pb-3 scroll-container h-[100px] overflow-y-scroll">
         <div class="pb-[20px]">
-          <div class="flex flex-row w-full mt-[10px] font-medium cursor-pointer" v-for="outcome of predictionSet.outcomes">
+          <div
+            class="flex flex-row w-full mt-[10px] font-medium cursor-pointer"
+            v-for="outcome of predictionSet.outcomes"
+          >
             <div>{{ outcome.name }}</div>
             <div class="flex ml-auto justify-center items-center">
               <div class="mr-[6px]">{{ (outcome.chance * 100).toFixed(0) }}%</div>
-              <div v-if="tradeEnabled(predictionSet.setStatus, predictionSet.endTime)">
-                <div class="mr-[6px] px-1.5 border-1 bg-statusGreen/20 border-statusGreen rounded-[8px] hover:opacity-80">
+              <div class="flex" v-if="tradeEnabled(predictionSet.setStatus, predictionSet.endTime)">
+                <div
+                  class="mr-[6px] px-1.5 border-1 bg-statusGreen/20 border-statusGreen rounded-[8px] hover:bg-statusGreen"
+                  @click="openDetails(TransactionType.BUY, 5)"
+                >
                   Buy 5
                 </div>
-                <div class="mr-[6px] px-1.5 border-1 bg-statusGreen/20 border-statusGreen rounded-[8px] hover:opacity-80">
+                <div
+                  class="mr-[6px] px-1.5 border-1 bg-statusGreen/20 border-statusGreen rounded-[8px] hover:bg-statusGreen"
+                  @click="openDetails(TransactionType.BUY, 5)"
+                >
                   Buy 10
                 </div>
-                <div class="px-1.5 border-1 bg-statusRed/20 border-statusRed rounded-[8px] hover:opacity-80">Sell</div>
+                <div
+                  class="px-1.5 border-1 bg-statusRed/20 border-statusRed rounded-[8px] hover:bg-statusRed"
+                  @click="openDetails(TransactionType.SELL)"
+                >
+                  Sell
+                </div>
               </div>
             </div>
           </div>
@@ -39,23 +56,50 @@
     </div>
 
     <div class="flex flex-row mt-[10px] items-center justify-center text-[12px] leading-[16px]">
-      <div :class="getStatusClass(predictionSet.setStatus, predictionSet.endTime)" class="font-bold rounded-[20px] py-[2px] px-[6px]">{{ getStatusName(predictionSet.setStatus, predictionSet.endTime) }}</div>
-      <div class="ml-[10px]">3d 3h 56min</div>
+      <Status :status="predictionSet.setStatus" :endTime="predictionSet.endTime"></Status>
+      <div class="ml-[10px] text-[#888888]">
+        {{ getDisplayDate(predictionSet.setStatus, predictionSet.endTime, predictionSet.resolutionTime) }}
+      </div>
       <div class="ml-auto flex items-center justify-center">
-        <NuxtIcon name="icon/star" class="text-primary" />
-        <div class="ml-[6px] font-medium">0.35$</div>
+        <div v-if="predictionSet.setStatus === PredictionSetStatus.FUNDING">
+          <BasicButton :size="'small'" :btnClass="['bg-statusBlue hover:bg-statusBlue-hover']">Fund</BasicButton>
+        </div>
+        <!-- TODO: Check for potential return. -->
+        <div v-else class="flex items-center justify-center">
+          <NuxtIcon name="icon/star" class="text-primary" />
+          <div class="ml-[6px] font-medium">0.35$</div>
+        </div>
       </div>
     </div>
   </n-card>
 </template>
 
 <script lang="ts" setup>
+import { TransactionType, PredictionSetStatus } from '~/lib/types/prediction-set';
+import Status from './Status.vue';
+import BasicButton from '~/components/general/BasicButton.vue';
+
 const props = defineProps({
   predictionSet: { type: Object, default: null, required: true },
 });
 
+const router = useRouter();
 
+function openDetails(transaction?: TransactionType, value?: number) {
+  let query: any = null;
+  if (transaction) {
+    query =
+      transaction === TransactionType.BUY
+        ? { transaction: TransactionType.BUY, value }
+        : { transaction: TransactionType.SELL };
+  }
 
+  router.push({
+    name: 'markets-id',
+    params: { id: props.predictionSet.id },
+    query,
+  });
+}
 </script>
 
 <style scoped>

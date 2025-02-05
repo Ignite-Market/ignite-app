@@ -3,8 +3,12 @@
  */
 import { DAY_IN_SECONDS, MONTH_IN_SECONDS, YEAR_SECONDS } from '../values/general.values';
 
-/** Time to days and hours */
-export function timeToDays(time: String): string {
+/**
+ * Time to days and hours and seconds.
+ * @param time
+ * @returns
+ */
+export function timeToDaysHoursSeconds(time: String): string {
   if (!time) return '';
 
   const [d, h, s] = time.split(':');
@@ -27,7 +31,27 @@ export function timeToDays(time: String): string {
   }
 }
 
-/** Seconds to days and hours and seconds */
+export function diffToDaysInDaysHoursMinutes(date: string) {
+  const now = new Date();
+  const end = new Date(date);
+  const diffMs = Number(end) - Number(now);
+
+  if (diffMs <= 0) {
+    return '0d 0h 0min';
+  }
+
+  const minutes = Math.floor((diffMs / (1000 * 60)) % 60);
+  const hours = Math.floor((diffMs / (1000 * 60 * 60)) % 24);
+  const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  return `${days}d ${hours}h ${minutes}min`;
+}
+
+/**
+ * Seconds to days and hours and seconds.
+ * @param time
+ * @returns
+ */
 export function secondsToHumanTime(time: number): string {
   const years = Math.floor(time / YEAR_SECONDS);
   const months = Math.floor((time % YEAR_SECONDS) / MONTH_IN_SECONDS);
@@ -49,6 +73,12 @@ export function secondsToHumanTime(time: number): string {
 export function dateTimeToTimestamp(dateTime: string): number {
   return new Date(dateTime).getTime();
 }
+
+/**
+ *
+ * @param dateTime
+ * @returns
+ */
 export function dateTimeToDate(dateTime: string): string {
   if (!dateTime) return '';
 
@@ -60,6 +90,12 @@ export function dateTimeToDate(dateTime: string): string {
   };
   return date.toLocaleDateString('en-us', options);
 }
+
+/**
+ *
+ * @param dateTime
+ * @returns
+ */
 export function dateTimeToDateAndTime(dateTime: string): string {
   if (!dateTime) return '';
 
@@ -75,7 +111,12 @@ export function dateTimeToDateAndTime(dateTime: string): string {
   };
   return date.toLocaleDateString('en-us', options);
 }
-/** Timestamp in seconds to DateTime */
+
+/**
+ * Timestamp in seconds to DateTime
+ * @param timestamp
+ * @returns
+ */
 export function timestampToDateAndTime(timestamp: number): string {
   if (!timestamp) return '';
 
@@ -90,6 +131,16 @@ export function timestampToDateAndTime(timestamp: number): string {
     hour12: false,
   };
   return date.toLocaleDateString('en-us', options);
+}
+
+/**
+ *
+ * @param dateString
+ * @returns
+ */
+export function toMonthAndYear(dateString: string) {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
 export function isDatePassedBy(dateTime: string): boolean {

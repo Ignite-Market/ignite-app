@@ -8,7 +8,10 @@ export const colors = {
   // Status colors:
   statusGreen: '#5DCE46',
   statusYellow: '#FFBC74',
-  statusBlue: '#5DCE46',
+  statusBlue: {
+    DEFAULT: '#5272FF',
+    hover: '#3353DA',
+  },
   statusRed: '#DE4941',
 
   // Charts colors:
@@ -22,6 +25,7 @@ export const colors = {
     light: '#D88ADC',
     DEFAULT: '#B14AB3',
     dark: '#8A3A8D',
+    hover: '#E159E4',
   },
 
   secondary: '#E7EDFF',
@@ -35,7 +39,7 @@ export const colors = {
 
   body: {
     light: '#A3AED0',
-    DEFAULT: '#9c9c95',
+    DEFAULT: '#F5F5F5',
     dark: '#6A6B63',
   },
 

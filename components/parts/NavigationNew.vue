@@ -43,7 +43,6 @@ const selectedMenu = ref<string>(routeNameToKey(route.name?.toString() || ''));
 
 /** Watch route name and refresh selected menu item */
 const routeName = computed(() => {
-  console.log(routeName);
   return route.name?.toString() || '';
 });
 
@@ -117,7 +116,7 @@ function renderMenuExtra(option: MenuOption) {
 
 :deep(.n-menu.n-menu--horizontal .n-menu-item-content.n-menu-item-content--selected) {
   color: #fff;
-  border-bottom: 2px solid theme('colors.primary.DEFAULT') !important;
+  border-bottom: 2px solid theme('colors.primary.DEFAULT') !important; /* Fix - one px is not visible */
 }
 
 :deep(.n-menu-item:hover .n-menu-item-content) {

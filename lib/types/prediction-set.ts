@@ -10,3 +10,12 @@ export enum PredictionSetStatus {
   FINALIZED = 6,
   ERROR = 7,
 }
+
+/**
+ * Prediction set transaction type.
+ */
+export enum TransactionType {
+  BUY = 1,
+  SELL = 2,
+  FUND = 3,
+}
