@@ -49,7 +49,10 @@ export default function useContracts() {
   }
 
   /**
-   * Init contract
+   *
+   * @param contractType
+   * @param contractAddress
+   * @returns
    */
   async function initContract(contractType: ContractType, contractAddress?: Address) {
     if (!walletClient.value) {
@@ -96,25 +99,12 @@ export default function useContracts() {
     });
   }
 
-  function getContractAddressByChain(type: string = ContractType.LENDEEFI, chain?: number): Address {
-    const id = chain || chainId.value;
-    if (!(type in config.public)) {
-      throw new Error(`Contract type ${type} not found in config`);
-    }
+  function getContractAddress(type: ContractType): Address | null {
+    switch (type) {
+      case ContractType.FPMM:
 
-    const contracts = config.public[type] as ContractAddresses;
-    switch (id) {
-      case Chains.BASE:
-      case Chains.BASE_SEPOLIA:
-        return contracts.base as Address;
-      case Chains.BSC:
-      case Chains.BSC_TESTNET:
-        return contracts.bsc as Address;
-      case Chains.MOONBEAM:
-      case Chains.MOONBASE:
-        return contracts.moonbeam as Address;
       default:
-        return contracts.moonbeam as Address;
+        return null;
     }
   }
 
@@ -123,7 +113,7 @@ export default function useContracts() {
     activeChain,
     initContract,
     ensureCorrectNetwork,
-    getContractAddressByChain,
+    getContractAddress,
     getPublicClient,
     getReadContract,
     resetContracts,

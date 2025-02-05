@@ -30,8 +30,112 @@
           tabTextColorActiveLine: '#F5F5F5',
         }"
       >
-        <n-tab-pane :disabled="!isEnabled" :name="TransactionType.BUY" tab="Buy">Wonderwall</n-tab-pane>
-        <n-tab-pane :disabled="!isEnabled" :name="TransactionType.SELL" tab="Sell">Hey Jude</n-tab-pane>
+        <n-tab-pane :disabled="!isEnabled" :name="TransactionType.BUY" class="!pt-[33px]" tab="Buy">
+          <div class="mb-3">
+            <div class="flex flex-row text-[12px] leading-[16px] mb-2">
+              <div class="font-bold">Amount</div>
+              <div class="ml-auto flex font-medium">
+                <div class="text-grey-lightest">Balance:</div>
+                <div class="text-white/80 ml-1">234,78 USDC</div>
+              </div>
+            </div>
+
+            <n-input-number
+              placeholder="0"
+              min="0"
+              v-model:value="value"
+              size="large"
+              class="min-w-full text-center"
+              type="number"
+              :show-button="true"
+              button-placement="both"
+            >
+              <template #minus-icon>
+                <div
+                  class="min-w-[20px] min-h-[20px] rounded-[4px] flex items-center justify-center bg-none hover:bg-grey-light"
+                >
+                  <NuxtIcon class="hover:text-white text-white" name="icon/minus" />
+                </div>
+              </template>
+
+              <template #add-icon>
+                <div
+                  class="min-w-[20px] min-h-[20px] rounded-[4px] flex items-center justify-center bg-none hover:bg-grey-light"
+                >
+                  <NuxtIcon class="hover:text-white text-white" name="icon/plus" />
+                </div>
+              </template>
+            </n-input-number>
+          </div>
+
+          <BasicButton class="w-full" :btnClass="[' !font-bold']" :size="'large'">Buy</BasicButton>
+
+          <div class="text-[16px] leading-[24px] text-grey-lightest font-normal mt-6">
+            <div class="flex items-center justify-center">
+              <div>Avg price</div>
+              <div class="ml-auto text-primary">0.374 USDC</div>
+            </div>
+            <div class="flex items-center justify-center mt-2">
+              <div>Shares (receive at least)</div>
+              <div class="ml-auto text-white/80">1.273662</div>
+            </div>
+            <div class="flex items-center justify-center mt-2">
+              <div>Potential return</div>
+              <div class="ml-auto text-statusGreen">1.273662 USDC</div>
+            </div>
+          </div>
+        </n-tab-pane>
+        <n-tab-pane :disabled="!isEnabled" :name="TransactionType.SELL" class="!pt-[33px]" tab="Sell">
+          <div class="mb-3">
+            <div class="flex flex-row text-[12px] leading-[16px] mb-2">
+              <div class="font-bold">Amount</div>
+              <div class="ml-auto flex font-medium">
+                <div class="text-grey-lightest">Balance:</div>
+                <div class="text-white/80 ml-1">234,78 USDC</div>
+              </div>
+            </div>
+
+            <n-input-number
+              placeholder="0"
+              min="0"
+              v-model:value="value"
+              size="large"
+              class="min-w-full text-center"
+              type="number"
+              :show-button="true"
+              button-placement="both"
+            >
+              <template #minus-icon>
+                <div
+                  class="min-w-[20px] min-h-[20px] rounded-[4px] flex items-center justify-center bg-none hover:bg-grey-light"
+                >
+                  <NuxtIcon class="hover:text-white text-white" name="icon/minus" />
+                </div>
+              </template>
+
+              <template #add-icon>
+                <div
+                  class="min-w-[20px] min-h-[20px] rounded-[4px] flex items-center justify-center bg-none hover:bg-grey-light"
+                >
+                  <NuxtIcon class="hover:text-white text-white" name="icon/plus" />
+                </div>
+              </template>
+            </n-input-number>
+          </div>
+
+          <BasicButton class="w-full" :btnClass="[' !font-bold']" :size="'large'">Sell</BasicButton>
+
+          <div class="text-[16px] leading-[24px] text-grey-lightest font-normal mt-6">
+            <div class="flex items-center justify-center">
+              <div>Avg price</div>
+              <div class="ml-auto text-primary">0.374 USDC</div>
+            </div>
+            <div class="flex items-center justify-center mt-2">
+              <div>Potential return</div>
+              <div class="ml-auto text-statusGreen">1.273662 USDC</div>
+            </div>
+          </div>
+        </n-tab-pane>
         <n-tab-pane :name="TransactionType.FUND" class="!pt-[33px]" tab="Fund">
           <div class="mb-3">
             <div class="flex flex-row text-[12px] leading-[16px] mb-2">

@@ -35,18 +35,14 @@ export type BaseStore<ListItem, Item = void> = {
   fetch: Function;
 } & Record<string, any>;
 declare global {
-  type ContractAddresses = {
-    base: Address;
-    bsc: Address;
-    moonbeam: Address;
-  };
   interface ConfigInterface {
     ENV?: string;
     VERSION: string;
     url: string;
     apiUrl: string;
-    lendeeFi: ContractAddresses;
-    nft: ContractAddresses;
-    token: ContractAddresses;
+
+    COLLATERAL_TOKEN_CONTRACT: Address;
+    CONDITIONAL_TOKEN_CONTRACT: Address;
+    FPMM_FACTORY_CONTRACT: Address;
   }
 }
