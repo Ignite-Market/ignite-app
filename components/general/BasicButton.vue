@@ -57,7 +57,7 @@ const btnClass = computed(() => {
       'bg-gradientGreen bg-clip-text text-transparent': props.type === 'gradient',
       'text-center rounded-[8px]': props.type !== 'link',
       'hover:text-green  !transition-all !duration-200': props.type === 'link',
-      'bg-body-dark': props.type !== 'link' && props.disabled,
+      '!bg-body-dark': props.type !== 'link' && props.disabled,
     },
   ];
 });

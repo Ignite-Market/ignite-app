@@ -13,6 +13,7 @@ export default function useContracts() {
   const chainId = useChainId();
   const chains = useChains();
   const { switchChain } = useSwitchChain();
+
   const publicClient = useClient();
   const { data: walletClient, refetch } = useConnectorClient();
 
@@ -28,6 +29,7 @@ export default function useContracts() {
       }
     });
   }
+
   function getPublicClient(id: number) {
     if (!(id in publicClients)) {
       initPublicClients();
@@ -35,9 +37,24 @@ export default function useContracts() {
     return publicClients[id];
   }
 
+  /**
+   *
+   * @param contractType
+   * @param chainId
+   * @param contractAddress
+   * @returns
+   */
   async function getReadContract(contractType: ContractType, chainId: number, contractAddress?: Address) {
-    const address = contractAddress || getContractAddressByChain(contractType);
-    if (!(address in contracts)) {
+    if (contractType === ContractType.FPMM && !contractAddress) {
+      throw new Error('FPMM contract address must be provided!');
+    }
+
+    const address = contractAddress || getContractAddress(contractType);
+    if (!address) {
+      throw new Error('Address not valid!');
+    }
+
+    if (!(address in readContracts)) {
       readContracts[address] = getContract({
         address,
         abi: getContractAbi(contractType),
@@ -55,41 +72,56 @@ export default function useContracts() {
    * @returns
    */
   async function initContract(contractType: ContractType, contractAddress?: Address) {
+    if (contractType === ContractType.FPMM && !contractAddress) {
+      throw new Error('FPMM contract address must be provided!');
+    }
+
     if (!walletClient.value) {
       await refetch();
       await sleep(200);
     }
 
-    const address = contractAddress || getContractAddressByChain(contractType);
-    const key = `${address}_${chainId.value}`;
+    if (!walletClient.value) {
+      throw new Error('Wallet client not available!');
+    }
 
-    if (!(key in contracts)) {
-      contracts[key] = getContract({
+    const address = contractAddress || getContractAddress(contractType);
+    if (!address) {
+      throw new Error('Address not valid!');
+    }
+
+    if (!(address in contracts)) {
+      contracts[address] = getContract({
         address,
         abi: getContractAbi(contractType),
-        client: walletClient.value,
-        publicClient: publicClient.value,
+        client: {
+          wallet: walletClient.value,
+          public: publicClient.value,
+        },
       });
     }
 
-    return contracts[key];
+    return contracts[address];
   }
 
-  // Helpers
-  async function ensureCorrectNetwork(id: number, retry = 0) {
-    if (id !== chainId.value) {
-      await switchChain({ chainId: id });
-      await sleep(100);
-      await refetch();
-      await sleep(100);
+  /**
+   *
+   * @param retry
+   */
+  async function ensureCorrectNetwork(retry: number = 0) {
+    const desiredChainId = chains.value[0].id;
 
-      if (id !== chainId.value) {
-        if (retry > 5) {
-          throw new Error('Failed to switch chain');
-        }
-        await sleep(100);
-        await ensureCorrectNetwork(id, retry + 1);
+    switchChain({ chainId: desiredChainId });
+    await sleep(100);
+    await refetch();
+    await sleep(100);
+
+    if (desiredChainId !== chainId.value) {
+      if (retry > 5) {
+        throw new Error('Failed to switch chain!');
       }
+      await sleep(100);
+      await ensureCorrectNetwork(retry + 1);
     }
   }
 
@@ -99,13 +131,16 @@ export default function useContracts() {
     });
   }
 
-  function getContractAddress(type: ContractType): Address | null {
+  function getContractAddress(type: ContractType): Address | undefined {
     switch (type) {
-      case ContractType.FPMM:
+      case ContractType.CONDITIONAL_TOKEN:
+        return config.public.CONDITIONAL_TOKEN_CONTRACT as Address;
 
-      default:
-        return null;
+      case ContractType.COLLATERAL_TOKEN:
+        return config.public.COLLATERAL_TOKEN_CONTRACT as Address;
     }
+
+    return undefined;
   }
 
   return {

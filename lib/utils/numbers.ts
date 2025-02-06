@@ -1,6 +1,7 @@
 export const randomNumbers = (count: number): number => {
   return Math.floor(Math.random() * 10 ** count);
 };
+
 export const randomBigInt = (count: number): bigint => {
   return BigInt(Math.floor(Math.random() * 10 ** count));
 };
@@ -11,8 +12,9 @@ export const randomBigInt = (count: number): bigint => {
 export function numToBigInt(input: number) {
   return BigInt(input * 10 ** 18);
 }
-export function bigIntToNum(input: bigint | string | number) {
-  return Number(BigInt(input) / 10n ** 18n);
+
+export function bigIntToNum(input: bigint | string | number, decimals: number = 18) {
+  return Number(BigInt(input) / 10n ** BigInt(decimals));
 }
 
 export function formatNumber(n: number) {

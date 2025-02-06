@@ -60,6 +60,7 @@ export default function useLendeeFi() {
       tokenStore.symbol = '';
     }
   }
+
   function getTokenStore() {
     switch (chainId.value) {
       case Chains.BASE:

@@ -23,7 +23,7 @@ const { $wagmiConfig } = useNuxtApp();
 const { error, success } = useMessage();
 const userStore = useUserStore();
 const assetStore = useAssetStore();
-const { resetContracts } = useContracts();
+const { resetContracts, ensureCorrectNetwork } = useContracts();
 
 /** Evm wallet - wagmi */
 const { disconnect } = useDisconnect();
@@ -81,6 +81,8 @@ async function evmWalletLogin(data: Record<string, any>) {
   } else if (loadingWallet.value) {
     return;
   }
+
+  // await ensureCorrectNetwork();
 
   loadingWallet.value = true;
   try {

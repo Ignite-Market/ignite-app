@@ -51,19 +51,16 @@ async function getPredictionSets() {
       page: page.value,
     });
 
-    console.log(res);
-
     if (res.data) {
       predictionSets.value.push(...(res.data.items as any[]));
     }
-
-    console.log(JSON.stringify(predictionSets.value, null, 2));
 
     page.value += 1;
     total.value = res?.data?.total || 0;
   } catch (error) {
     message.error(apiError(error));
+  } finally {
+    loading.value = false;
   }
-  loading.value = false;
 }
 </script>

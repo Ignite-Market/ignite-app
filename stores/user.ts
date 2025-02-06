@@ -14,6 +14,15 @@ export const useUserStore = defineStore('user', {
     promises: {
       profile: null as any,
     },
+    collateralToken: {
+      balance: BigInt(0),
+      parsedBalance: '0.0',
+      decimals: 0,
+      symbol: '',
+      loaded: false,
+      loading: false,
+    },
+
     token: {
       base: {
         allowance: BigInt(0),

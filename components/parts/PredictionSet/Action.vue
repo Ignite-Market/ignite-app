@@ -8,14 +8,14 @@
       <div v-if="selectedTab === TransactionType.FUND" class="flex items-center justify-center">
         <div class="text-[12px] leading-[16px] pt-[19px] pb-[19px]">Fund this market</div>
       </div>
-      <div v-else class="bg-grey-lighter rounded-[8px] p-3 flex flex-row items-center justify-center">
+      <div v-else class="bg-grey-light rounded-[8px] p-3 flex flex-row items-center justify-center">
         <div class="w-[30px] h-[30px] flex-shrink-0">
           <img
             class="rounded-[48px] w-full h-full object-cover"
             src="https://s3-alpha-sig.figma.com/img/99a4/f1e2/82e026f7f9103144567086cf6cd6a662?Expires=1739750400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=X~LM1-8x2K~GS-WxTXco4sGom-IufMECvaatFC8NWpNF36plKwoS2GWG-ONIx4DYF0FaaiLk0avNaWu593gzQWGan2SISOHnwzD1OFljZForFAebXzMFFkLPw7zRXOAj6C5F38rvn7hCASSLNtnaupzkJlwyocPQzzHBx35iULp9DGfuV2jChQvZIhCeqRbqdheJu~r16qKI9TslaML0SAuaZOsPe-GxfdNTl81pghUkpVxyktSzkaaoqLEoJ0pOtVDu-HaUIw9rvcWDsb0JGP~Ed6AJyWjneQteo3W4tu0G4APnxed3bNpX55mp4tM~AdnH0vVNVTNCxjeWL4vBTg__"
           />
         </div>
-        <div class="ml-2 text-[12px] leading-[16px] font-bold">NO</div>
+        <div class="ml-2 text-[12px] leading-[16px] font-bold">{{ outcome.name }}</div>
         <div class="text-[12px] leading-[16px] font-bold ml-auto">75%</div>
         <NuxtIcon class="ml-3 opacity-[24%] text-white" name="icon/refresh" />
         <NuxtIcon class="ml-3 text-white" name="icon/settings" />
@@ -30,7 +30,8 @@
           tabTextColorActiveLine: '#F5F5F5',
         }"
       >
-        <n-tab-pane :disabled="!isEnabled" :name="TransactionType.BUY" class="!pt-[33px]" tab="Buy">
+        <!-- BUY PANE -->
+        <n-tab-pane :disabled="!isEnabled || loading" :name="TransactionType.BUY" class="!pt-[33px]" tab="Buy">
           <div class="mb-3">
             <div class="flex flex-row text-[12px] leading-[16px] mb-2">
               <div class="font-bold">Amount</div>
@@ -43,7 +44,7 @@
             <n-input-number
               placeholder="0"
               min="0"
-              v-model:value="value"
+              v-model:value="amount"
               size="large"
               class="min-w-full text-center"
               type="number"
@@ -68,7 +69,9 @@
             </n-input-number>
           </div>
 
-          <BasicButton class="w-full" :btnClass="[' !font-bold']" :size="'large'">Buy</BasicButton>
+          <BasicButton :disabled="!isConnected || loading" class="w-full" :btnClass="[' !font-bold']" :size="'large'">
+            Buy
+          </BasicButton>
 
           <div class="text-[16px] leading-[24px] text-grey-lightest font-normal mt-6">
             <div class="flex items-center justify-center">
@@ -85,7 +88,9 @@
             </div>
           </div>
         </n-tab-pane>
-        <n-tab-pane :disabled="!isEnabled" :name="TransactionType.SELL" class="!pt-[33px]" tab="Sell">
+
+        <!-- SELL PANE -->
+        <n-tab-pane :disabled="!isEnabled || loading" :name="TransactionType.SELL" class="!pt-[33px]" tab="Sell">
           <div class="mb-3">
             <div class="flex flex-row text-[12px] leading-[16px] mb-2">
               <div class="font-bold">Amount</div>
@@ -98,7 +103,7 @@
             <n-input-number
               placeholder="0"
               min="0"
-              v-model:value="value"
+              v-model:value="amount"
               size="large"
               class="min-w-full text-center"
               type="number"
@@ -123,7 +128,9 @@
             </n-input-number>
           </div>
 
-          <BasicButton class="w-full" :btnClass="[' !font-bold']" :size="'large'">Sell</BasicButton>
+          <BasicButton :disabled="!isConnected || loading" class="w-full" :btnClass="[' !font-bold']" :size="'large'">
+            Sell
+          </BasicButton>
 
           <div class="text-[16px] leading-[24px] text-grey-lightest font-normal mt-6">
             <div class="flex items-center justify-center">
@@ -136,20 +143,22 @@
             </div>
           </div>
         </n-tab-pane>
-        <n-tab-pane :name="TransactionType.FUND" class="!pt-[33px]" tab="Fund">
+
+        <!-- FUNDING PANE -->
+        <n-tab-pane :disabled="loading" :name="TransactionType.FUND" class="!pt-[33px]" tab="Fund">
           <div class="mb-3">
             <div class="flex flex-row text-[12px] leading-[16px] mb-2">
               <div class="font-bold">Amount</div>
               <div class="ml-auto flex font-medium">
-                <div class="text-grey-lightest">Balance:</div>
-                <div class="text-white/80 ml-1">234,78 USDC</div>
+                <div class="text-grey-lightest mr-1">Balance:</div>
+                <div class="text-white/80 self-end">{{ tokenStore.parsedBalance }} USDC</div>
               </div>
             </div>
 
             <n-input-number
               placeholder="0"
               min="0"
-              v-model:value="value"
+              v-model:value="amount"
               size="large"
               class="min-w-full text-center"
               type="number"
@@ -178,6 +187,9 @@
             class="w-full"
             :btnClass="['bg-statusBlue hover:bg-statusBlue-hover !font-bold']"
             :size="'large'"
+            :disabled="!isConnected || !amount || !enoughCollateralBalance"
+            :loading="loading"
+            @click="fund"
           >
             Fund
           </BasicButton>
@@ -187,20 +199,111 @@
   </n-card>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { TransactionType } from '~/lib/types/prediction-set';
+import type { OutcomeInterface } from '~/lib/types/prediction-set';
+import type { Address } from 'viem';
+
+import { useChainId, useAccount, useChains, useClient, useConnectorClient, useSwitchChain } from '@wagmi/vue';
+import { addDaysWithOptions } from 'date-fns/fp';
+
+const props = defineProps({
+  contractAddress: { type: String, default: null, required: true },
+  outcome: { type: Object as PropType<OutcomeInterface>, default: {}, required: true },
+});
+
+const { getSellAmount, getBuyAmount, addFunding } = useFixedMarketMaker();
+const { refreshBalance, getTokenStore } = useCollateralToken();
+const { isConnected } = useAccount();
+
+const message = useMessage();
+const { resetContracts } = useContracts();
+
+const txWait = useTxWait();
+const tokenStore = getTokenStore();
 
 const selectedTab = ref(TransactionType.FUND);
 const isEnabled = ref(false);
+const loading = ref(false);
 
-const value = ref(null);
+const chains = useChains();
+const amount = ref<number>();
 
-onMounted(() => {
-  // Short delay to ensure initial render is complete
+const balanceLoading = ref(false);
+
+const collateralBalance = ref(0);
+
+const enoughCollateralBalance = computed(() => {
+  const scaledAmount = BigInt(Math.round((amount.value || 0) * 10 ** tokenStore.decimals));
+  return tokenStore.balance >= scaledAmount;
+});
+
+onMounted(async () => {
+  console.log(chains.value);
   setTimeout(() => {
     isEnabled.value = true;
   }, 100);
+
+  await refreshBalance();
 });
+
+watch(
+  () => amount.value,
+  async () => {
+    if (amount.value === 0) {
+      // TODO: handle
+      return;
+    }
+
+    if (!amount.value) {
+      return;
+    }
+
+    if (selectedTab.value === TransactionType.BUY) {
+      await updateBuyAmount();
+    } else if (selectedTab.value === TransactionType.SELL) {
+      await updateSellAmount();
+    }
+  }
+);
+
+async function updateBuyAmount() {
+  if (!amount.value) {
+    return;
+  }
+
+  const result = await getBuyAmount(props.contractAddress as Address, amount.value, props.outcome.outcomeIndex);
+  console.log(result);
+}
+
+async function updateSellAmount() {
+  if (!amount.value) {
+    return;
+  }
+
+  const result = await getSellAmount(props.contractAddress as Address, amount.value, props.outcome.outcomeIndex);
+  console.log(result);
+}
+
+async function fund() {
+  if (!amount.value) {
+    return;
+  }
+
+  loading.value = true;
+  try {
+    txWait.hash.value = await addFunding(props.contractAddress as Address, amount.value);
+    await txWait.wait();
+
+    amount.value = 0;
+    await refreshBalance();
+  } catch (error) {
+    console.error(error);
+    message.error(contractError(error));
+  } finally {
+    loading.value = false;
+  }
+}
 </script>
 
 <style scoped>
