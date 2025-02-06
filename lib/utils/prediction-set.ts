@@ -6,7 +6,7 @@ import { PredictionSetStatus } from '../types/prediction-set';
  * @param endTime
  * @returns
  */
-export function getStatusName(status: PredictionSetStatus, endTime: string) {
+export function getStatusName(status: PredictionSetStatus, endTime: string | Date) {
   switch (status) {
     case PredictionSetStatus.ACTIVE:
       if (Number(new Date()) > Number(new Date(endTime))) {
@@ -29,7 +29,7 @@ export function getStatusName(status: PredictionSetStatus, endTime: string) {
   }
 }
 
-export function getStatusClass(status: PredictionSetStatus, endTime: string) {
+export function getStatusClass(status: PredictionSetStatus, endTime: string | Date) {
   switch (status) {
     case PredictionSetStatus.ACTIVE:
       if (Number(new Date()) > Number(new Date(endTime))) {
@@ -52,7 +52,7 @@ export function getStatusClass(status: PredictionSetStatus, endTime: string) {
   }
 }
 
-export function getDisplayDate(status: PredictionSetStatus, endTime: string, resolutionTime: string) {
+export function getDisplayDate(status: PredictionSetStatus, endTime: string, resolutionTime: string | Date) {
   switch (status) {
     case PredictionSetStatus.ACTIVE:
       if (Number(new Date()) > Number(new Date(endTime))) {
@@ -81,7 +81,7 @@ export function getDisplayDate(status: PredictionSetStatus, endTime: string, res
  * @param endTime
  * @returns
  */
-export function tradeEnabled(status: PredictionSetStatus, endTime: Date) {
+export function tradeEnabled(status: PredictionSetStatus, endTime: string | Date) {
   switch (status) {
     case PredictionSetStatus.ACTIVE:
       if (Number(new Date()) > Number(new Date(endTime))) {

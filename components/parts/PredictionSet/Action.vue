@@ -1,6 +1,6 @@
 <template>
   <n-card
-    class="bg-grey max-w-[410px] border-1 !border-grey-lighter"
+    class="bg-grey w-[409px] border-1 !border-grey-lighter"
     :content-class="'!py-5 !pb-5 !pt-4 !rounded-[8px]'"
     :header-class="'!py-5 !px-6 bg-grey-dark !rounded-t-[8px]'"
   >
@@ -31,7 +31,7 @@
         }"
       >
         <!-- BUY PANE -->
-        <n-tab-pane :disabled="!isEnabled || loading" :name="TransactionType.BUY" class="!pt-[33px]" tab="Buy">
+        <n-tab-pane :disabled="!isBuyEnabled || loading" :name="TransactionType.BUY" class="!pt-[33px]" tab="Buy">
           <div class="mb-3">
             <div class="flex flex-row text-[12px] leading-[16px] mb-2">
               <div class="font-bold">Amount</div>
@@ -90,7 +90,7 @@
         </n-tab-pane>
 
         <!-- SELL PANE -->
-        <n-tab-pane :disabled="!isEnabled || loading" :name="TransactionType.SELL" class="!pt-[33px]" tab="Sell">
+        <n-tab-pane :disabled="!isSellEnabled || loading" :name="TransactionType.SELL" class="!pt-[33px]" tab="Sell">
           <div class="mb-3">
             <div class="flex flex-row text-[12px] leading-[16px] mb-2">
               <div class="font-bold">Amount</div>
@@ -145,7 +145,7 @@
         </n-tab-pane>
 
         <!-- FUNDING PANE -->
-        <n-tab-pane :disabled="loading" :name="TransactionType.FUND" class="!pt-[33px]" tab="Fund">
+        <n-tab-pane :disabled="!isFundEnabled || loading" :name="TransactionType.FUND" class="!pt-[33px]" tab="Fund">
           <div class="mb-3">
             <div class="flex flex-row text-[12px] leading-[16px] mb-2">
               <div class="font-bold">Amount</div>
@@ -187,7 +187,7 @@
             class="w-full"
             :btnClass="['bg-statusBlue hover:bg-statusBlue-hover !font-bold']"
             :size="'large'"
-            :disabled="!isConnected || !amount || !enoughCollateralBalance"
+            :disabled="!isConnected || !amount || !enoughCollateralBalance || !isFundEnabled"
             :loading="loading"
             @click="fund"
           >
@@ -200,9 +200,10 @@
 </template>
 
 <script setup lang="ts">
-import { TransactionType } from '~/lib/types/prediction-set';
+import { PredictionSetStatus, TransactionType } from '~/lib/types/prediction-set';
 import type { OutcomeInterface } from '~/lib/types/prediction-set';
 import type { Address } from 'viem';
+import { watchDebounced } from '@vueuse/core';
 
 import { useChainId, useAccount, useChains, useClient, useConnectorClient, useSwitchChain } from '@wagmi/vue';
 import { addDaysWithOptions } from 'date-fns/fp';
@@ -210,6 +211,8 @@ import { addDaysWithOptions } from 'date-fns/fp';
 const props = defineProps({
   contractAddress: { type: String, default: null, required: true },
   outcome: { type: Object as PropType<OutcomeInterface>, default: {}, required: true },
+  status: { type: Number as PropType<PredictionSetStatus>, default: null, required: true },
+  action: { type: Number as PropType<TransactionType>, default: null, required: false },
 });
 
 const { getSellAmount, getBuyAmount, addFunding } = useFixedMarketMaker();
@@ -222,8 +225,11 @@ const { resetContracts } = useContracts();
 const txWait = useTxWait();
 const tokenStore = getTokenStore();
 
-const selectedTab = ref(TransactionType.FUND);
-const isEnabled = ref(false);
+const selectedTab = ref(TransactionType.BUY);
+const isBuyEnabled = ref(true);
+const isSellEnabled = ref(true);
+const isFundEnabled = ref(true);
+
 const loading = ref(false);
 
 const chains = useChains();
@@ -239,15 +245,31 @@ const enoughCollateralBalance = computed(() => {
 });
 
 onMounted(async () => {
-  console.log(chains.value);
-  setTimeout(() => {
-    isEnabled.value = true;
-  }, 100);
+  if (props.status === PredictionSetStatus.FUNDING) {
+    selectedTab.value = TransactionType.FUND;
+    isBuyEnabled.value = false;
+    isSellEnabled.value = false;
+  } else if (props.action) {
+    selectedTab.value = props.action;
+  }
 
   await refreshBalance();
+
+  // setTimeout(() => {
+  //   if (props.status === PredictionSetStatus.FUNDING) {
+  //     selectedTab.value = TransactionType.FUND;
+  //   }
+  // }, 100);
 });
 
 watch(
+  () => props.action,
+  () => {
+    selectedTab.value = props.action;
+  }
+);
+
+watchDebounced(
   () => amount.value,
   async () => {
     if (amount.value === 0) {
@@ -264,7 +286,8 @@ watch(
     } else if (selectedTab.value === TransactionType.SELL) {
       await updateSellAmount();
     }
-  }
+  },
+  { debounce: 500, maxWait: 1000 }
 );
 
 async function updateBuyAmount() {

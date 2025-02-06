@@ -52,7 +52,7 @@ const btnClass = computed(() => {
       [sizeClass.value]: props.type !== 'link',
       'font-medium text-[14px] leading-[20px] transition-colors duration-200 text-white ': props.type !== 'link',
       'bg-primary hover:bg-primary-hover transition-none': props.type === 'primary' && !props.disabled,
-      'bg-transparent text-primary border border-primary hover:bg-primary hover:text-white':
+      'bg-primary/20 text-white border-1 border-primary hover:bg-primary hover:text-white':
         props.type === 'secondary' && !props.disabled,
       'bg-gradientGreen bg-clip-text text-transparent': props.type === 'gradient',
       'text-center rounded-[8px]': props.type !== 'link',

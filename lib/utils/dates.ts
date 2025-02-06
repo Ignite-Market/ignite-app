@@ -138,7 +138,7 @@ export function timestampToDateAndTime(timestamp: number): string {
  * @param dateString
  * @returns
  */
-export function toMonthAndYear(dateString: string) {
+export function toMonthAndYear(dateString: string | Date) {
   const date = new Date(dateString);
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
