@@ -45,5 +45,6 @@ declare global {
     COLLATERAL_TOKEN_CONTRACT: Address;
     CONDITIONAL_TOKEN_CONTRACT: Address;
     FPMM_FACTORY_CONTRACT: Address;
+    ORACLE_CONTRACT: Address;
   }
 }

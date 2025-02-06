@@ -4,6 +4,15 @@ import { YEAR_SECONDS } from '../values/general.values';
 import type { AnyOffer } from '../types/offer';
 import { getCurrentTime } from '../misc/web3';
 
+/**
+ *
+ * @param address
+ * @returns
+ */
+export function shortenAddress(address: string) {
+  return `${address.slice(0, 6)}...${address.slice(-4)}`;
+}
+
 export function sleep(timeMs = 1000) {
   return new Promise(resolve => setTimeout(resolve, timeMs));
 }
@@ -57,6 +66,7 @@ export function copyToClipboard(text: string) {
     }
   );
 }
+
 export function copyToClipboardWithResponseTexts(text: string, successMsg?: string, errorMsg?: string) {
   navigator.clipboard.writeText(text).then(
     () => {

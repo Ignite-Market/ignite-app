@@ -55,7 +55,7 @@ export interface OutcomeInterface extends GeneralInterface {
   outcomeIndex: number;
   positionId: string;
   name: string;
-  // TODO: add latest chance.
+  latestChance: OutcomeChance;
 }
 
 export interface ChainDataInterface extends GeneralInterface {
@@ -65,4 +65,10 @@ export interface ChainDataInterface extends GeneralInterface {
   contractAddress: Address;
   lastProcessedBlock: number;
   parseBlockSize: number;
+}
+
+export interface OutcomeChance extends GeneralInterface {
+  chance: number;
+  supply: number;
+  totalSupply: number;
 }

@@ -13,12 +13,21 @@ export default function useFixedMarketMaker() {
    * @param fpmmContractAddress
    * @param amount
    * @param outcomeIndex
+   * @param slippage
    * @returns
    */
-  async function getSellAmount(fpmmContractAddress: Address, amount: number, outcomeIndex: number) {
+  async function getMaxTokensToSell(
+    fpmmContractAddress: Address,
+    amount: number,
+    outcomeIndex: number,
+    slippage: number
+  ) {
     const contract = await initContract(ContractType.FPMM, fpmmContractAddress);
 
-    return await contract.read.calcSellAmount([amount, outcomeIndex]);
+    const sellAmount = await contract.read.calcSellAmount([amount, outcomeIndex]);
+    const maxOutcomeTokensToSell = sellAmount * (BigInt(100 - slippage) / BigInt(100));
+
+    return maxOutcomeTokensToSell;
   }
 
   /**
@@ -26,12 +35,22 @@ export default function useFixedMarketMaker() {
    * @param fpmmContractAddress
    * @param amount
    * @param outcomeIndex
+   * @param slippage
    * @returns
    */
-  async function getBuyAmount(fpmmContractAddress: Address, amount: number, outcomeIndex: number) {
+  async function getMinTokensToBuy(
+    fpmmContractAddress: Address,
+    amount: number,
+    outcomeIndex: number,
+    slippage: number
+  ) {
     const contract = await initContract(ContractType.FPMM, fpmmContractAddress);
 
-    return await contract.read.calcBuyAmount([amount, outcomeIndex]);
+    const scaledAmount = BigInt(Math.round(amount * 10 ** tokenStore.decimals));
+    const expectedShares = await contract.read.calcBuyAmount([scaledAmount, outcomeIndex]);
+    const minOutcomeTokensToBuy = (expectedShares * BigInt(100 - slippage)) / BigInt(100);
+
+    return minOutcomeTokensToBuy;
   }
 
   /**
@@ -57,9 +76,48 @@ export default function useFixedMarketMaker() {
     }
   }
 
+  /**
+   *
+   * @param fpmmContractAddress
+   * @param amount
+   * @param outcomeIndex
+   * @param slippage
+   * @returns
+   */
+  async function buy(fpmmContractAddress: Address, amount: number, outcomeIndex: number, slippage: number) {
+    if (!tokenStore.loaded) {
+      await loadToken();
+    }
+    const contract = await initContract(ContractType.FPMM, fpmmContractAddress);
+
+    const allowance = await checkAllowance(fpmmContractAddress);
+    if (allowance) {
+      const minOutcomeTokensToBuy = await getMinTokensToBuy(fpmmContractAddress, amount, outcomeIndex, slippage);
+      const scaledAmount = BigInt(Math.round(amount * 10 ** tokenStore.decimals));
+
+      return await contract.write.buy([scaledAmount, outcomeIndex, minOutcomeTokensToBuy]);
+    }
+  }
+
+  async function sell(fpmmContractAddress: Address, amount: number, outcomeIndex: number, slippage: number) {
+    if (!tokenStore.loaded) {
+      await loadToken();
+    }
+    const contract = await initContract(ContractType.FPMM, fpmmContractAddress);
+
+    const allowance = await checkAllowance(fpmmContractAddress);
+    if (allowance) {
+      const minOutcomeTokensToBuy = await getMinTokensToBuy(fpmmContractAddress, amount, outcomeIndex, slippage);
+      const scaledAmount = BigInt(Math.round(amount * 10 ** tokenStore.decimals));
+
+      return await contract.write.buy([scaledAmount, outcomeIndex, minOutcomeTokensToBuy]);
+    }
+  }
+
   return {
-    getSellAmount,
-    getBuyAmount,
+    getMaxTokensToSell,
+    getMinTokensToBuy,
     addFunding,
+    buy,
   };
 }

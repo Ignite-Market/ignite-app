@@ -58,7 +58,9 @@
             </div>
 
             <div class="flex items-center ml-auto pr-4">
-              <div class="font-bold text-[16px] leading-[24px] mr-9">47%</div>
+              <div class="font-bold text-[16px] leading-[24px] mr-9">
+                {{ Number(outcome.latestChance.chance * 100).toFixed(0) }} %
+              </div>
               <div class="flex ml-auto">
                 <BasicButton
                   class="mr-3"
@@ -97,12 +99,18 @@
         >
           <div class="flex border-r-[0.5px] border-r-grey-lighter pr-11 items-center">
             <div class="text-white/80">Contract</div>
-            <div class="ml-auto font-bold">address</div>
+            <div class="ml-auto font-bold hover:text-primary cursor-pointer">
+              {{ shortenAddress(predictionSet.chainData.contractAddress) }}
+            </div>
+            <NuxtIcon class="ml-2 text-white" name="icon/copy" />
           </div>
 
           <div class="flex border-l-[0.5px] border-l-grey-lighter pl-11 items-center">
             <div class="text-white/80">Resolver</div>
-            <div class="ml-auto font-bold">address</div>
+            <div class="ml-auto font-bol hover:text-primary cursor-pointer">
+              {{ shortenAddress(config.public.ORACLE_CONTRACT) }}
+            </div>
+            <NuxtIcon class="ml-2 text-white" name="icon/copy" />
           </div>
         </div>
       </div>
@@ -131,6 +139,7 @@ import Endpoints from '~/lib/values/endpoints';
 
 const { params } = useRoute();
 const router = useRouter();
+const config = useRuntimeConfig();
 
 const loading = ref<boolean>(true);
 

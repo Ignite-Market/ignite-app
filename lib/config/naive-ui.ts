@@ -62,7 +62,7 @@ export const themeOverrides: GlobalThemeOverrides = {
     colorFocus: colors.grey.dark,
     colorFocusError: colors.grey.dark,
     colorFocusWarning: colors.grey.dark,
-    colorDisabled: colors.primary.light,
+    colorDisabled: colors.grey.dark,
     heightTiny: '30px',
     heightSmall: '34px',
     heightMedium: '40px',

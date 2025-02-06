@@ -72,6 +72,7 @@ export default function useCollateralToken() {
     const tokenStore = getTokenStore();
 
     const balance = Number(tokenStore.balance) / Math.pow(10, tokenStore.decimals);
+
     return balance.toFixed(fixed);
   }
 
