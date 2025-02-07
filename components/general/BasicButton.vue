@@ -31,6 +31,8 @@ const props = defineProps({
   innerClass: { type: [String, Array, Object], default: '' },
   type: { type: String as PropType<BtnType>, default: 'primary' },
   size: { type: String as PropType<BtnSize>, default: 'medium' },
+  selected: { type: Boolean, default: false },
+  selectedClass: { type: [String, Array, Object], default: '' },
 });
 const emit = defineEmits(['click']);
 
@@ -45,7 +47,7 @@ const sizeClass = computed(() => {
 });
 
 const btnClass = computed(() => {
-  return [
+  const clsArray = [
     props.btnClass,
     {
       'pointer-events-none pointer-default': props.disabled || props.loading,
@@ -60,6 +62,12 @@ const btnClass = computed(() => {
       '!bg-body-dark': props.type !== 'link' && props.disabled,
     },
   ];
+
+  if (props.selected) {
+    clsArray.push(props.selectedClass);
+  }
+
+  return clsArray;
 });
 
 function onClick(event: MouseEvent) {

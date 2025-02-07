@@ -15,10 +15,12 @@ export default function useCollateralToken() {
    * @param fpmmContractAddress
    * @returns
    */
-  async function checkAllowance(fpmmContractAddress: Address) {
+  async function checkCollateralAllowance(fpmmContractAddress: Address) {
     const contract = await initContract(ContractType.COLLATERAL_TOKEN);
 
     try {
+      await ensureCorrectNetwork();
+
       const allowance = await contract.read.allowance([address.value, fpmmContractAddress]);
       if (allowance < maxUint256) {
         txWait.hash.value = await contract.write.approve([fpmmContractAddress, maxUint256]);
@@ -38,7 +40,7 @@ export default function useCollateralToken() {
    *
    * @returns
    */
-  async function getTokenBalance() {
+  async function getCollateralBalance() {
     const contract = await initContract(ContractType.COLLATERAL_TOKEN);
     return await contract.read.balanceOf([address.value]);
   }
@@ -84,7 +86,7 @@ export default function useCollateralToken() {
       await ensureCorrectNetwork();
 
       tokenStore.loading = true;
-      tokenStore.balance = await getTokenBalance();
+      tokenStore.balance = await getCollateralBalance();
       tokenStore.decimals = await getDecimals();
       tokenStore.symbol = await getSymbol();
       tokenStore.parsedBalance = parseBalance();
@@ -106,14 +108,14 @@ export default function useCollateralToken() {
   /**
    *
    */
-  async function refreshBalance() {
+  async function refreshCollateralBalance() {
     const tokenStore = getTokenStore();
 
     if (!tokenStore.loaded) {
       await loadToken();
     } else {
       tokenStore.loading = true;
-      tokenStore.balance = await getTokenBalance();
+      tokenStore.balance = await getCollateralBalance();
       tokenStore.parsedBalance = parseBalance();
       tokenStore.loading = false;
     }
@@ -129,10 +131,10 @@ export default function useCollateralToken() {
 
   return {
     getTokenStore,
-    checkAllowance,
-    getTokenBalance,
+    checkCollateralAllowance,
+    getCollateralBalance,
     getSymbol,
-    refreshBalance,
+    refreshCollateralBalance,
     loadToken,
     parseBalance,
   };

@@ -1,6 +1,6 @@
 <template>
   <n-card
-    class="bg-grey w-[409px] border-1 !border-grey-lighter"
+    class="bg-grey border-1 !border-grey-lighter"
     :content-class="'!py-5 !pb-5 !pt-4 !rounded-[8px]'"
     :header-class="'!py-5 !px-6 bg-grey-dark !rounded-t-[8px]'"
   >
@@ -17,7 +17,7 @@
         </div>
         <div class="ml-2 text-[12px] leading-[16px] font-bold">{{ outcome.name }}</div>
         <div class="text-[12px] leading-[16px] font-bold ml-auto">
-          {{ (outcome.latestChance.chance * 100).toFixed(0) }} %
+          {{ outcome.latestChance.chance ? (outcome.latestChance.chance * 100).toFixed(0) : 0.0 }} %
         </div>
         <NuxtIcon class="ml-3 opacity-[24%] text-white" name="icon/refresh" />
         <NuxtIcon class="ml-3 text-white" name="icon/settings" />
@@ -33,7 +33,12 @@
         }"
       >
         <!-- BUY PANE -->
-        <n-tab-pane :disabled="!isBuyEnabled || loading" :name="TransactionType.BUY" class="!pt-[33px]" tab="Buy">
+        <n-tab-pane
+          :disabled="!tradeEnabled(status, endTime) || loading"
+          :name="TransactionType.BUY"
+          class="!pt-[33px]"
+          tab="Buy"
+        >
           <div class="mb-3">
             <div class="flex flex-row text-[12px] leading-[16px] mb-2">
               <div class="font-bold">Amount</div>
@@ -87,7 +92,9 @@
           <div class="text-[16px] leading-[24px] text-grey-lightest font-normal mt-6">
             <div class="flex items-center justify-center">
               <div>Avg price</div>
-              <div class="ml-auto text-primary">{{ outcome.latestChance.chance.toFixed(3) }} USDC</div>
+              <div class="ml-auto text-primary">
+                {{ outcome.latestChance.chance ? outcome.latestChance.chance.toFixed(3) : 0.0 }} USDC
+              </div>
             </div>
             <div class="flex items-center justify-center mt-2">
               <div>Shares (receive at least)</div>
@@ -101,13 +108,18 @@
         </n-tab-pane>
 
         <!-- SELL PANE -->
-        <n-tab-pane :disabled="!isSellEnabled || loading" :name="TransactionType.SELL" class="!pt-[33px]" tab="Sell">
+        <n-tab-pane
+          :disabled="!tradeEnabled(status, endTime) || loading"
+          :name="TransactionType.SELL"
+          class="!pt-[33px]"
+          tab="Sell"
+        >
           <div class="mb-3">
             <div class="flex flex-row text-[12px] leading-[16px] mb-2">
               <div class="font-bold">Amount</div>
               <div class="ml-auto flex font-medium">
                 <div class="text-grey-lightest">Balance:</div>
-                <div class="text-white/80 ml-1">234,78 USDC</div>
+                <div class="text-white/80 ml-1">{{ parseConditionalBalance(conditionalBalance) }}</div>
               </div>
             </div>
 
@@ -120,6 +132,7 @@
               type="number"
               :show-button="true"
               button-placement="both"
+              :max="parseConditionalBalance(conditionalBalance)"
               :disabled="loading"
             >
               <template #minus-icon>
@@ -140,14 +153,23 @@
             </n-input-number>
           </div>
 
-          <BasicButton :disabled="!isConnected || loading" class="w-full" :btnClass="[' !font-bold']" :size="'large'">
+          <BasicButton
+            :disabled="!isConnected || !enoughConditionalBalance"
+            class="w-full"
+            :btnClass="[' !font-bold']"
+            :size="'large'"
+            :loading="loading"
+            @click="sellOutcome"
+          >
             Sell
           </BasicButton>
 
           <div class="text-[16px] leading-[24px] text-grey-lightest font-normal mt-6">
             <div class="flex items-center justify-center">
               <div>Avg price</div>
-              <div class="ml-auto text-primary">0.374 USDC</div>
+              <div class="ml-auto text-primary">
+                {{ outcome.latestChance.chance ? outcome.latestChance.chance.toFixed(3) : 0.0 }} USDC
+              </div>
             </div>
             <div class="flex items-center justify-center mt-2">
               <div>Potential return</div>
@@ -176,6 +198,7 @@
               type="number"
               :show-button="true"
               button-placement="both"
+              :max="tokenStore.parsedBalance"
               :disabled="loading"
             >
               <template #minus-icon>
@@ -213,47 +236,41 @@
 </template>
 
 <script setup lang="ts">
-import { PredictionSetStatus, TransactionType } from '~/lib/types/prediction-set';
-import type { OutcomeInterface } from '~/lib/types/prediction-set';
-import type { Address } from 'viem';
 import { watchDebounced } from '@vueuse/core';
-
-import { useChainId, useAccount, useChains, useClient, useConnectorClient, useSwitchChain } from '@wagmi/vue';
-import { addDaysWithOptions } from 'date-fns/fp';
+import type { Address } from 'viem';
+import type { OutcomeInterface } from '~/lib/types/prediction-set';
+import { PredictionSetStatus, TransactionType } from '~/lib/types/prediction-set';
+import { useAccount } from '@wagmi/vue';
 
 const props = defineProps({
   contractAddress: { type: String, default: null, required: true },
   outcome: { type: Object as PropType<OutcomeInterface>, default: {}, required: true },
   status: { type: Number as PropType<PredictionSetStatus>, default: null, required: true },
   action: { type: Number as PropType<TransactionType>, default: null, required: false },
+  endTime: { type: Date, default: null, required: false },
 });
 
-const { getMaxTokensToSell, getMinTokensToBuy, addFunding, buy } = useFixedMarketMaker();
-const { refreshBalance, getTokenStore } = useCollateralToken();
-const { isConnected } = useAccount();
-
-const message = useMessage();
+const { getMaxTokensToSell, getMinTokensToBuy, addFunding, buy, sell } = useFixedMarketMaker();
+const { refreshCollateralBalance, getTokenStore } = useCollateralToken();
+const { getConditionalBalance, parseConditionalBalance } = useConditionalToken();
 const { resetContracts, ensureCorrectNetwork } = useContracts();
-
+const { isConnected } = useAccount();
+const message = useMessage();
 const txWait = useTxWait();
 const tokenStore = getTokenStore();
 
 const selectedTab = ref(TransactionType.BUY);
-const isBuyEnabled = ref(true);
-const isSellEnabled = ref(true);
 const isFundEnabled = ref(true);
-
 const slippage = ref(0);
-
 const loading = ref(false);
-
-const chains = useChains();
 const amount = ref<number>();
 const returnAmount = ref<string>('0.0');
+const conditionalBalance = ref(BigInt(0));
 
-const balanceLoading = ref(false);
-
-const collateralBalance = ref(0);
+const enoughConditionalBalance = computed(() => {
+  const scaledAmount = BigInt(Math.round((amount.value || 0) * 10 ** tokenStore.decimals));
+  return conditionalBalance.value >= scaledAmount;
+});
 
 const enoughCollateralBalance = computed(() => {
   const scaledAmount = BigInt(Math.round((amount.value || 0) * 10 ** tokenStore.decimals));
@@ -263,19 +280,17 @@ const enoughCollateralBalance = computed(() => {
 onMounted(async () => {
   if (props.status === PredictionSetStatus.FUNDING) {
     selectedTab.value = TransactionType.FUND;
-    isBuyEnabled.value = false;
-    isSellEnabled.value = false;
   } else if (props.action) {
     selectedTab.value = props.action;
   }
 
-  await refreshBalance();
+  await refreshCollateralBalance();
+});
 
-  // setTimeout(() => {
-  //   if (props.status === PredictionSetStatus.FUNDING) {
-  //     selectedTab.value = TransactionType.FUND;
-  //   }
-  // }, 100);
+watchEffect(async () => {
+  if (props.outcome.positionId) {
+    conditionalBalance.value = await getConditionalBalance(props.outcome.positionId);
+  }
 });
 
 watch(
@@ -289,11 +304,12 @@ watchDebounced(
   () => amount.value,
   async () => {
     if (amount.value === 0) {
-      // TODO: handle
+      returnAmount.value = '0.0';
       return;
     }
 
     if (!amount.value) {
+      returnAmount.value = '0.0';
       return;
     }
 
@@ -349,7 +365,34 @@ async function fund() {
     await txWait.wait();
 
     amount.value = '' as any;
-    await refreshBalance();
+    await refreshCollateralBalance();
+  } catch (error) {
+    console.error(error);
+    message.error(contractError(error));
+  } finally {
+    loading.value = false;
+  }
+}
+
+async function sellOutcome() {
+  if (!amount.value) {
+    return;
+  }
+
+  loading.value = true;
+  try {
+    await ensureCorrectNetwork();
+
+    txWait.hash.value = await sell(
+      props.contractAddress as Address,
+      amount.value,
+      props.outcome.outcomeIndex,
+      slippage.value
+    );
+    await txWait.wait();
+
+    amount.value = '' as any;
+    await refreshCollateralBalance();
   } catch (error) {
     console.error(error);
     message.error(contractError(error));
@@ -376,7 +419,7 @@ async function buyOutcome() {
     await txWait.wait();
 
     amount.value = '' as any;
-    await refreshBalance();
+    await refreshCollateralBalance();
   } catch (error) {
     console.error(error);
     message.error(contractError(error));

@@ -4,9 +4,43 @@ import { ContractType } from '~/lib/config/contracts';
 
 export default function useFixedMarketMaker() {
   const { address } = useAccount();
-  const { checkAllowance, getTokenStore, loadToken } = useCollateralToken();
+  const { checkCollateralAllowance, getTokenStore, loadToken } = useCollateralToken();
+  const { checkConditionalApprove } = useConditionalToken();
   const { activeChain, initContract } = useContracts();
   const tokenStore = getTokenStore();
+
+  // // Function to get price per share
+  // async function getPricePerShare(
+  //   contract: any, // The contract instance
+  //   investmentAmount: BigNumber, // The amount to invest
+  //   outcomeIndex: number // The outcome index
+  // ): Promise<BigNumber> {
+  //   try {
+  //     // Call calcBuyAmount to get the number of shares received
+  //     const sharesReceived: BigNumber = await contract.calcBuyAmount(investmentAmount, outcomeIndex);
+
+  //     if (sharesReceived.isZero()) {
+  //       throw new Error('Shares received is zero, cannot divide.');
+  //     }
+
+  //     // Price per share = investmentAmount / sharesReceived
+  //     return investmentAmount.div(sharesReceived);
+  //   } catch (error) {
+  //     console.error('Error calculating price per share:', error);
+  //     return BigNumber.from(0);
+  //   }
+  // }
+
+  async function getPricePerShare(fpmmContractAddress: Address, outcomeIndex: number) {
+    const amount = BigInt(Math.round(1 * 10 ** tokenStore.decimals));
+
+    const contract = await initContract(ContractType.FPMM, fpmmContractAddress);
+    const expectedShares = await contract.read.calcBuyAmount([amount, outcomeIndex]);
+    console.log(amount);
+    console.log(expectedShares);
+
+    return amount / expectedShares;
+  }
 
   /**
    *
@@ -69,7 +103,7 @@ export default function useFixedMarketMaker() {
 
     const contract = await initContract(ContractType.FPMM, fpmmContractAddress);
 
-    const allowance = await checkAllowance(fpmmContractAddress);
+    const allowance = await checkCollateralAllowance(fpmmContractAddress);
     if (allowance) {
       const scaledAmount = BigInt(Math.round(amount * 10 ** tokenStore.decimals));
       return await contract.write.addFunding([scaledAmount, []]);
@@ -90,7 +124,7 @@ export default function useFixedMarketMaker() {
     }
     const contract = await initContract(ContractType.FPMM, fpmmContractAddress);
 
-    const allowance = await checkAllowance(fpmmContractAddress);
+    const allowance = await checkCollateralAllowance(fpmmContractAddress);
     if (allowance) {
       const minOutcomeTokensToBuy = await getMinTokensToBuy(fpmmContractAddress, amount, outcomeIndex, slippage);
       const scaledAmount = BigInt(Math.round(amount * 10 ** tokenStore.decimals));
@@ -103,14 +137,15 @@ export default function useFixedMarketMaker() {
     if (!tokenStore.loaded) {
       await loadToken();
     }
+
     const contract = await initContract(ContractType.FPMM, fpmmContractAddress);
 
-    const allowance = await checkAllowance(fpmmContractAddress);
-    if (allowance) {
+    const approved = await checkConditionalApprove(fpmmContractAddress);
+    if (approved) {
       const minOutcomeTokensToBuy = await getMinTokensToBuy(fpmmContractAddress, amount, outcomeIndex, slippage);
       const scaledAmount = BigInt(Math.round(amount * 10 ** tokenStore.decimals));
 
-      return await contract.write.buy([scaledAmount, outcomeIndex, minOutcomeTokensToBuy]);
+      return await contract.write.sell([scaledAmount, outcomeIndex, 1]);
     }
   }
 
@@ -119,5 +154,7 @@ export default function useFixedMarketMaker() {
     getMinTokensToBuy,
     addFunding,
     buy,
+    sell,
+    getPricePerShare,
   };
 }

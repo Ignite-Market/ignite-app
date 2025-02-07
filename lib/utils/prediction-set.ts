@@ -45,7 +45,7 @@ export function getStatusClass(status: PredictionSetStatus, endTime: string | Da
       return 'bg-statusYellow/20 text-statusYellow';
 
     case PredictionSetStatus.FINALIZED:
-      return 'bg-white/24 text-white';
+      return 'bg-white/25 text-white';
 
     default:
       break;
@@ -81,7 +81,7 @@ export function getDisplayDate(status: PredictionSetStatus, endTime: string, res
  * @param endTime
  * @returns
  */
-export function tradeEnabled(status: PredictionSetStatus, endTime: string | Date) {
+export function tradeEnabled(status: PredictionSetStatus, endTime: string | Date): boolean {
   switch (status) {
     case PredictionSetStatus.ACTIVE:
       if (Number(new Date()) > Number(new Date(endTime))) {
@@ -96,6 +96,23 @@ export function tradeEnabled(status: PredictionSetStatus, endTime: string | Date
       return false;
 
     default:
-      break;
+      return false;
+  }
+}
+
+export function actionsEnabled(status: PredictionSetStatus, endTime: string | Date): boolean {
+  switch (status) {
+    case PredictionSetStatus.FUNDING:
+      return true;
+
+    case PredictionSetStatus.ACTIVE:
+      if (Number(new Date()) > Number(new Date(endTime))) {
+        return false;
+      }
+
+      return true;
+
+    default:
+      return false;
   }
 }

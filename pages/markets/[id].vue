@@ -1,6 +1,6 @@
 <template>
   <Dashboard :loading="loading">
-    <div v-if="predictionSet" class="relative">
+    <div v-if="predictionSet" class="flex flex-row justify-center">
       <div class="flex flex-col max-w-[736px]">
         <!-- HEADER -->
         <div class="flex">
@@ -16,10 +16,7 @@
             </div>
 
             <div class="flex mt-4 items-center">
-              <PredictionSetStatus
-                :status="predictionSet.setStatus"
-                :endTime="predictionSet.endTime.toString()"
-              ></PredictionSetStatus>
+              <Status :status="predictionSet.setStatus" :endTime="predictionSet.endTime.toString()"></Status>
 
               <div class="mx-4 border-r-1 border-r-white/25 h-[14px]"></div>
 
@@ -39,6 +36,7 @@
           <div
             v-for="outcome in predictionSet.outcomes"
             class="flex bg-grey rounded-lg pl-3 py-[6px] items-center w-full"
+            :class="{ 'border-1 border-primary': winningOutcome?.id === outcome.id }"
           >
             <div class="flex">
               <div class="w-[56px] h-[56px] flex-shrink-0">
@@ -49,7 +47,7 @@
               </div>
 
               <div class="flex flex-col ml-4">
-                <div class="text-[16px] leading-[24px] font-bold text-white">
+                <div class="text-[16px] leading-[24px] font-bold text-white pt-[4px]">
                   {{ outcome.name }}
                 </div>
 
@@ -58,17 +56,26 @@
             </div>
 
             <div class="flex items-center ml-auto pr-4">
-              <div class="font-bold text-[16px] leading-[24px] mr-9">
+              <div
+                class="font-bold text-[16px] leading-[24px]"
+                v-if="predictionSet.setStatus !== PredictionSetStatus.FINALIZED"
+              >
                 {{ Number(outcome.latestChance.chance * 100).toFixed(0) }} %
               </div>
-              <div class="flex ml-auto">
+
+              <div v-if="winningOutcome?.id === outcome.id" class="flex items-center justify-center">
+                <NuxtIcon class="text-primary text-[24px]" name="icon/complete" />
+              </div>
+
+              <div class="flex ml-auto pl-9" v-if="tradeEnabled(predictionSet.setStatus, predictionSet.endTime)">
                 <BasicButton
                   class="mr-3"
                   size="large"
                   type="secondary"
                   :btnClass="['bg-statusGreen/20 border-statusGreen hover:bg-statusGreen']"
                   @click="selectOutcome(TransactionType.BUY, outcome)"
-                  :selected="true"
+                  :selected="selectedOutcome.id === outcome.id && selectedAction === TransactionType.BUY"
+                  :selectedClass="['!bg-statusGreen !border-statusGreen']"
                 >
                   Buy
                 </BasicButton>
@@ -77,6 +84,8 @@
                   type="secondary"
                   :btnClass="['bg-statusRed/20 border-statusRed hover:bg-statusRed']"
                   @click="selectOutcome(TransactionType.SELL, outcome)"
+                  :selected="selectedOutcome.id === outcome.id && selectedAction === TransactionType.SELL"
+                  :selectedClass="['!bg-statusRed !border-statusRed']"
                 >
                   Sell
                 </BasicButton>
@@ -102,7 +111,11 @@
             <div class="ml-auto font-bold hover:text-primary cursor-pointer">
               {{ shortenAddress(predictionSet.chainData.contractAddress) }}
             </div>
-            <NuxtIcon class="ml-2 text-white" name="icon/copy" />
+            <NuxtIcon
+              class="ml-2 text-white cursor-pointer"
+              name="icon/copy"
+              @click="copyToClipboard(predictionSet.chainData.contractAddress)"
+            />
           </div>
 
           <div class="flex border-l-[0.5px] border-l-grey-lighter pl-11 items-center">
@@ -110,29 +123,49 @@
             <div class="ml-auto font-bol hover:text-primary cursor-pointer">
               {{ shortenAddress(config.public.ORACLE_CONTRACT) }}
             </div>
-            <NuxtIcon class="ml-2 text-white" name="icon/copy" />
+            <NuxtIcon
+              class="ml-2 text-white cursor-pointer"
+              name="icon/copy"
+              @click="copyToClipboard(predictionSet.chainData.contractAddress)"
+            />
           </div>
         </div>
       </div>
 
-      <div class="absolute top-0 right-0">
+      <div class="sticky top-0 self-start ml-24 w-[409px]">
         <PredictionSetAction
+          v-if="actionsEnabled(predictionSet.setStatus, predictionSet.endTime)"
           :contract-address="predictionSet.chainData.contractAddress"
           :outcome="selectedOutcome"
           :action="selectedAction"
           :status="predictionSet.setStatus"
+          :end-time="predictionSet.endTime"
         >
         </PredictionSetAction>
+
+        <PredictionSetPhase
+          v-if="predictionSet.setStatus !== PredictionSetStatus.FINALIZED"
+          :prediction-set="predictionSet"
+        >
+        </PredictionSetPhase>
+
+        <PredictionSetResults
+          v-if="predictionSet.setStatus === PredictionSetStatus.FINALIZED"
+          :outcome="winningOutcome"
+        >
+        </PredictionSetResults>
       </div>
     </div>
   </Dashboard>
 </template>
 
 <script lang="ts" setup>
+import Status from '~/components/parts/PredictionSet/Status.vue';
 import {
   type OutcomeInterface,
   type PredictionSetInterface,
   type PredictionSetResponse,
+  PredictionSetStatus,
   TransactionType,
 } from '~/lib/types/prediction-set';
 import Endpoints from '~/lib/values/endpoints';
@@ -147,6 +180,8 @@ const predictionSet = ref<PredictionSetInterface | null>();
 const selectedOutcome = ref();
 const selectedAction = ref();
 
+const winningOutcome = ref();
+
 onMounted(async () => {
   loading.value = true;
 
@@ -154,12 +189,15 @@ onMounted(async () => {
 
   try {
     const res = await $api.get<PredictionSetResponse>(Endpoints.predictionSetsById(Number(params?.id)));
-
     predictionSet.value = res.data;
 
-    // TODO: look at url if another outcome is selected.
-    selectedOutcome.value = predictionSet.value.outcomes[0];
-    selectedAction.value = TransactionType.BUY;
+    if (predictionSet.value.setStatus === PredictionSetStatus.FINALIZED) {
+      winningOutcome.value = predictionSet.value.outcomes.find(o => o.id === predictionSet.value?.winner_outcome_id);
+    } else {
+      // TODO: look at url if another outcome is selected.
+      selectedOutcome.value = predictionSet.value.outcomes[0];
+      selectedAction.value = TransactionType.BUY;
+    }
   } catch (error) {
     router.push({ name: 'index' });
   } finally {
