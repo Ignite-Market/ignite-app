@@ -1,5 +1,5 @@
 <template>
-  <div class="flex-bc w-full bg-grey-light px-6">
+  <div class="flex-bc w-full bg-grey px-6">
     <div class="mt-2">
       <Logo class="inline-block" />
     </div>
@@ -17,12 +17,8 @@
     </div>
 
     <div class="flex">
-      <button>test</button>
-      <button>test</button>
-      <button>test</button>
-      <button>test</button>
       <div v-if="isConnected && userStore.loggedIn" class="flex-cc text-white">
-        <HeaderNotifications />
+        <!-- <HeaderNotifications /> -->
         <HeaderProfile />
       </div>
       <WalletLogin v-else />

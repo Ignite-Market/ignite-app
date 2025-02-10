@@ -98,8 +98,8 @@ export default {
     colors: colors,
 
     fontFamily: {
-      heading: ['Lato', 'serif'],
-      sans: ['Roboto', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+      heading: ['Inter', 'serif'],
+      sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
     },
 
     container: {

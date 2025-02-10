@@ -1,17 +1,17 @@
 <template>
   <n-form ref="formRef" class="w-full max-w-lg" :model="formData" :rules="rules" @submit.prevent="handleSubmit">
     <!--  Username -->
-    <n-form-item path="name" :label="$t('form.label.username')" :label-props="{ for: 'username' }">
+    <n-form-item path="name" :label="'Username'" :label-props="{ for: 'username' }">
       <n-input
         v-model:value="formData.name"
         :input-props="{ id: 'username' }"
-        :placeholder="$t('form.placeholder.username')"
+        :placeholder="'Username'"
         :loading="loadingForm"
       />
     </n-form-item>
 
     <!--  Email -->
-    <n-form-item path="email" :label="$t('form.label.email')" :label-props="{ for: 'email' }">
+    <n-form-item path="email" :label="'Email address'" :label-props="{ for: 'email' }">
       <n-input
         v-model:value="formData.email"
         :input-props="{ id: 'email', type: 'email' }"
@@ -22,10 +22,10 @@
 
     <!--  Submit -->
     <n-form-item :show-label="false">
-      <input type="submit" class="hidden" :value="$t('form.save')" />
-      <Btn class="mt-2" size="large" type="secondary" :loading="loading || loadingForm" @click="handleSubmit">
-        {{ $t('form.save') }}
-      </Btn>
+      <input type="submit" class="hidden" />
+      <BasicButton class="mt-2" size="large" type="primary" :loading="loading || loadingForm" @click="handleSubmit">
+        Save
+      </BasicButton>
     </n-form-item>
   </n-form>
 </template>
@@ -36,8 +36,8 @@ import { ruleRequired } from '~/lib/misc/validation';
 import Endpoints from '~/lib/values/endpoints';
 
 type FormUserProfile = {
+  name: string;
   email: string;
-  phone?: string | null;
 };
 
 const message = useMessage();
@@ -49,6 +49,7 @@ const loadingForm = ref<boolean>(true);
 const formRef = ref<FormInst | null>(null);
 
 const formData = ref<FormUserProfile>({
+  name: userStore.name,
   email: userStore.email,
 });
 

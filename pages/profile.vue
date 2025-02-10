@@ -1,25 +1,14 @@
 <template>
   <Dashboard :loading="userStore.loadingProfile">
-    <template #heading>
-      <h1>Profile</h1>
-
-      <MenuProfile />
-    </template>
     <slot>
-      <ActionAllowance />
-      <ActionApprovalAll />
-
-      <!-- Edit user profile -->
-      <FormWrapper class="mt-8" :title="$t('profile.accountInformation')">
+      <FormWrapper class="mt-8" :title="'Account information'">
         <FormUserProfile />
       </FormWrapper>
-
-      <!-- Security -->
-      <FormWrapper :title="$t('profile.email')">
-        <!-- Change password -->
+      <!-- 
+      <FormWrapper :title="'Email'">
         <n-h5>{{ $t('profile.email.changeRequest') }}</n-h5>
         <FormUserEmail />
-      </FormWrapper>
+      </FormWrapper> -->
     </slot>
   </Dashboard>
 </template>

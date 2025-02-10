@@ -1,10 +1,11 @@
 <template>
-  <Btn v-bind="$attrs" @click="btnAction()">
+  <BasicButton class="py-[17px] px-[16px]" v-bind="$attrs" @click="btnAction()" size="large">
     <span v-if="address">
-      {{ $t('wallet.disconnect') }} <small class="tracking-wide">({{ truncateWallet(address) }})</small>
+      Disconnect
+      <small>({{ truncateWallet(address) }})</small>
     </span>
-    <span v-else>{{ $t('wallet.connect') }}</span>
-  </Btn>
+    <span v-else class="font-bold text-[14px] leading-[20px]">Log In</span>
+  </BasicButton>
 
   <!-- Modal - Wallet select -->
   <modal v-model:show="modalWalletSelectVisible" class="w-auto" :title="$t('wallet.info')">
@@ -17,6 +18,7 @@ import { useAccount, useAccountEffect, useDisconnect, type Config } from '@wagmi
 import { signMessage } from '@wagmi/vue/actions';
 import Endpoints from '~/lib/values/endpoints';
 import { truncateWallet } from '~/lib/misc/strings';
+import BasicButton from '~/components/general/BasicButton.vue';
 
 const { t } = useI18n();
 const { $wagmiConfig } = useNuxtApp();
@@ -82,9 +84,15 @@ async function evmWalletLogin(data: Record<string, any>) {
     return;
   }
 
-  // await ensureCorrectNetwork();
-
   loadingWallet.value = true;
+
+  try {
+    await ensureCorrectNetwork();
+  } catch (error) {
+    console.log('Error while switching network: ');
+    console.log(error);
+  }
+
   try {
     const resMessage = await $api.get<WalletMessageResponse>(Endpoints.walletMessage);
     const message = resMessage.data.message;
@@ -102,8 +110,11 @@ async function evmWalletLogin(data: Record<string, any>) {
     /** Show success message */
     success(t('wallet.login.success'));
   } catch (e) {
+    // TODO: handle canceled signature.
+
     console.error(e);
     error(apiError(e));
+    disconnect();
   }
   loadingWallet.value = false;
 }

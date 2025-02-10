@@ -126,7 +126,7 @@
             <NuxtIcon
               class="ml-2 text-white cursor-pointer"
               name="icon/copy"
-              @click="copyToClipboard(predictionSet.chainData.contractAddress)"
+              @click="copyToClipboard(config.public.ORACLE_CONTRACT)"
             />
           </div>
         </div>

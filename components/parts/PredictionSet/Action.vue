@@ -387,7 +387,8 @@ async function sellOutcome() {
       props.contractAddress as Address,
       amount.value,
       props.outcome.outcomeIndex,
-      slippage.value
+      slippage.value,
+      props.outcome.latestChance.chance
     );
     await txWait.wait();
 

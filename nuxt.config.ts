@@ -140,11 +140,8 @@ export default defineNuxtConfig({
     display: 'swap',
     download: true,
     families: {
-      Lato: {
-        wght: [400],
-      },
-      Roboto: {
-        wght: [400, 500, 700],
+      Inter: {
+        wght: [400, 500, 600, 700],
       },
     },
   },

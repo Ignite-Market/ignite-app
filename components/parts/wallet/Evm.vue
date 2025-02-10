@@ -10,7 +10,7 @@ const { connect, connectors } = useConnect();
 
 <template>
   <n-space :size="22" vertical>
-    <Btn
+    <BasicButton
       v-for="(connector, key) in connectors"
       :key="key"
       class="flex-cc w-full"
@@ -25,6 +25,6 @@ const { connect, connectors } = useConnect();
         <NuxtIcon :name="`wallet/${connector.type}`" filled />
         {{ connector.name }}
       </span>
-    </Btn>
+    </BasicButton>
   </n-space>
 </template>
