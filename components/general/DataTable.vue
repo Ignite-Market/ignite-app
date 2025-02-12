@@ -16,9 +16,8 @@
       <n-empty description="No data" />
     </div>
     <div v-else-if="showGrid" class="grid grid-cols-billing gap-2 bg-bg pt-2 -mx-6 -mb-2">
-      <template v-for="offer in store.items">
-        <CardNft v-if="'loanHash' in offer" :nft="parseNft(offer)" :offer="offer" />
-        <CardNft v-else :nft="parseNft(offer)" :offer-request="offer" />
+      <template v-for="item in store.items">
+        {{ item }}
       </template>
     </div>
     <n-data-table
@@ -43,7 +42,6 @@
 
 <script lang="ts" setup>
 import type { DataTableColumns, DataTableInst, DataTableSortState } from 'naive-ui';
-import { parseAssetFromOffer, parseAssetMetadata } from '~/lib/misc/parsers';
 import type { BaseStore } from '~/lib/types/config';
 import type { AnyOffer, AnyOfferRequest } from '~/lib/types/offer';
 import { PAGINATION_LIMIT } from '~/lib/values/general.values';
@@ -108,17 +106,5 @@ async function getItems(page: number = 1, limit: number = PAGINATION_LIMIT) {
     props.store.pagination.pageSize = limit;
     await props.store.fetch({ page, limit, sorter: props.store.sorter });
   }
-}
-
-function parseNft(offer: AnyOffer | AnyOfferRequest) {
-  const asset = parseAssetFromOffer(offer);
-  const metadata = parseAssetMetadata(asset.metadata);
-  return {
-    ...metadata,
-    id: asset.tokenId,
-    uri: asset.tokenURI,
-    chain: asset.chainId + '',
-    contractAddress: asset.contractAddress,
-  };
 }
 </script>

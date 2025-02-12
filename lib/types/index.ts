@@ -78,16 +78,6 @@ declare global {
     status: number;
   }
 
-  interface MoralisResponse<T>
-    extends GeneralResponse<{
-      status: string;
-      total: number;
-      page: number;
-      page_size: number;
-      cursor: string;
-      result: T;
-    }> {}
-
   type FetchParams = {
     page?: number;
     limit?: number;

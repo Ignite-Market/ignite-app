@@ -20,29 +20,11 @@
 </template>
 
 <script lang="ts" setup>
-/** Papa parser */
-type CsvFileData = {
-  data: Array<any>;
-  errors: Array<any>;
-  meta: {
-    aborted: boolean;
-    cursor: number;
-    delimeter: string;
-    fields: Array<string>;
-    linebreak: string;
-    truncated: boolean;
-  };
-};
-
 const emit = defineEmits(['file-uploaded']);
 const props = defineProps({
   multiple: { type: Boolean, default: false },
 });
 
-const { vueApp } = useNuxtApp();
-const $papa = vueApp.config.globalProperties.$papa;
-
-const { t } = useI18n();
 const message = useMessage();
 const uploadedFile = ref<File>();
 const input = ref<HTMLInputElement | null>(null);
@@ -70,33 +52,9 @@ const processFile = async (file?: File | null) => {
   }
 
   uploadedFile.value = file;
-  emit('file-uploaded', await parseUploadedFile(file));
+  emit('file-uploaded', file);
 };
 const processFiles = async (files?: FileList | null) => {
   console.log(files);
 };
-
-/**
- * Parse CSV file and prepare data, columns and attributes
- */
-async function parseUploadedFile(file?: File | null) {
-  if (!file) {
-    return [];
-  }
-  let data: Array<any> = [];
-
-  await $papa.parse(file, {
-    header: true,
-    skipEmptyLines: true,
-    complete: function (results: CsvFileData) {
-      data = results.data;
-    },
-    error: function (error: string) {
-      console.warn(error);
-    },
-  });
-  await sleep(100);
-
-  return data;
-}
 </script>
