@@ -87,9 +87,7 @@ const activePhase = computed(() => {
   return Phase.RESULTS;
 });
 
-onMounted(() => {
-  console.log('active: ', activePhase.value);
-});
+onMounted(() => {});
 
 watch(
   () => activePhase.value,

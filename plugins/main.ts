@@ -1,6 +1,6 @@
+import { Buffer } from 'buffer';
 import VueCookieAcceptDecline from 'vue-cookie-accept-decline';
 import Jazzicon from 'vue3-jazzicon/src/components';
-import { Buffer } from 'buffer';
 import { LS_KEYS } from '~/lib/values/general.values';
 import config from '../package.json';
 

@@ -54,7 +54,6 @@ watch(
 );
 
 function routeNameToKey(name: string) {
-  console.log('name: ', name);
   return props.sliceName ? removeIdOrSlug(name) : name;
 }
 

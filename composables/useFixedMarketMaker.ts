@@ -2,20 +2,27 @@ import { useAccount } from '@wagmi/vue';
 import { type Address } from 'viem';
 import { ContractType } from '~/lib/config/contracts';
 
+/**
+ * Use Fixed Market Maker (FMM) Contract.
+ */
 export default function useFixedMarketMaker() {
   const { checkCollateralAllowance, getTokenStore, loadToken } = useCollateralToken();
-  const { checkConditionalApprove, getConditionalBalance } = useConditionalToken();
+  const { checkConditionalApprove } = useConditionalToken();
+  const { initContract } = useContracts();
   const { address } = useAccount();
-  const { activeChain, initContract } = useContracts();
   const tokenStore = getTokenStore();
 
+  /**
+   *
+   * @param fpmmContractAddress
+   * @param outcomeIndex
+   * @returns
+   */
   async function getPricePerShare(fpmmContractAddress: Address, outcomeIndex: number) {
     const amount = BigInt(Math.round(1 * 10 ** tokenStore.decimals));
 
     const contract = await initContract(ContractType.FPMM, fpmmContractAddress);
     const expectedShares = await contract.read.calcBuyAmount([amount, outcomeIndex]);
-    console.log(amount);
-    console.log(expectedShares);
 
     return amount / expectedShares;
   }
@@ -63,25 +70,6 @@ export default function useFixedMarketMaker() {
     const minOutcomeTokensToBuy = (expectedShares * BigInt(100 - slippage)) / BigInt(100);
 
     return minOutcomeTokensToBuy;
-  }
-
-  /**
-   * Adds funding to selected market.
-   * @param fpmmContractAddress FPMM contract address.
-   * @param amount Funding amount in collateral token.
-   */
-  async function addFunding(fpmmContractAddress: Address, amount: number) {
-    if (!tokenStore.loaded) {
-      await loadToken();
-    }
-
-    const contract = await initContract(ContractType.FPMM, fpmmContractAddress);
-
-    const allowance = await checkCollateralAllowance(fpmmContractAddress);
-    if (allowance) {
-      const scaledAmount = BigInt(Math.round(amount * 10 ** tokenStore.decimals));
-      return await contract.write.addFunding([scaledAmount, []]);
-    }
   }
 
   /**
@@ -155,17 +143,32 @@ export default function useFixedMarketMaker() {
   }
 
   /**
-   *
-   * @param fpmmContractAddress
-   * @param shareAmount
-   * @returns
+   * Adds funding to selected market.
+   * @param fpmmContractAddress FPMM contract address.
+   * @param amount Funding amount in collateral token.
+   */
+  async function addFunding(fpmmContractAddress: Address, amount: number) {
+    if (!tokenStore.loaded) {
+      await loadToken();
+    }
+    const contract = await initContract(ContractType.FPMM, fpmmContractAddress);
+
+    const allowance = await checkCollateralAllowance(fpmmContractAddress);
+    if (allowance) {
+      const scaledAmount = BigInt(Math.round(amount * 10 ** tokenStore.decimals));
+      return await contract.write.addFunding([scaledAmount, []]);
+    }
+  }
+
+  /**
+   * Removes funding from the selected market.
+   * @param fpmmContractAddress FPMM contract address.
+   * @param shareAmount Amount of shares to return.
    */
   async function removeFunding(fpmmContractAddress: Address, shareAmount: bigint) {
     const contract = await initContract(ContractType.FPMM, fpmmContractAddress);
 
-    console.log(shareAmount);
-
-    return await contract.read.removeFunding([Number(shareAmount)]);
+    return await contract.write.removeFunding([Number(shareAmount)]);
   }
 
   return {

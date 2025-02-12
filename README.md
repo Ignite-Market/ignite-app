@@ -1,6 +1,15 @@
 # Ignite Market Application
 
-This repository contains source code for the Dashboard frontend.
+| Stage | Status                                                                                                                                                                                                                                                                                                                | URL                               |
+| ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- |
+| DEV   | ![Build dev](https://codebuild.us-east-1.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoiSWNlOGNWM2xpYXZ6SkZiZlBycEZSSmQyK2J0RFVKektnVUxhVG1uc3JaZzUxZHAzYTlLOU9sY2FwbmlIUEw0REVWN21LUXBkK3dKYUdlRjhCa09qMlFRPSIsIml2UGFyYW1ldGVyU3BlYyI6IjZ4SGJTZm5WcDVxNEZkelEiLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=develop) | https://app-dev.ignitemarket.xyz/ |
+| PROD  | ![Build prod](https://codebuild.us-east-1.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoiSWNlOGNWM2xpYXZ6SkZiZlBycEZSSmQyK2J0RFVKektnVUxhVG1uc3JaZzUxZHAzYTlLOU9sY2FwbmlIUEw0REVWN21LUXBkK3dKYUdlRjhCa09qMlFRPSIsIml2UGFyYW1ldGVyU3BlYyI6IjZ4SGJTZm5WcDVxNEZkelEiLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=main)   | https://app.ignitemarket.xyz/     |
+
+Ignite Market is a decentralized prediction market platform, designed to enable users to trade on the outcomes of real-world events.
+
+The detailed product description can be found [here](https://github.com/kalmiallc/ignite-market-contracts/blob/main/ProductDescription.md).
+
+This repository contains source code for the Ignite Market application frontend.
 
 ## Stack
 

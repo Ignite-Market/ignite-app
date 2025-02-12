@@ -21,11 +21,9 @@ export enum PageSize {
 }
 
 export const WebStorageKeys = {
-  ASSET_STORE: 'len_asset_store',
-  CONTRACT_EVENT_STORE: 'len_contract_event_store',
   USER_STORE: 'len_user_store',
   TX_STORE: 'len_tx_store',
 };
 export const LS_KEYS = {
-  APP_VERSION: 'len_app_version',
+  APP_VERSION: 'ignite_market_app_version',
 };

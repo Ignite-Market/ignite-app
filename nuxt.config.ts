@@ -13,7 +13,7 @@ const meta = {
   description:
     'Ignite Market is a decentralized prediction market platform, designed to enable users to trade on the outcomes of real-world events.',
   url: appConfig.url,
-  image: `${appConfig.url}/og.jpg`,
+  image: `${appConfig.url}/og.png`,
   twitter: '@ignitemarket',
 };
 
