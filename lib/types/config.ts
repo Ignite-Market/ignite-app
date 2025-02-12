@@ -34,6 +34,7 @@ export type BaseStore<ListItem, Item = void> = {
   sorter?: DataTableSortState | null;
   fetch: Function;
 } & Record<string, any>;
+
 declare global {
   interface ConfigInterface {
     ENV?: string;

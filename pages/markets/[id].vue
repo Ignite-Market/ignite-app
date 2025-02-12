@@ -152,6 +152,8 @@
         <PredictionSetResults
           v-if="predictionSet.setStatus === PredictionSetStatus.FINALIZED"
           :outcome="winningOutcome"
+          :contract-address="predictionSet.chainData.contractAddress"
+          :condition-id="predictionSet.chainData.conditionId"
         >
         </PredictionSetResults>
       </div>
@@ -170,22 +172,34 @@ import {
 } from '~/lib/types/prediction-set';
 import Endpoints from '~/lib/values/endpoints';
 
+const REFRESH_INTERVAL = 10_000;
+
 const { params } = useRoute();
 const router = useRouter();
 const config = useRuntimeConfig();
 
 const loading = ref<boolean>(true);
+const refreshInterval = ref<NodeJS.Timeout>();
 
 const predictionSet = ref<PredictionSetInterface | null>();
 const selectedOutcome = ref();
 const selectedAction = ref();
-
 const winningOutcome = ref();
 
 onMounted(async () => {
-  loading.value = true;
-
   await sleep(10);
+  await getPredictionSet();
+});
+
+async function selectOutcome(transaction: TransactionType, outcome: OutcomeInterface) {
+  selectedAction.value = transaction;
+  selectedOutcome.value = outcome;
+}
+
+async function getPredictionSet(silent: boolean = false) {
+  if (!silent) {
+    loading.value = true;
+  }
 
   try {
     const res = await $api.get<PredictionSetResponse>(Endpoints.predictionSetsById(Number(params?.id)));
@@ -193,20 +207,25 @@ onMounted(async () => {
 
     if (predictionSet.value.setStatus === PredictionSetStatus.FINALIZED) {
       winningOutcome.value = predictionSet.value.outcomes.find(o => o.id === predictionSet.value?.winner_outcome_id);
+
+      clearInterval(refreshInterval.value);
     } else {
       // TODO: look at url if another outcome is selected.
-      selectedOutcome.value = predictionSet.value.outcomes[0];
-      selectedAction.value = TransactionType.BUY;
+      if (!selectedOutcome.value || !selectedAction.value) {
+        selectedOutcome.value = predictionSet.value.outcomes[0];
+        selectedAction.value = TransactionType.BUY;
+      }
+
+      if (!refreshInterval.value) {
+        refreshInterval.value = setInterval(async () => {
+          await getPredictionSet(true);
+        }, REFRESH_INTERVAL);
+      }
     }
   } catch (error) {
     router.push({ name: 'index' });
   } finally {
     loading.value = false;
   }
-});
-
-async function selectOutcome(transaction: TransactionType, outcome: OutcomeInterface) {
-  selectedAction.value = transaction;
-  selectedOutcome.value = outcome;
 }
 </script>

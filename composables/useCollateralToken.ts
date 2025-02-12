@@ -1,21 +1,21 @@
 import { useAccount } from '@wagmi/vue';
-import { type Address, getAddress } from 'viem';
+import { maxUint256, type Address } from 'viem';
 import { ContractType } from '~/lib/config/contracts';
-import { maxUint256 } from 'viem';
 
 export default function useCollateralToken() {
-  const { address } = useAccount();
   const { ensureCorrectNetwork, initContract } = useContracts();
+  const { address } = useAccount();
   const txWait = useTxWait();
   const message = useMessage();
   const userStore = useUserStore();
 
   /**
+   * Checks collateral token balance and increases it if it is not sufficient.
    *
-   * @param fpmmContractAddress
-   * @returns
+   * @param fpmmContractAddress FPMM contract address.
+   * @returns Boolean.
    */
-  async function checkCollateralAllowance(fpmmContractAddress: Address) {
+  async function checkCollateralAllowance(fpmmContractAddress: Address): Promise<boolean> {
     const contract = await initContract(ContractType.COLLATERAL_TOKEN);
 
     try {
@@ -37,8 +37,9 @@ export default function useCollateralToken() {
   }
 
   /**
+   * Get collateral token balance.
    *
-   * @returns
+   * @returns Collateral token balance.
    */
   async function getCollateralBalance() {
     const contract = await initContract(ContractType.COLLATERAL_TOKEN);
@@ -46,8 +47,9 @@ export default function useCollateralToken() {
   }
 
   /**
+   * Get collateral token symbol.
    *
-   * @returns
+   * @returns Collateral token symbol.
    */
   async function getSymbol(): Promise<string> {
     const contract = await initContract(ContractType.COLLATERAL_TOKEN);
@@ -56,8 +58,9 @@ export default function useCollateralToken() {
   }
 
   /**
+   * Get collateral token decimals.
    *
-   * @returns
+   * @returns Collateral token decimals.
    */
   async function getDecimals(): Promise<number> {
     const contract = await initContract(ContractType.COLLATERAL_TOKEN);
@@ -66,9 +69,10 @@ export default function useCollateralToken() {
   }
 
   /**
+   * Parses collateral token balance.
    *
-   * @param fixed
-   * @returns
+   * @param fixed TO how many decimal points should the balance be parsed.
+   * @returns Parsed balance.
    */
   function parseBalance(fixed: number = 3) {
     const tokenStore = getTokenStore();
@@ -78,7 +82,7 @@ export default function useCollateralToken() {
   }
 
   /**
-   *
+   * Loads collateral token.
    */
   async function loadToken() {
     const tokenStore = getTokenStore();
@@ -106,7 +110,7 @@ export default function useCollateralToken() {
   }
 
   /**
-   *
+   * Refreshes collateral token.
    */
   async function refreshCollateralBalance() {
     const tokenStore = getTokenStore();
@@ -122,8 +126,9 @@ export default function useCollateralToken() {
   }
 
   /**
+   * Returns collateral token store.
    *
-   * @returns
+   * @returns Collateral token store.
    */
   function getTokenStore() {
     return userStore.collateralToken;

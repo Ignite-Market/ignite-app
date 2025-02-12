@@ -353,12 +353,14 @@ async function updateSellAmount() {
 }
 
 async function fund() {
-  if (!amount.value) {
-    return;
-  }
-
   loading.value = true;
   try {
+    await refreshCollateralBalance();
+
+    if (!amount.value || !enoughCollateralBalance.value) {
+      return;
+    }
+
     await ensureCorrectNetwork();
 
     txWait.hash.value = await addFunding(props.contractAddress as Address, amount.value);
@@ -375,12 +377,14 @@ async function fund() {
 }
 
 async function sellOutcome() {
-  if (!amount.value) {
-    return;
-  }
-
   loading.value = true;
   try {
+    await refreshCollateralBalance();
+
+    if (!amount.value) {
+      return;
+    }
+
     await ensureCorrectNetwork();
 
     txWait.hash.value = await sell(
@@ -403,12 +407,14 @@ async function sellOutcome() {
 }
 
 async function buyOutcome() {
-  if (!amount.value) {
-    return;
-  }
-
   loading.value = true;
   try {
+    await refreshCollateralBalance();
+
+    if (!amount.value || !enoughCollateralBalance.value) {
+      return;
+    }
+
     await ensureCorrectNetwork();
 
     txWait.hash.value = await buy(

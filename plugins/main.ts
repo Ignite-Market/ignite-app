@@ -1,7 +1,6 @@
 import VueCookieAcceptDecline from 'vue-cookie-accept-decline';
 import Jazzicon from 'vue3-jazzicon/src/components';
 import { Buffer } from 'buffer';
-import VuePapaParse from 'vue-papa-parse';
 import { LS_KEYS } from '~/lib/values/general.values';
 import config from '../package.json';
 
@@ -13,9 +12,6 @@ export default defineNuxtPlugin(nuxtApp => {
     /** Set API base URL */
     const appConfig = useRuntimeConfig();
     $api.setBaseUrl(appConfig.public.apiUrl);
-
-    /** CSV parser */
-    nuxtApp.vueApp.use(VuePapaParse);
 
     /** Cookie notice */
     nuxtApp.vueApp.component('vue-cookie-accept-decline', VueCookieAcceptDecline);

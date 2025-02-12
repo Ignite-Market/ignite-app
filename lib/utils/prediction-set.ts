@@ -19,7 +19,7 @@ export function getStatusName(status: PredictionSetStatus, endTime: string | Dat
       return 'Funding';
 
     case PredictionSetStatus.VOTING:
-      return 'Resolving...';
+      return 'Voting...';
 
     case PredictionSetStatus.FINALIZED:
       return 'Closed';

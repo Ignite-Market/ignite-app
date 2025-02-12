@@ -24,7 +24,6 @@ const { t } = useI18n();
 const { $wagmiConfig } = useNuxtApp();
 const { error, success } = useMessage();
 const userStore = useUserStore();
-const assetStore = useAssetStore();
 const { resetContracts, ensureCorrectNetwork } = useContracts();
 
 /** Evm wallet - wagmi */
@@ -39,13 +38,13 @@ const loadingWallet = ref<boolean>(false);
 const modalWalletSelectVisible = ref<boolean>(false);
 
 onBeforeMount(() => {
-  if (!isConnected.value) {
-    try {
-      assetStore.$reset();
-    } catch (e) {
-      console.error(e);
-    }
-  }
+  // if (!isConnected.value) {
+  //   try {
+  //     assetStore.$reset();
+  //   } catch (e) {
+  //     console.error(e);
+  //   }
+  // }
 
   if (!userStore.loggedIn) {
     disconnect();

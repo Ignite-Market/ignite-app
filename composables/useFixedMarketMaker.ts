@@ -3,33 +3,11 @@ import { type Address } from 'viem';
 import { ContractType } from '~/lib/config/contracts';
 
 export default function useFixedMarketMaker() {
-  const { address } = useAccount();
   const { checkCollateralAllowance, getTokenStore, loadToken } = useCollateralToken();
   const { checkConditionalApprove, getConditionalBalance } = useConditionalToken();
+  const { address } = useAccount();
   const { activeChain, initContract } = useContracts();
   const tokenStore = getTokenStore();
-
-  // // Function to get price per share
-  // async function getPricePerShare(
-  //   contract: any, // The contract instance
-  //   investmentAmount: BigNumber, // The amount to invest
-  //   outcomeIndex: number // The outcome index
-  // ): Promise<BigNumber> {
-  //   try {
-  //     // Call calcBuyAmount to get the number of shares received
-  //     const sharesReceived: BigNumber = await contract.calcBuyAmount(investmentAmount, outcomeIndex);
-
-  //     if (sharesReceived.isZero()) {
-  //       throw new Error('Shares received is zero, cannot divide.');
-  //     }
-
-  //     // Price per share = investmentAmount / sharesReceived
-  //     return investmentAmount.div(sharesReceived);
-  //   } catch (error) {
-  //     console.error('Error calculating price per share:', error);
-  //     return BigNumber.from(0);
-  //   }
-  // }
 
   async function getPricePerShare(fpmmContractAddress: Address, outcomeIndex: number) {
     const amount = BigInt(Math.round(1 * 10 ** tokenStore.decimals));
@@ -166,14 +144,28 @@ export default function useFixedMarketMaker() {
     }
   }
 
+  /**
+   * Returns user's funding balance - LP tokens.
+   * @param fpmmContractAddress FPMM contract address.
+   * @returns Funding balance.
+   */
   async function getFundingBalance(fpmmContractAddress: Address) {
     const contract = await initContract(ContractType.FPMM, fpmmContractAddress);
     return await contract.read.balanceOf([address.value]);
   }
 
+  /**
+   *
+   * @param fpmmContractAddress
+   * @param shareAmount
+   * @returns
+   */
   async function removeFunding(fpmmContractAddress: Address, shareAmount: bigint) {
     const contract = await initContract(ContractType.FPMM, fpmmContractAddress);
-    return await contract.read.balanceOf([address.value]);
+
+    console.log(shareAmount);
+
+    return await contract.read.removeFunding([Number(shareAmount)]);
   }
 
   return {
