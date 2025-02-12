@@ -19,7 +19,7 @@ export function getAppConfig(env?: string) {
 export function prepareOG(
   title = 'Ignite Market - A decentralized prediction market platform, designed to enable users to trade on the outcomes of real-world events.',
   description = 'Ignite Market is a decentralized prediction market platform, designed to enable users to trade on the outcomes of real-world events.',
-  image = 'https://app.ignitemarket.xyz/images/og.jpg',
+  image = 'https://app.ignitemarket.xyz/og.png',
   url = 'https://app.ignitemarket.xyz/'
 ) {
   return {

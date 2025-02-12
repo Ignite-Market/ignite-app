@@ -10,6 +10,7 @@
 
     <div class="font-bold text-[16px] leading-[24px] mt-2">{{ outcome.name }}</div>
     <div class="w-[70%] border-b-1 border-grey-lighter pt-5"></div>
+
     <div v-if="canClaim" class="flex items-center justify-center mt-5">
       <NuxtIcon name="icon/star" class="text-primary text-[17px]" />
       <div class="ml-[4px] text-[14px] leading-[20px] font-medium mr-5 text-white/60">0.35$</div>
@@ -36,9 +37,7 @@ import type { OutcomeInterface } from '~/lib/types/prediction-set';
 
 const { getConditionalBalance, claim } = useConditionalToken();
 const { getFundingBalance, removeFunding } = useFixedMarketMaker();
-const { getMaxTokensToSell, getMinTokensToBuy, addFunding, buy, sell } = useFixedMarketMaker();
-const { refreshCollateralBalance, getTokenStore } = useCollateralToken();
-const { resetContracts, ensureCorrectNetwork } = useContracts();
+const { ensureCorrectNetwork } = useContracts();
 const message = useMessage();
 const txWait = useTxWait();
 
@@ -84,9 +83,6 @@ async function claimWinnings() {
 
     txWait.hash.value = await claim(props.conditionId, props.outcome.outcomeIndex);
     const receipt = await txWait.wait();
-    console.log(receipt);
-
-    console.log('hello');
 
     await updateClaimBalance();
   } catch (error) {

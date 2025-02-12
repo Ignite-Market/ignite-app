@@ -180,7 +180,6 @@ const config = useRuntimeConfig();
 
 const loading = ref<boolean>(true);
 const refreshInterval = ref<NodeJS.Timeout>();
-
 const predictionSet = ref<PredictionSetInterface | null>();
 const selectedOutcome = ref();
 const selectedAction = ref();
