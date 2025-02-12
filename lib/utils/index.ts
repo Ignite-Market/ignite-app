@@ -1,9 +1,9 @@
-import stg from '../config/staging';
 import dev from '../config/development';
-import prod from '../config/production';
 import local from '../config/local';
-import { CACHE_EXPIRATION_IN_MS, ON_CLICK_OPEN, PageSize, PAGINATION_LIMIT } from '../values/general.values';
+import prod from '../config/production';
+import stg from '../config/staging';
 import type { PaginationConfig, TableFilters } from '../types/config';
+import { CACHE_EXPIRATION_IN_MS, ON_CLICK_OPEN, PageSize, PAGINATION_LIMIT } from '../values/general.values';
 
 export function getAppConfig(env?: string) {
   const configFile = env === 'staging' ? stg : env === 'development' ? dev : env === 'local' ? local : prod;
@@ -17,10 +17,10 @@ export function getAppConfig(env?: string) {
  * OG data
  */
 export function prepareOG(
-  title = 'LendeeFi - Web3 development platform.',
-  description = '',
-  image = 'https://app.lendeefi.io/images/lendeefi_og.jpg',
-  url = 'https://app.lendeefi.io/'
+  title = 'Ignite Market - A decentralized prediction market platform, designed to enable users to trade on the outcomes of real-world events.',
+  description = 'Ignite Market is a decentralized prediction market platform, designed to enable users to trade on the outcomes of real-world events.',
+  image = 'https://app.ignitemarket.xyz/images/og.jpg',
+  url = 'https://app.ignitemarket.xyz/'
 ) {
   return {
     title,
