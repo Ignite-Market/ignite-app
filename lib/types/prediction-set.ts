@@ -72,3 +72,13 @@ export interface OutcomeChance extends GeneralInterface {
   supply: number;
   totalSupply: number;
 }
+
+export interface CommentInterface extends GeneralInterface {
+  user_id: number;
+  prediction_set_id: number;
+  parent_comment_id: number;
+  content: string;
+  username: string;
+  walletAddress: string;
+  replies: CommentInterface[];
+}

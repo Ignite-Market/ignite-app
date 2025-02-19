@@ -12,6 +12,10 @@ const Endpoints = {
   /** Prediction Sets */
   predictionSets: '/prediction-sets',
   predictionSetsById: (id: number) => `/prediction-sets/${id}`,
+
+  /** Prediction set comments */
+  comments: '/comments',
+  predictionSetComments: (id: number) => `/comments/prediction-set/${id}`,
 };
 
 export default Endpoints;

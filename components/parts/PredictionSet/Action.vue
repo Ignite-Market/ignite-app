@@ -10,10 +10,7 @@
       </div>
       <div v-else class="bg-grey-light rounded-[8px] p-3 flex flex-row items-center justify-center">
         <div class="w-[30px] h-[30px] flex-shrink-0">
-          <img
-            class="rounded-[48px] w-full h-full object-cover"
-            src="https://s3-alpha-sig.figma.com/img/99a4/f1e2/82e026f7f9103144567086cf6cd6a662?Expires=1739750400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=X~LM1-8x2K~GS-WxTXco4sGom-IufMECvaatFC8NWpNF36plKwoS2GWG-ONIx4DYF0FaaiLk0avNaWu593gzQWGan2SISOHnwzD1OFljZForFAebXzMFFkLPw7zRXOAj6C5F38rvn7hCASSLNtnaupzkJlwyocPQzzHBx35iULp9DGfuV2jChQvZIhCeqRbqdheJu~r16qKI9TslaML0SAuaZOsPe-GxfdNTl81pghUkpVxyktSzkaaoqLEoJ0pOtVDu-HaUIw9rvcWDsb0JGP~Ed6AJyWjneQteo3W4tu0G4APnxed3bNpX55mp4tM~AdnH0vVNVTNCxjeWL4vBTg__"
-          />
+          <img class="rounded-[48px] w-full h-full object-cover" src="https://app-dev.ignitemarket.xyz/favicon.png" />
         </div>
         <div class="ml-2 text-[12px] leading-[16px] font-bold">{{ outcome.name }}</div>
         <div class="text-[12px] leading-[16px] font-bold ml-auto">
@@ -253,7 +250,7 @@ const props = defineProps({
 const { getMaxTokensToSell, getMinTokensToBuy, addFunding, buy, sell } = useFixedMarketMaker();
 const { refreshCollateralBalance, getTokenStore } = useCollateralToken();
 const { getConditionalBalance, parseConditionalBalance } = useConditionalToken();
-const { resetContracts, ensureCorrectNetwork } = useContracts();
+const { ensureCorrectNetwork } = useContracts();
 const { isConnected } = useAccount();
 const message = useMessage();
 const txWait = useTxWait();
