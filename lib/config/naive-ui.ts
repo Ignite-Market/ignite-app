@@ -69,7 +69,7 @@ export const themeOverrides: GlobalThemeOverrides = {
     heightLarge: '48px',
     iconColor: colors.black,
     iconColorHover: colors.black,
-    loadingColor: colors.grey.DEFAULT,
+    loadingColor: colors.white,
     placeholderColor: colors.grey.lightest,
     suffixTextColor: colors.white,
     textColor: colors.white,

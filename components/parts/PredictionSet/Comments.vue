@@ -1,14 +1,17 @@
 <template>
-  <div class="mt-5 pb-[500px]">
+  <div class="mt-5 pb-[33vh]">
     <n-input
       placeholder="Add comment"
       size="large"
       v-model:value="comment"
       :disabled="!isConnected || commentLoading"
       :loading="commentLoading"
+      @keyup.enter="addComment()"
+      :maxlength="600"
     >
       <template #suffix>
         <NuxtIcon
+          v-if="!commentLoading"
           class="text-white text-[20px] cursor-pointer"
           :class="{ '!cursor-default': !comment, '!opacity-70': !comment, 'hover:text-primary-bright': comment }"
           name="icon/send"
@@ -46,9 +49,12 @@ onMounted(async () => {
 async function getComments() {
   loading.value = true;
   try {
-    const res = await $api.get<GeneralItemsResponse<any>>(Endpoints.predictionSetComments(props.predictionSetId));
+    const res = await $api.get<GeneralItemsResponse<any>>(Endpoints.predictionSetComments(props.predictionSetId), {
+      orderBy: ['id'],
+      desc: [true],
+    });
 
-    comments.value = res.data.items.reverse();
+    comments.value = res.data.items;
 
     console.log(comments.value);
   } catch (error) {
@@ -71,8 +77,7 @@ async function addComment(parentId: number = 0) {
       ...(parentId ? { parent_comment_id: parentId } : {}),
     });
 
-    await getComments();
-
+    comments.value = [res.data, ...comments.value];
     comment.value = '';
   } catch (error) {
     console.log(error);

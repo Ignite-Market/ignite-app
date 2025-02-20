@@ -80,5 +80,7 @@ export interface CommentInterface extends GeneralInterface {
   content: string;
   username: string;
   walletAddress: string;
+  reply_user_id: number;
+  taggedUserUsername: string;
   replies: CommentInterface[];
 }

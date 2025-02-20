@@ -1,22 +1,35 @@
 <template>
-  <div class="flex flex-row w-full">
+  <div class="flex flex-row w-full max-w-[99%] flex-grow">
     <jazzicon
       class="cursor-pointer rounded-[50%] w-[32px] h-[32px] flex-shrink-0"
       :address="comment.walletAddress"
       :diameter="32"
+      @click="openUserProfile(comment.user_id)"
     />
 
-    <div class="flex flex-col ml-4 flex-grow w-full">
-      <div class="flex">
-        <div class="text-[12px] leading-[16px] text-white/80 font-medium cursor-pointer hover:text-primary-bright">
+    <div class="flex flex-col ml-4 flex-grow">
+      <div class="flex relative">
+        <div
+          class="text-[12px] leading-[16px] text-white/80 font-medium cursor-pointer hover:text-primary-bright"
+          @click="openUserProfile(comment.user_id)"
+        >
           {{ comment.username }}
         </div>
         <div class="ml-[10px] text-[12px] leading-[16px] text-grey-lightest font-medium">
           {{ formatDistanceToNow(new Date(comment.createTime), { addSuffix: true }) }}
         </div>
+        <div v-if="isConnected" class="ml-auto">
+          <PredictionSetCommentOptions
+            :comment="comment"
+            @delete="(deletedComment: any) => handleDelete(comment, deletedComment)"
+          ></PredictionSetCommentOptions>
+        </div>
       </div>
 
-      <div class="text-[12px] leading-[16px] text-white font-medium mt-[10px] w-[90%]">
+      <div
+        class="text-[12px] leading-[16px] text-white font-medium mt-[10px] w-[100%] break-all pr-4"
+        :class="{ 'text-white/60': comment.status === SqlModelStatus.DELETED }"
+      >
         {{ comment.content }}
       </div>
 
@@ -27,14 +40,17 @@
         Reply
       </div>
 
-      <div v-if="showReply" class="mt-[10px] w-full">
+      <div v-if="showReply" class="my-[10px] w-full">
         <n-input
           placeholder="Add comment"
           size="medium"
           v-model:value="firstReply"
-          :disabled="!isConnected"
+          :disabled="!isConnected || replyLoading"
+          :loading="replyLoading"
           class="text-[12px]"
           ref="firstReplyRef"
+          @keyup.enter="addReply(firstReply)"
+          :maxlength="600"
         >
           <template #prefix>
             <div class="text-[12px] text-primary-light">{{ replyPrefix }}</div>
@@ -42,6 +58,7 @@
 
           <template #suffix>
             <NuxtIcon
+              v-if="!replyLoading"
               class="text-white text-[20px] cursor-pointer"
               :class="{
                 '!cursor-default': !firstReply,
@@ -61,21 +78,39 @@
             class="cursor-pointer rounded-[50%] w-[32px] h-[32px] flex-shrink-0"
             :address="replyComment.walletAddress"
             :diameter="32"
+            @click="openUserProfile(replyComment.user_id)"
           />
 
           <div class="flex flex-col ml-4 flex-grow w-full">
             <div class="flex w-full">
               <div
                 class="text-[12px] leading-[16px] text-white/80 font-medium cursor-pointer hover:text-primary-bright"
+                @click="openUserProfile(replyComment.user_id)"
               >
                 {{ replyComment.username }}
               </div>
               <div class="ml-[10px] text-[12px] leading-[16px] text-grey-lightest font-medium">
                 {{ formatDistanceToNow(new Date(replyComment.createTime), { addSuffix: true }) }}
               </div>
+              <div class="ml-auto">
+                <PredictionSetCommentOptions
+                  :comment="replyComment"
+                  @delete="(deletedComment: any) => handleDelete(replyComment, deletedComment)"
+                ></PredictionSetCommentOptions>
+              </div>
             </div>
 
-            <div class="text-[12px] leading-[16px] text-white font-medium mt-[10px] w-full">
+            <div
+              class="text-[12px] leading-[16px] text-white font-medium mt-[10px] w-full break-all pr-4"
+              :class="{ 'text-white/60': replyComment.status === SqlModelStatus.DELETED }"
+            >
+              <span
+                v-if="replyComment.status !== SqlModelStatus.DELETED"
+                class="text-primary-light hover:text-primary-bright cursor-pointer"
+                @click="openUserProfile(replyComment.reply_user_id)"
+              >
+                @{{ replyComment.taggedUserUsername }}&nbsp;
+              </span>
               {{ replyComment.content }}
             </div>
 
@@ -86,14 +121,17 @@
               Reply
             </div>
 
-            <div v-if="replyTo === replyComment.id" class="mt-[10px] w-full">
+            <div v-if="replyTo === replyComment.id" class="my-[10px] w-full">
               <n-input
                 placeholder="Add comment"
                 size="medium"
                 v-model:value="secondReply"
-                :disabled="!isConnected"
+                :disabled="!isConnected || replyLoading"
+                :loading="replyLoading"
                 class="text-[12px]"
                 :ref="el => (secondReplyRefs[replyComment.id] = el as any)"
+                @keyup.enter="addReply(secondReply)"
+                :maxlength="600"
               >
                 <template #prefix>
                   <div class="text-[12px] text-primary-light">{{ replyPrefix }}</div>
@@ -101,6 +139,7 @@
 
                 <template #suffix>
                   <NuxtIcon
+                    v-if="!replyLoading"
                     class="text-white text-[20px] cursor-pointer"
                     :class="{
                       '!cursor-default': !secondReply,
@@ -122,6 +161,7 @@
 
 <script lang="ts" setup>
 import type { CommentInterface } from '~/lib/types/prediction-set';
+import { SqlModelStatus } from '~/lib/types';
 import { formatDistanceToNow } from 'date-fns';
 import { useAccount } from '@wagmi/vue';
 import Endpoints from '~/lib/values/endpoints';
@@ -132,14 +172,18 @@ const props = defineProps({
 });
 
 const { isConnected } = useAccount();
+const router = useRouter();
+const userStore = useUserStore();
 
 const firstReply = ref('');
 const secondReply = ref('');
 
 const replyLoading = ref(false);
+
 const showReply = ref(false);
 const replyTo = ref<any>(null);
 const replyPrefix = ref('');
+const taggedUser = ref();
 
 const firstReplyRef = ref<InputInst | null>(null);
 const secondReplyRefs = ref<Record<string, InputInst>>({});
@@ -157,7 +201,10 @@ async function addReply(replyContent: string) {
       prediction_set_id: props.comment.prediction_set_id,
       content: replyContent,
       parent_comment_id: parentId,
+      reply_user_id: taggedUser.value,
     });
+
+    props.comment.replies = [...(props.comment.replies || []), res.data];
 
     replyTo.value = null;
     showReply.value = false;
@@ -167,33 +214,9 @@ async function addReply(replyContent: string) {
   } catch (error) {
     console.log(error);
   } finally {
-    replyLoading.value = true;
+    replyLoading.value = false;
   }
 }
-
-// async function addReply1(replyContent: string) {
-//   if (!reply.value) {
-//     return;
-//   }
-
-//   replyLoading.value = true;
-//   try {
-//     const parentId = props.comment.parent_comment_id ? props.comment.parent_comment_id : props.comment.id;
-
-//     const res = await $api.post<GeneralResponse<any>>(Endpoints.comments, {
-//       prediction_set_id: props.comment.prediction_set_id,
-//       content: reply.value,
-//       parent_comment_id: parentId,
-//     });
-
-//     reply.value = '';
-//     showReply.value = false;
-//   } catch (error) {
-//     console.log(error);
-//   } finally {
-//     replyLoading.value = true;
-//   }
-// }
 
 function handleFirstLvlReply() {
   firstReply.value = '';
@@ -202,6 +225,7 @@ function handleFirstLvlReply() {
   replyTo.value = null;
   showReply.value = !showReply.value;
   replyPrefix.value = `@${props.comment.username}`;
+  taggedUser.value = props.comment.user_id;
 
   if (showReply.value) {
     nextTick(() => {
@@ -217,12 +241,39 @@ function handleSecondLvlReply(replyComment: CommentInterface) {
   showReply.value = false;
   replyTo.value = replyTo.value === replyComment.id && replyTo.value ? null : replyComment.id;
   replyPrefix.value = `@${replyComment.username}`;
+  taggedUser.value = replyComment.user_id;
+
+  console.log(replyComment);
 
   if (replyTo.value) {
     nextTick(() => {
       secondReplyRefs.value[replyComment.id]?.focus();
     });
   }
+}
+
+function openUserProfile(userId: number) {
+  if (userId === userStore.user.id) {
+    router.push('profile');
+    return;
+  }
+
+  router.push({
+    name: 'profile-id',
+    params: { id: userId },
+  });
+}
+
+function handleDelete(comment: CommentInterface, deletedComment: any) {
+  console.log('holalaaaa');
+  console.log(comment);
+  console.log(deletedComment);
+
+  comment.content = deletedComment.content;
+  comment.status = deletedComment.status;
+
+  console.log(comment.content);
+  console.log(deletedComment);
 }
 </script>
 
