@@ -16,8 +16,66 @@
         <div class="text-[12px] leading-[16px] font-bold ml-auto">
           {{ outcome.latestChance.chance ? (outcome.latestChance.chance * 100).toFixed(0) : 0.0 }} %
         </div>
-        <NuxtIcon class="ml-3 opacity-[24%] text-white" name="icon/refresh" />
-        <NuxtIcon class="ml-3 text-white" name="icon/settings" />
+
+        <div
+          @click="refreshBalances"
+          class="min-w-[20px] min-h-[20px] rounded-[4px] flex items-center justify-center bg-none hover:bg-grey-dark ml-[10px] cursor-pointer"
+        >
+          <NuxtIcon class="opacity-[24%] hover:opacity-[100%] text-white" name="icon/refresh" />
+        </div>
+
+        <n-popover trigger="hover" raw :show-arrow="false" placement="bottom-end">
+          <template #trigger>
+            <div
+              class="min-w-[20px] min-h-[20px] rounded-[4px] flex items-center justify-center bg-none hover:bg-grey-dark ml-[10px] cursor-pointer"
+            >
+              <NuxtIcon class="hover:text-white text-white" name="icon/settings" />
+            </div>
+          </template>
+          <div class="flex flex-col bg-grey-dark border-1 !border-grey-lighter px-4 pt-2 pb-4 rounded-[8px]">
+            <div class="mb-2">Slippage</div>
+            <div class="flex gap-x-2">
+              <BasicButton
+                class=""
+                size="large"
+                type="secondary"
+                :btnClass="['w-[70px] flex justify-center items-center']"
+                @click="slippage = 0.5"
+                :selected="slippage === 0.5"
+                :selectedClass="['!bg-primary !border-primary']"
+              >
+                0.5%
+              </BasicButton>
+
+              <BasicButton
+                size="large"
+                type="secondary"
+                :btnClass="['w-[70px] flex justify-center items-center']"
+                @click="slippage = 1"
+                :selected="slippage === 1"
+                :selectedClass="['!bg-primary !border-primary']"
+              >
+                1%
+              </BasicButton>
+
+              <BasicButton
+                class=""
+                size="large"
+                type="secondary"
+                :btnClass="['w-[70px] flex justify-center items-center']"
+                @click="slippage = 3"
+                :selected="slippage === 3"
+                :selectedClass="['!bg-primary !border-primary']"
+              >
+                3%
+              </BasicButton>
+
+              <n-input-number :show-button="false" :max="100" :min="0" class="w-[70px]" v-model:value="slippage">
+                <template #suffix>%</template>
+              </n-input-number>
+            </div>
+          </div>
+        </n-popover>
       </div>
     </template>
     <div class="tabs-wrapper">
@@ -258,7 +316,7 @@ const tokenStore = getTokenStore();
 
 const selectedTab = ref(TransactionType.BUY);
 const isFundEnabled = ref(true);
-const slippage = ref(0);
+const slippage = ref(3);
 const loading = ref(false);
 const amount = ref<number>();
 const returnAmount = ref<string>('0.0');
@@ -430,6 +488,14 @@ async function buyOutcome() {
   } finally {
     loading.value = false;
   }
+}
+
+async function refreshBalances() {
+  // TODO: Add price refreshing.
+  try {
+    await refreshCollateralBalance();
+    conditionalBalance.value = await getConditionalBalance(props.outcome.positionId);
+  } catch (error) {}
 }
 </script>
 
