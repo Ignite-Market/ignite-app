@@ -118,31 +118,36 @@ onMounted(() => {
           );
         },
       },
-      {
-        key: 'edit',
-        type: 'render',
-        props: {
-          onClick: () => {
-            showDropdown.value = false;
-          },
-        },
-        render: () => {
-          return h(
-            'div',
-            {
-              class:
-                'flex items-center gap-1 px-2 text-[14px] cursor-pointer hover:text-primary-bright justify-start py-1 text-white/80',
-            },
-            [
-              h(resolveComponent('NuxtIcon'), {
-                name: 'icon/edit',
-                class: 'text-[15px]',
-              }),
-              'Edit',
-            ]
-          );
-        },
-      },
+      /***
+       *
+       * TODO: Add edit option.
+       *
+       */
+      // {
+      //   key: 'edit',
+      //   type: 'render',
+      //   props: {
+      //     onClick: () => {
+      //       showDropdown.value = false;
+      //     },
+      //   },
+      //   render: () => {
+      //     return h(
+      //       'div',
+      //       {
+      //         class:
+      //           'flex items-center gap-1 px-2 text-[14px] cursor-pointer hover:text-primary-bright justify-start py-1 text-white/80',
+      //       },
+      //       [
+      //         h(resolveComponent('NuxtIcon'), {
+      //           name: 'icon/edit',
+      //           class: 'text-[15px]',
+      //         }),
+      //         'Edit',
+      //       ]
+      //     );
+      //   },
+      // },
     ];
   }
 
