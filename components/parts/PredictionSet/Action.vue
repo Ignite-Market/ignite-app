@@ -157,7 +157,7 @@
             </div>
             <div class="flex items-center justify-center mt-2">
               <div>Potential return</div>
-              <div class="ml-auto text-statusGreen">1.273662 USDC</div>
+              <div class="ml-auto text-statusGreen">{{ potentialReturn }} USDC</div>
             </div>
           </div>
         </n-tab-pane>
@@ -228,7 +228,7 @@
             </div>
             <div class="flex items-center justify-center mt-2">
               <div>Potential return</div>
-              <div class="ml-auto text-statusGreen">1.273662 USDC</div>
+              <div class="ml-auto text-statusGreen">{{ potentialReturn }} USDC</div>
             </div>
           </div>
         </n-tab-pane>
@@ -302,10 +302,12 @@ const props = defineProps({
   outcome: { type: Object as PropType<OutcomeInterface>, default: {}, required: true },
   status: { type: Number as PropType<PredictionSetStatus>, default: null, required: true },
   action: { type: Number as PropType<TransactionType>, default: null, required: false },
-  endTime: { type: Date, default: null, required: false },
+  endTime: { type: String, default: null, required: false },
+  outcomes: { type: Array as PropType<OutcomeInterface[]>, default: [], required: true },
 });
 
-const { getMaxTokensToSell, getMinTokensToBuy, addFunding, buy, sell } = useFixedMarketMaker();
+const { getMaxTokensToSell, getMinTokensToBuy, addFunding, buy, sell, calcSellAmountInCollateral } =
+  useFixedMarketMaker();
 const { refreshCollateralBalance, getTokenStore } = useCollateralToken();
 const { getConditionalBalance, parseConditionalBalance } = useConditionalToken();
 const { ensureCorrectNetwork } = useContracts();
@@ -320,6 +322,7 @@ const slippage = ref(3);
 const loading = ref(false);
 const amount = ref<number>();
 const returnAmount = ref<string>('0.0');
+const potentialReturn = ref<string>('0.0');
 const conditionalBalance = ref(BigInt(0));
 
 const enoughConditionalBalance = computed(() => {
@@ -377,6 +380,32 @@ watchDebounced(
   { debounce: 500, maxWait: 1000 }
 );
 
+watchDebounced(
+  () => slippage.value,
+  async () => {
+    if (!slippage.value) {
+      slippage.value = 0;
+    }
+
+    if (amount.value === 0) {
+      returnAmount.value = '0.0';
+      return;
+    }
+
+    if (!amount.value) {
+      returnAmount.value = '0.0';
+      return;
+    }
+
+    if (selectedTab.value === TransactionType.BUY) {
+      await updateBuyAmount();
+    } else if (selectedTab.value === TransactionType.SELL) {
+      await updateSellAmount();
+    }
+  },
+  { debounce: 500, maxWait: 1000 }
+);
+
 async function updateBuyAmount() {
   if (!amount.value) {
     return;
@@ -397,14 +426,14 @@ async function updateSellAmount() {
     return;
   }
 
-  const result = await getMaxTokensToSell(
-    props.contractAddress as Address,
+  const result = await calcSellAmountInCollateral(
     amount.value,
     props.outcome.outcomeIndex,
-    slippage.value
+    props.contractAddress as Address,
+    props.outcomes.map(o => o.positionId)
   );
 
-  returnAmount.value = '';
+  potentialReturn.value = (Number(result) / Math.pow(10, tokenStore.decimals)).toString();
 }
 
 async function fund() {
@@ -434,25 +463,33 @@ async function fund() {
 async function sellOutcome() {
   loading.value = true;
   try {
-    await refreshCollateralBalance();
+    conditionalBalance.value = await getConditionalBalance(props.outcome.positionId);
 
-    if (!amount.value) {
+    if (!amount.value || !enoughConditionalBalance.value) {
       return;
     }
 
     await ensureCorrectNetwork();
 
-    txWait.hash.value = await sell(
-      props.contractAddress as Address,
+    const collateralAmount = await calcSellAmountInCollateral(
       amount.value,
       props.outcome.outcomeIndex,
-      slippage.value,
-      props.outcome.latestChance.chance
+      props.contractAddress as Address,
+      props.outcomes.map(o => o.positionId)
+    );
+
+    txWait.hash.value = await sell(
+      props.contractAddress as Address,
+      collateralAmount,
+      props.outcome.outcomeIndex,
+      slippage.value
     );
     await txWait.wait();
 
+    console.log(collateralAmount);
+
     amount.value = '' as any;
-    await refreshCollateralBalance();
+    await refreshBalances();
   } catch (error) {
     console.error(error);
     message.error(contractError(error));
@@ -481,7 +518,7 @@ async function buyOutcome() {
     await txWait.wait();
 
     amount.value = '' as any;
-    await refreshCollateralBalance();
+    await refreshBalances();
   } catch (error) {
     console.error(error);
     message.error(contractError(error));

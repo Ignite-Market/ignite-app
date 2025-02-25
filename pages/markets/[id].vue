@@ -151,7 +151,8 @@
           :outcome="selectedOutcome"
           :action="selectedAction"
           :status="predictionSet.setStatus"
-          :end-time="predictionSet.endTime"
+          :end-time="predictionSet.endTime.toString()"
+          :outcomes="predictionSet.outcomes"
         >
         </PredictionSetAction>
 
