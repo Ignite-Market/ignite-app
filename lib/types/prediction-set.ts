@@ -84,3 +84,13 @@ export interface CommentInterface extends GeneralInterface {
   taggedUserUsername: string;
   replies: CommentInterface[];
 }
+
+export interface PredictionSetChanceHistoryResponse extends GeneralResponse<PredictionSetOutcomeChanceInterface> {}
+
+export interface PredictionSetOutcomeChanceInterface {
+  [outcomeId: number]: {
+    outcomeId: number;
+    chance: number;
+    date: Date;
+  }[];
+}
