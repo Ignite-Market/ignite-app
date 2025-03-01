@@ -9,7 +9,7 @@ const messageOverrides: MessageThemeOverrides = {};
  */
 export const themeOverrides: GlobalThemeOverrides = {
   common: {
-    bodyColor: colors.bg.DEFAULT,
+    bodyColor: colors.grey.DEFAULT,
     primaryColor: colors.primary.DEFAULT,
     primaryColorHover: colors.primary.light,
     primaryColorPressed: colors.primary.light,
@@ -18,11 +18,11 @@ export const themeOverrides: GlobalThemeOverrides = {
     textColorBase: colors.white,
   },
   DataTable: {
-    tdColor: colors.bg.box,
-    thColor: colors.bg.box,
+    tdColor: colors.grey.DEFAULT,
+    thColor: colors.grey.dark,
     borderColor: colors.transparent,
     borderRadius: '8px',
-    tdColorHover: colors.bg.light,
+    tdColorHover: colors.grey.light,
   },
   DatePicker: {
     iconColor: colors.grey.dark,
@@ -152,9 +152,6 @@ export const themeOverrides: GlobalThemeOverrides = {
         colorActiveError: colors.bg.DEFAULT,
         colorActiveWarning: colors.bg.DEFAULT,
         colorDisabled: colors.primary.dark,
-        boxShadowActive: '0px 4px 4px 0px #00000040',
-        boxShadowFocus: '0px 4px 4px 0px #00000040',
-        boxShadowHover: '0px 4px 4px 0px #00000040',
         fontSizeMedium: '14px',
         fontWeight: 'medium',
         heightTiny: '28px',
@@ -162,13 +159,13 @@ export const themeOverrides: GlobalThemeOverrides = {
         heightMedium: '38px',
         heightLarge: '48px',
         loadingColor: colors.grey.DEFAULT,
-        placeholderColor: colors.grey.DEFAULT,
+        placeholderColor: colors.grey.lightest,
         paddingSingle: '0 20px',
         textColor: colors.white,
         textColorDisabled: colors.grey.lighter,
       },
       InternalSelectMenu: {
-        color: colors.bg.light,
+        color: colors.grey.light,
         optionColorActive: colors.bg.DEFAULT,
         optionColorActivePending: colors.bg.DEFAULT,
         optionColorPending: colors.bg.DEFAULT,

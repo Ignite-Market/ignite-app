@@ -14,6 +14,11 @@ export enum SqlModelStatus {
   DELETED = 9,
 }
 
+export enum ProfileTabs {
+  PREDICTIONS = 'Predictions',
+  ACTIVITIES = 'Activities',
+}
+
 declare global {
   type Prefixed<T, Prefix extends string> = {
     [K in keyof T as `${Prefix}${Uncapitalize<string & K>}`]: T[K];

@@ -221,6 +221,10 @@ onMounted(async () => {
   await getPredictionSet();
 });
 
+onUnmounted(() => {
+  clearInterval(refreshInterval.value);
+});
+
 async function selectOutcome(transaction: TransactionType, outcome: OutcomeInterface) {
   selectedAction.value = transaction;
   selectedOutcome.value = outcome;

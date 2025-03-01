@@ -1,8 +1,13 @@
 const Endpoints = {
   /** User */
   me: '/users/me',
+  user: (id: number) => `/users/${id}`,
   walletMessage: '/users/wallet-message',
   walletLogin: '/users/wallet-login',
+
+  /** User predictions */
+  userPredictions: (id: number) => `/users/${id}/predictions`,
+  userActivity: (id: number) => `/users/${id}/activity`,
 
   // NOT USED
   changeMail: '/users/change-email',
