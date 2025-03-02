@@ -1,3 +1,5 @@
+import type { PredictionSetActivity } from '#components';
+
 const Endpoints = {
   /** User */
   me: '/users/me',
@@ -18,11 +20,15 @@ const Endpoints = {
   predictionSets: '/prediction-sets',
   predictionSetsById: (id: number) => `/prediction-sets/${id}`,
   predictionSetChanceHistory: (id: number) => `/prediction-sets/${id}/chance-history`,
+  PredictionSetActivity: (id: number) => `/prediction-sets/${id}/activity`,
 
   /** Prediction set comments */
   comments: '/comments',
   commentById: (id: number) => `/comments/${id}`,
   predictionSetComments: (id: number) => `/comments/prediction-set/${id}`,
+
+  /** User prediction watchlist */
+  predictionSetUserWatchlist: (id: number) => `/prediction-sets/${id}/watchlist`,
 };
 
 export default Endpoints;

@@ -103,16 +103,4 @@ declare global {
     outcomeTokens: number;
   }
   export interface UserPredictionsResponse extends GeneralItemsResponse<UserPredictionInterface> {}
-
-  /**
-   * User Activity
-   */
-  interface UserActivityInterface extends Omit<PredictionSetInterface, 'outcomes'> {
-    outcomeName: string;
-    userAmount: number;
-    type: TransactionType;
-    outcomeTokens: number;
-    txHash: string;
-  }
-  export interface UserActivitiesResponse extends GeneralItemsResponse<UserActivityInterface> {}
 }

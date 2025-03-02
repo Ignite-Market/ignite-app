@@ -4,7 +4,7 @@
       <BasicButton
         v-if="!isRangeDisabled(range)"
         size="small"
-        class="!bg-grey w-[46px] h-[26px]"
+        class="!bg-grey-light w-[46px] h-[26px] hover:!bg-grey-lighter"
         :class="selectedRange === range ? 'border-primary border-2' : ''"
         @click="() => (selectedRange = range)"
       >
@@ -82,7 +82,7 @@ const options = ref({
     },
     position: 'right',
     max: 1,
-    min: 0
+    min: 0,
   },
   tooltip: {
     trigger: 'axis',

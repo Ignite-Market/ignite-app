@@ -49,6 +49,7 @@ export interface PredictionSetInterface extends GeneralInterface {
   setStatus: PredictionSetStatus;
   outcomes: OutcomeInterface[];
   chainData: ChainDataInterface;
+  isWatched?: boolean;
 }
 
 export interface OutcomeInterface extends GeneralInterface {
@@ -94,3 +95,19 @@ export interface PredictionSetOutcomeChanceInterface {
     date: Date;
   }[];
 }
+
+/**
+ * Activity
+ */
+export interface ActivityInterface extends Omit<PredictionSetInterface, 'outcomes'> {
+  outcomeName: string;
+  userAmount: number;
+  type: TransactionType;
+  outcomeTokens: number;
+  txHash: string;
+  transactionTime: Date;
+  userId?: number;
+  username?: string;
+  userWallet?: string;
+}
+export interface ActivitiesResponse extends GeneralItemsResponse<ActivityInterface> {}

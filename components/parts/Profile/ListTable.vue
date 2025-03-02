@@ -85,7 +85,7 @@ const activitiesColumns = [
     title: 'Prediction',
     sorter: 'default',
     minWidth: 150,
-    render(row: UserActivityInterface) {
+    render(row: ActivityInterface) {
       return h(resolveComponent('NuxtLink'), { to: { path: `/markets/${row.id}` } }, [
         // h(resolveComponent('AssetDetails'), {
         //   asset: row
@@ -99,7 +99,7 @@ const activitiesColumns = [
     key: 'type',
     title: 'Type',
     sorter: 'default',
-    render(row: UserActivityInterface) {
+    render(row: ActivityInterface) {
       return transactionType[row.type];
     },
   },
@@ -107,7 +107,7 @@ const activitiesColumns = [
     key: 'userAmount',
     title: 'Amount',
     sorter: 'default',
-    render(row: UserActivityInterface) {
+    render(row: ActivityInterface) {
       return +(row.userAmount / 1e6).toFixed(4);
     },
   },
@@ -115,7 +115,7 @@ const activitiesColumns = [
     key: 'outcomeTokens',
     title: 'Shares',
     sorter: 'default',
-    render(row: UserActivityInterface) {
+    render(row: ActivityInterface) {
       return +(row.outcomeTokens / 1e6).toFixed(4);
     },
   },
@@ -123,7 +123,7 @@ const activitiesColumns = [
     key: 'txHash',
     title: 'Transaction',
     sorter: 'default',
-    render(row: UserActivityInterface) {
+    render(row: ActivityInterface) {
       return h(
         'a',
         { class: 'underline', href: `https://sepolia.basescan.org/tx/${row.txHash}`, target: '_blank' },
@@ -131,7 +131,7 @@ const activitiesColumns = [
       );
     },
   },
-] as DataTableColumns<UserActivityInterface>;
+] as DataTableColumns<ActivityInterface>;
 
 const columns = props.tab === ProfileTabs.PREDICTIONS ? predictionColumns : activitiesColumns;
 
