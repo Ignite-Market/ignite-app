@@ -1,8 +1,11 @@
+import type { PredictionSetInterface, TransactionType } from './prediction-set';
+
 export {};
 
 export enum NotificationType {
   UNKNOWN = 0,
 }
+
 declare global {
   /**
    * User
@@ -10,8 +13,8 @@ declare global {
   interface UserInterface {
     id: number;
     email: string;
-    evmWallet: string | null;
-    name: string;
+    walletAddress: string | null;
+    username: string;
     phone?: string | null;
     status: number;
     user_uuid: string;
@@ -20,6 +23,7 @@ declare global {
     wallet: string | null;
     token?: any;
     captchaJwt?: any;
+    createTime?: string;
   }
 
   interface UserResponse extends GeneralResponse<UserInterface> {}

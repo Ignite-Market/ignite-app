@@ -63,7 +63,7 @@
         </div>
         <!-- TODO: Check for potential return. -->
         <div v-else class="flex items-center justify-center">
-          <NuxtIcon name="icon/star" class="text-primary" />
+          <NuxtIcon name="icon/star2" class="text-primary" />
           <div class="ml-[6px] font-medium">0.35$</div>
         </div>
       </div>
