@@ -23,7 +23,9 @@
 
               <div class="mx-4 border-r-1 border-r-white/25 h-[14px]"></div>
 
-              <div class="text-white/80 text-[14px] leading-[20px]">1,283 USDC</div>
+              <div class="text-white/80 text-[14px] leading-[20px]">
+                {{ formatTokenAmount(predictionSet.volume || 0, 2) }} USDC
+              </div>
             </div>
           </div>
         </div>
@@ -85,7 +87,9 @@
                     {{ outcome.name }}
                   </div>
 
-                  <div class="text-[14px] leading-[20px] font-medium text-grey-lightest mt-[4px]">$ 1,845,924</div>
+                  <div class="text-[14px] leading-[20px] font-medium text-grey-lightest mt-[4px]">
+                    {{ formatTokenAmount(outcome.volume, 2) }} USDC
+                  </div>
                 </div>
               </div>
 
@@ -190,7 +194,7 @@
         </div>
 
         <!-- RIGHT -->
-        <div class="sticky top-0 self-start ml-24 w-[409px]">
+        <div class="sticky top-6 self-start ml-24 w-[409px]">
           <PredictionSetAction
             v-if="actionsEnabled(predictionSet.setStatus, predictionSet.endTime)"
             :contract-address="predictionSet.chainData.contractAddress"

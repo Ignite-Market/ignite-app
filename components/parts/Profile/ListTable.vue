@@ -23,6 +23,8 @@ onMounted(() => {
 const transactionType = {
   [TransactionType.BUY]: 'Buy',
   [TransactionType.SELL]: 'Sell',
+  [TransactionType.FUND]: 'Fund',
+  [TransactionType.REMOVE_FUND]: 'Remove fund',
 };
 
 const predictionColumns = [
@@ -153,6 +155,8 @@ const filters = {
             { label: 'All', value: null },
             { label: 'Buy', value: TransactionType.BUY },
             { label: 'Sell', value: TransactionType.SELL },
+            { label: 'Fund', value: TransactionType.FUND },
+            { label: 'Remove fund', value: TransactionType.REMOVE_FUND },
           ],
         },
         userId: {

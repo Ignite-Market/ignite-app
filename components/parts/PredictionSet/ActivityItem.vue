@@ -15,11 +15,28 @@
         >
           {{ item.username }}
         </span>
-        <span>
+        <span v-if="item.type < TransactionType.FUND">
           {{ item.type === TransactionType.BUY ? ' bought ' : ' sold ' }}
-          <span class="text-primary">{{ formatTokenAmount(item.outcomeTokens) }} {{ item.outcomeName }}</span> for
-          <span class="font-bold">{{ formatTokenAmount(item.userAmount) }} USDC</span></span
-        >
+          <span class="text-primary"
+            >{{ formatTokenAmount(item.outcomeTokens) }} <span class="font-bold">{{ item.outcomeName }}</span></span
+          >
+          for <span class="font-bold">{{ formatTokenAmount(item.userAmount) }} USDC</span>
+        </span>
+        <span v-else>
+          {{ item.type === TransactionType.FUND ? ' funded ' : ' removed funding ' }}
+          <span v-if="item.type === TransactionType.FUND">
+            for
+            <span class="font-bold">{{ formatTokenAmount(item.userAmount) }} USDC </span>
+          </span>
+          <a
+            :href="`https://sepolia.basescan.org/tx/${item.txHash}`"
+            target="_blank"
+            class="underline inline-block align-middle ml-1"
+          >
+            <!-- TODO: add open icon -->
+            <NuxtIcon name="icon/link" />
+          </a>
+        </span>
       </div>
 
       <div class="ml-[10px] text-[12px] leading-[16px] text-grey-lightest font-medium">

@@ -62,5 +62,5 @@ export function getFixed(num: number | string, places = 2, round = false, roundT
 }
 
 export function formatTokenAmount(num: number, decimals: number = 4) {
-  return +(num / 10 ** 6).toFixed(decimals);
+  return formatNumber(+(num / 10 ** 6).toFixed(decimals));
 }

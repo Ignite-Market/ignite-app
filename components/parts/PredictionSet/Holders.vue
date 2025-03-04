@@ -46,6 +46,7 @@ const items = ref<any>([]);
 const pagination = ref({ ...createPagination(), pageSize: 50 });
 
 onMounted(async () => {
+  console.log(1);
   await getActivity();
 });
 
