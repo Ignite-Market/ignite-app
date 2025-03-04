@@ -92,15 +92,4 @@ declare global {
     userId: number;
   }
   interface NotificationsResponse extends GeneralItemsResponse<NotificationInterface> {}
-
-  /**
-   * User Prediction
-   */
-  interface UserPredictionInterface extends Omit<PredictionSetInterface, 'outcomes'> {
-    outcomeName: string;
-    boughtAmount: number;
-    soldAmount: number;
-    outcomeTokens: number;
-  }
-  export interface UserPredictionsResponse extends GeneralItemsResponse<UserPredictionInterface> {}
 }

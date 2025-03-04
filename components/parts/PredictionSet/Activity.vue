@@ -1,6 +1,10 @@
 <template>
   <div class="mt-5 pb-[33vh]">
-    <div class="flex flex-col mt-6 gap-y-5">
+    <div v-if="loading">
+      <Spinner />
+    </div>
+    <div v-else-if="!items.length" class="text-center">No activity</div>
+    <div v-else class="flex flex-col mt-6 gap-y-5">
       <PredictionSetActivityItem :item="item" v-for="item of items" />
     </div>
   </div>
@@ -28,17 +32,20 @@ async function getActivity(page: number = 1) {
     loading.value = true;
     try {
       pagination.value.page = page;
-      const res = await $api.get<GeneralItemsResponse<any>>(Endpoints.PredictionSetActivity(props.predictionSetId), {
+      const res = await $api.get<GeneralItemsResponse<any>>(Endpoints.predictionSetActivity, {
+        predictionId: props.predictionSetId,
         page,
         limit: pagination.value.pageSize,
+        orderBy: 'transactionTime',
+        desc: true,
       });
 
-      items.value = [...res.data.items, ...res.data.items];
+      items.value = res.data.items;
       pagination.value.itemCount = res.data.total;
     } catch (error) {
       console.log(error);
     } finally {
-      loading.value = true;
+      loading.value = false;
     }
   }
 }

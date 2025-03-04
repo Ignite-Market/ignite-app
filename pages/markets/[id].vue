@@ -176,7 +176,12 @@
               <n-tab-pane name="Comments" tab="Comments">
                 <PredictionSetComments :prediction-set-id="predictionSet.id"></PredictionSetComments>
               </n-tab-pane>
-              <n-tab-pane name="Top holders" tab="Top holder"> </n-tab-pane>
+              <n-tab-pane name="Top holders" tab="Top holder">
+                <PredictionSetHolders
+                  :prediction-set-id="predictionSet.id"
+                  :outcomes="predictionSet.outcomes"
+                ></PredictionSetHolders>
+              </n-tab-pane>
               <n-tab-pane name="Activity" tab="Activity">
                 <PredictionSetActivity :prediction-set-id="predictionSet.id"></PredictionSetActivity>
               </n-tab-pane>

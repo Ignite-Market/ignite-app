@@ -9,7 +9,6 @@ const Endpoints = {
 
   /** User predictions */
   userPredictions: (id: number) => `/users/${id}/predictions`,
-  userActivity: (id: number) => `/users/${id}/activity`,
 
   // NOT USED
   changeMail: '/users/change-email',
@@ -20,7 +19,8 @@ const Endpoints = {
   predictionSets: '/prediction-sets',
   predictionSetsById: (id: number) => `/prediction-sets/${id}`,
   predictionSetChanceHistory: (id: number) => `/prediction-sets/${id}/chance-history`,
-  PredictionSetActivity: (id: number) => `/prediction-sets/${id}/activity`,
+  predictionSetActivity: `/prediction-sets/activity`,
+  predictionSetHolders: `/prediction-sets/holders`,
 
   /** Prediction set comments */
   comments: '/comments',

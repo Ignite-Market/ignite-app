@@ -111,3 +111,18 @@ export interface ActivityInterface extends Omit<PredictionSetInterface, 'outcome
   userWallet?: string;
 }
 export interface ActivitiesResponse extends GeneralItemsResponse<ActivityInterface> {}
+
+/**
+ * User Prediction
+ */
+export interface UserPredictionInterface extends Omit<PredictionSetInterface, 'outcomes'> {
+  userAmount: number;
+  userId: number;
+  username: string;
+  userWallet: string;
+  outcomeName: string;
+  boughtAmount: number;
+  soldAmount: number;
+  outcomeTokens: number;
+}
+export interface UserPredictionsResponse extends GeneralItemsResponse<UserPredictionInterface> {}

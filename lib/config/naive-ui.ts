@@ -168,7 +168,7 @@ export const themeOverrides: GlobalThemeOverrides = {
         color: colors.grey.light,
         optionColorActive: colors.bg.DEFAULT,
         optionColorActivePending: colors.bg.DEFAULT,
-        optionColorPending: colors.bg.DEFAULT,
+        optionColorPending: colors.grey.lighter,
         optionCheckColor: colors.bg.DEFAULT,
         optionTextColor: colors.white,
         optionTextColorPressed: colors.white,

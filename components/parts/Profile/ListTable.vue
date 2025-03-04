@@ -7,9 +7,9 @@
 <script setup lang="ts">
 import { type DataTableColumns } from 'naive-ui';
 import { ProfileTabs } from '~/lib/types';
-import Endpoints from '../../../lib/values/endpoints';
-import { TransactionType } from '../../../lib/types/prediction-set';
-import type { TableFilters } from '../../../lib/types/config';
+import Endpoints from '~/lib/values/endpoints';
+import { TransactionType, type ActivityInterface, type UserPredictionInterface } from '~/lib/types/prediction-set';
+import type { TableFilters } from '~/lib/types/config';
 
 const props = defineProps({
   tab: { type: String as PropType<ProfileTabs>, required: true },
@@ -46,7 +46,7 @@ const predictionColumns = [
     title: 'Shares',
     sorter: 'default',
     render(row: UserPredictionInterface) {
-      return +(row.outcomeTokens / 1e6).toFixed(4);
+      return formatTokenAmount(row.outcomeTokens);
     },
   },
   {
@@ -54,7 +54,7 @@ const predictionColumns = [
     title: 'Bought Amount',
     sorter: 'default',
     render(row: UserPredictionInterface) {
-      return +(row.boughtAmount / 1e6).toFixed(4);
+      return formatTokenAmount(row.boughtAmount);
     },
   },
   {
@@ -62,7 +62,7 @@ const predictionColumns = [
     title: 'Sold Amount',
     sorter: 'default',
     render(row: UserPredictionInterface) {
-      return +(row.soldAmount / 1e6).toFixed(4);
+      return formatTokenAmount(row.soldAmount);
     },
   },
   {
@@ -108,7 +108,7 @@ const activitiesColumns = [
     title: 'Amount',
     sorter: 'default',
     render(row: ActivityInterface) {
-      return +(row.userAmount / 1e6).toFixed(4);
+      return formatTokenAmount(row.userAmount);
     },
   },
   {
@@ -116,7 +116,7 @@ const activitiesColumns = [
     title: 'Shares',
     sorter: 'default',
     render(row: ActivityInterface) {
-      return +(row.outcomeTokens / 1e6).toFixed(4);
+      return formatTokenAmount(row.outcomeTokens);
     },
   },
   {
@@ -136,9 +136,7 @@ const activitiesColumns = [
 const columns = props.tab === ProfileTabs.PREDICTIONS ? predictionColumns : activitiesColumns;
 
 const endpoint =
-  props.tab === ProfileTabs.PREDICTIONS
-    ? Endpoints.userPredictions(props.userId)
-    : Endpoints.userActivity(props.userId);
+  props.tab === ProfileTabs.PREDICTIONS ? Endpoints.userPredictions(props.userId) : Endpoints.predictionSetActivity;
 
 const filters = {
   search: {
@@ -156,6 +154,10 @@ const filters = {
             { label: 'Buy', value: TransactionType.BUY },
             { label: 'Sell', value: TransactionType.SELL },
           ],
+        },
+        userId: {
+          show: false,
+          value: props.userId,
         },
       }
     : {}),
