@@ -28,6 +28,7 @@ export enum TransactionType {
   BUY = 1,
   SELL = 2,
   FUND = 3,
+  REMOVE_FUND = 4,
 }
 
 export interface PredictionSetResponse extends GeneralResponse<PredictionSetInterface> {}
@@ -49,6 +50,8 @@ export interface PredictionSetInterface extends GeneralInterface {
   setStatus: PredictionSetStatus;
   outcomes: OutcomeInterface[];
   chainData: ChainDataInterface;
+  isWatched?: boolean;
+  volume?: number;
 }
 
 export interface OutcomeInterface extends GeneralInterface {
@@ -56,6 +59,7 @@ export interface OutcomeInterface extends GeneralInterface {
   positionId: string;
   name: string;
   latestChance: OutcomeChance;
+  volume: number;
 }
 
 export interface ChainDataInterface extends GeneralInterface {
@@ -94,3 +98,34 @@ export interface PredictionSetOutcomeChanceInterface {
     date: Date;
   }[];
 }
+
+/**
+ * Activity
+ */
+export interface ActivityInterface extends Omit<PredictionSetInterface, 'outcomes'> {
+  outcomeName: string;
+  userAmount: number;
+  type: TransactionType;
+  outcomeTokens: number;
+  txHash: string;
+  transactionTime: Date;
+  userId?: number;
+  username?: string;
+  userWallet?: string;
+}
+export interface ActivitiesResponse extends GeneralItemsResponse<ActivityInterface> {}
+
+/**
+ * User Prediction
+ */
+export interface UserPredictionInterface extends Omit<PredictionSetInterface, 'outcomes'> {
+  userAmount: number;
+  userId: number;
+  username: string;
+  userWallet: string;
+  outcomeName: string;
+  boughtAmount: number;
+  soldAmount: number;
+  outcomeTokens: number;
+}
+export interface UserPredictionsResponse extends GeneralItemsResponse<UserPredictionInterface> {}

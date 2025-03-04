@@ -12,7 +12,7 @@
     <div class="w-[70%] border-b-1 border-grey-lighter pt-5"></div>
 
     <div v-if="canClaim" class="flex items-center justify-center mt-5">
-      <NuxtIcon name="icon/star" class="text-primary text-[17px]" />
+      <NuxtIcon name="icon/star2" class="text-primary text-[17px]" />
       <div class="ml-[4px] text-[14px] leading-[20px] font-medium mr-5 text-white/60">0.35$</div>
       <BasicButton :loading="loading" @click="claimWinnings" size="small" class="py-[6px] px-[10px]">Claim</BasicButton>
     </div>

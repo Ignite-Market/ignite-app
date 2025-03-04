@@ -1,8 +1,8 @@
 <template>
   <Dashboard :loading="loading">
-    <div v-if="predictionSet" class="flex flex-row justify-center">
-      <div class="flex flex-col max-w-[736px]">
-        <!-- HEADER -->
+    <div v-if="predictionSet" class="px-4 flex flex-col justify-self-center">
+      <!-- HEADER -->
+      <div class="flex max-w-[1241px] mb-10 justify-between">
         <div class="flex">
           <div class="w-[80px] h-[80px] flex-shrink-0">
             <img class="rounded-[8px] w-full h-full object-cover" src="https://app-dev.ignitemarket.xyz/favicon.png" />
@@ -23,166 +23,203 @@
 
               <div class="mx-4 border-r-1 border-r-white/25 h-[14px]"></div>
 
-              <div class="text-white/80 text-[14px] leading-[20px]">1,283 USDC</div>
+              <div class="text-white/80 text-[14px] leading-[20px]">
+                {{ formatTokenAmount(predictionSet.volume || 0, 2) }} USDC
+              </div>
             </div>
           </div>
         </div>
-
-        <div class="mt-10" v-if="predictionSet.setStatus !== PredictionSetStatus.FUNDING">
-          <PredictionSetGraph
-            v-if="params?.id"
-            :prediction-id="+params.id"
-            :outcomes="graphOutcomes"
-            :start-time="predictionSet.startTime"
-            :end-time="predictionSet.endTime"
-          />
-        </div>
-
-        <!-- OUTCOMES -->
-        <div class="flex flex-col gap-y-[6px] mt-10">
-          <div
-            v-for="(outcome, i) in predictionSet.outcomes"
-            class="flex bg-grey rounded-lg pl-3 py-[6px] items-center w-full relative"
-            :class="{ 'border-1 border-primary': winningOutcome?.id === outcome.id }"
+        <div class="flex gap-1.5 mt-2">
+          <Btn
+            v-if="loggedIn"
+            class="bg-grey-light h-8 w-8 rounded flex-cc hover:bg-grey-lighter"
+            type="link"
+            @click="toggleWatchlist"
           >
-            <div
-              class="absolute w-0.5 h-6 left-0 top-1/2 bottom-1/2 -translate-y-1/2"
-              :style="{ backgroundColor: outcomeColors[i] }"
-            ></div>
-            <div class="flex">
-              <div class="w-[56px] h-[56px] flex-shrink-0">
-                <img
-                  class="rounded-[78px] w-full h-full object-cover"
-                  src="https://app-dev.ignitemarket.xyz/favicon.png"
-                />
-              </div>
-
-              <div class="flex flex-col ml-4">
-                <div class="text-[16px] leading-[24px] font-bold text-white pt-[4px]">
-                  {{ outcome.name }}
-                </div>
-
-                <div class="text-[14px] leading-[20px] font-medium text-grey-lightest mt-[4px]">$ 1,845,924</div>
-              </div>
-            </div>
-
-            <div class="flex items-center ml-auto pr-4">
-              <div
-                class="font-bold text-[16px] leading-[24px]"
-                v-if="predictionSet.setStatus !== PredictionSetStatus.FINALIZED"
-              >
-                {{ Number(outcome.latestChance.chance * 100).toFixed(0) }} %
-              </div>
-
-              <div v-if="winningOutcome?.id === outcome.id" class="flex items-center justify-center">
-                <NuxtIcon class="text-primary text-[24px]" name="icon/complete" />
-              </div>
-
-              <div class="flex ml-auto pl-9" v-if="tradeEnabled(predictionSet.setStatus, predictionSet.endTime)">
-                <BasicButton
-                  class="mr-3"
-                  size="large"
-                  type="secondary"
-                  :btnClass="['bg-statusGreen/20 border-statusGreen hover:bg-statusGreen']"
-                  @click="selectOutcome(TransactionType.BUY, outcome)"
-                  :selected="selectedOutcome.id === outcome.id && selectedAction === TransactionType.BUY"
-                  :selectedClass="['!bg-statusGreen !border-statusGreen']"
-                >
-                  Buy
-                </BasicButton>
-                <BasicButton
-                  size="large"
-                  type="secondary"
-                  :btnClass="['bg-statusRed/20 border-statusRed hover:bg-statusRed']"
-                  @click="selectOutcome(TransactionType.SELL, outcome)"
-                  :selected="selectedOutcome.id === outcome.id && selectedAction === TransactionType.SELL"
-                  :selectedClass="['!bg-statusRed !border-statusRed']"
-                >
-                  Sell
-                </BasicButton>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- RULES -->
-        <div class="border-1 border-grey-lighter rounded-lg mt-10 flex-col p-6">
-          <div class="font-bold text-[14px] leading-[20px] mb-4 text-white">Rules</div>
-          <div class="font-medium text-[14px] leading-[20px] mb-4 text-white/80">
-            {{ predictionSet.outcomeResolutionDef }}
-          </div>
-        </div>
-
-        <!-- CONTRACTS -->
-        <div
-          class="border-1 border-grey-lighter rounded-lg mt-10 p-6 grid grid-cols-2 font-medium text-[14px] leading-[20px]"
-        >
-          <div class="flex border-r-[0.5px] border-r-grey-lighter pr-11 items-center">
-            <div class="text-white/80">Contract</div>
-            <div class="ml-auto font-bold hover:text-primary cursor-pointer">
-              {{ shortenAddress(predictionSet.chainData.contractAddress) }}
-            </div>
             <NuxtIcon
-              class="ml-2 text-white cursor-pointer"
-              name="icon/copy"
-              @click="copyToClipboard(predictionSet.chainData.contractAddress)"
-            />
-          </div>
-
-          <div class="flex border-l-[0.5px] border-l-grey-lighter pl-11 items-center">
-            <div class="text-white/80">Resolver</div>
-            <div class="ml-auto font-bol hover:text-primary cursor-pointer">
-              {{ shortenAddress(config.public.ORACLE_CONTRACT) }}
-            </div>
-            <NuxtIcon
-              class="ml-2 text-white cursor-pointer"
-              name="icon/copy"
-              @click="copyToClipboard(config.public.ORACLE_CONTRACT)"
-            />
-          </div>
-        </div>
-
-        <div class="mt-9">
-          <n-tabs
-            type="line"
-            animated
-            :theme-overrides="{
-              tabTextColorActiveLine: '#F5F5F5',
-            }"
-          >
-            <n-tab-pane name="Comments" tab="Comments">
-              <PredictionSetComments :prediction-set-id="predictionSet.id"></PredictionSetComments>
-            </n-tab-pane>
-            <n-tab-pane name="Top holders" tab="Top holder"> </n-tab-pane>
-          </n-tabs>
+              :name="predictionSet.isWatched ? 'icon/star' : 'icon/star-outline'"
+              :class="predictionSet.isWatched && 'text-primary'"
+              class="text-[20px]"
+            ></NuxtIcon>
+          </Btn>
+          <Btn class="bg-grey-light h-8 w-8 rounded flex-cc hover:bg-grey-lighter" type="link" @click="copyLink">
+            <NuxtIcon name="icon/link" class="text-[20px]"></NuxtIcon>
+          </Btn>
         </div>
       </div>
 
-      <div class="sticky top-0 self-start ml-24 w-[409px]">
-        <PredictionSetAction
-          v-if="actionsEnabled(predictionSet.setStatus, predictionSet.endTime)"
-          :contract-address="predictionSet.chainData.contractAddress"
-          :outcome="selectedOutcome"
-          :action="selectedAction"
-          :status="predictionSet.setStatus"
-          :end-time="predictionSet.endTime.toString()"
-          :outcomes="predictionSet.outcomes"
-        >
-        </PredictionSetAction>
+      <!-- CONTENT -->
+      <div class="flex flex-row justify-center">
+        <!-- LEFT -->
+        <div class="flex flex-col max-w-[736px]">
+          <!-- GRAPH -->
+          <div v-if="predictionSet.setStatus !== PredictionSetStatus.FUNDING">
+            <PredictionSetGraph
+              v-if="params?.id"
+              :prediction-id="+params.id"
+              :outcomes="graphOutcomes"
+              :start-time="predictionSet.startTime"
+              :end-time="predictionSet.endTime"
+            />
+          </div>
 
-        <PredictionSetPhase
-          v-if="predictionSet.setStatus !== PredictionSetStatus.FINALIZED"
-          :prediction-set="predictionSet"
-        >
-        </PredictionSetPhase>
+          <!-- OUTCOMES -->
+          <div class="flex flex-col gap-y-[6px] mt-10">
+            <div
+              v-for="(outcome, i) in predictionSet.outcomes"
+              class="flex bg-grey rounded-lg pl-3 py-[6px] items-center w-full relative"
+              :class="{ 'border-1 border-primary': winningOutcome?.id === outcome.id }"
+            >
+              <div
+                class="absolute w-0.5 h-6 left-0 top-1/2 bottom-1/2 -translate-y-1/2"
+                :style="{ backgroundColor: outcomeColors[i] }"
+              ></div>
+              <div class="flex">
+                <div class="w-[56px] h-[56px] flex-shrink-0">
+                  <img
+                    class="rounded-[78px] w-full h-full object-cover"
+                    src="https://app-dev.ignitemarket.xyz/favicon.png"
+                  />
+                </div>
 
-        <PredictionSetResults
-          v-if="predictionSet.setStatus === PredictionSetStatus.FINALIZED"
-          :outcome="winningOutcome"
-          :contract-address="predictionSet.chainData.contractAddress"
-          :condition-id="predictionSet.chainData.conditionId"
-        >
-        </PredictionSetResults>
+                <div class="flex flex-col ml-4">
+                  <div class="text-[16px] leading-[24px] font-bold text-white pt-[4px]">
+                    {{ outcome.name }}
+                  </div>
+
+                  <div class="text-[14px] leading-[20px] font-medium text-grey-lightest mt-[4px]">
+                    {{ formatTokenAmount(outcome.volume, 2) }} USDC
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex items-center ml-auto pr-4">
+                <div
+                  class="font-bold text-[16px] leading-[24px]"
+                  v-if="predictionSet.setStatus !== PredictionSetStatus.FINALIZED"
+                >
+                  {{ Number(outcome.latestChance.chance * 100).toFixed(0) }} %
+                </div>
+
+                <div v-if="winningOutcome?.id === outcome.id" class="flex items-center justify-center">
+                  <NuxtIcon class="text-primary text-[24px]" name="icon/complete" />
+                </div>
+
+                <div class="flex ml-auto pl-9" v-if="tradeEnabled(predictionSet.setStatus, predictionSet.endTime)">
+                  <BasicButton
+                    class="mr-3"
+                    size="large"
+                    type="secondary"
+                    :btnClass="['bg-statusGreen/20 border-statusGreen hover:bg-statusGreen']"
+                    @click="selectOutcome(TransactionType.BUY, outcome)"
+                    :selected="selectedOutcome.id === outcome.id && selectedAction === TransactionType.BUY"
+                    :selectedClass="['!bg-statusGreen !border-statusGreen']"
+                  >
+                    Buy
+                  </BasicButton>
+                  <BasicButton
+                    size="large"
+                    type="secondary"
+                    :btnClass="['bg-statusRed/20 border-statusRed hover:bg-statusRed']"
+                    @click="selectOutcome(TransactionType.SELL, outcome)"
+                    :selected="selectedOutcome.id === outcome.id && selectedAction === TransactionType.SELL"
+                    :selectedClass="['!bg-statusRed !border-statusRed']"
+                  >
+                    Sell
+                  </BasicButton>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- RULES -->
+          <div class="border-1 border-grey-lighter rounded-lg mt-10 flex-col p-6">
+            <div class="font-bold text-[14px] leading-[20px] mb-4 text-white">Rules</div>
+            <div class="font-medium text-[14px] leading-[20px] mb-4 text-white/80">
+              {{ predictionSet.outcomeResolutionDef }}
+            </div>
+          </div>
+
+          <!-- CONTRACTS -->
+          <div
+            class="border-1 border-grey-lighter rounded-lg mt-10 p-6 grid grid-cols-2 font-medium text-[14px] leading-[20px]"
+          >
+            <div class="flex border-r-[0.5px] border-r-grey-lighter pr-11 items-center">
+              <div class="text-white/80">Contract</div>
+              <div class="ml-auto font-bold hover:text-primary cursor-pointer">
+                {{ shortenAddress(predictionSet.chainData.contractAddress) }}
+              </div>
+              <NuxtIcon
+                class="ml-2 text-white cursor-pointer"
+                name="icon/copy"
+                @click="copyToClipboard(predictionSet.chainData.contractAddress)"
+              />
+            </div>
+
+            <div class="flex border-l-[0.5px] border-l-grey-lighter pl-11 items-center">
+              <div class="text-white/80">Resolver</div>
+              <div class="ml-auto font-bol hover:text-primary cursor-pointer">
+                {{ shortenAddress(config.public.ORACLE_CONTRACT) }}
+              </div>
+              <NuxtIcon
+                class="ml-2 text-white cursor-pointer"
+                name="icon/copy"
+                @click="copyToClipboard(config.public.ORACLE_CONTRACT)"
+              />
+            </div>
+          </div>
+
+          <div class="mt-9">
+            <n-tabs
+              type="line"
+              animated
+              :theme-overrides="{
+                tabTextColorActiveLine: '#F5F5F5',
+              }"
+            >
+              <n-tab-pane name="Comments" tab="Comments">
+                <PredictionSetComments :prediction-set-id="predictionSet.id"></PredictionSetComments>
+              </n-tab-pane>
+              <n-tab-pane name="Top holders" tab="Top holder">
+                <PredictionSetHolders
+                  :prediction-set-id="predictionSet.id"
+                  :outcomes="predictionSet.outcomes"
+                ></PredictionSetHolders>
+              </n-tab-pane>
+              <n-tab-pane name="Activity" tab="Activity">
+                <PredictionSetActivity :prediction-set-id="predictionSet.id"></PredictionSetActivity>
+              </n-tab-pane>
+            </n-tabs>
+          </div>
+        </div>
+
+        <!-- RIGHT -->
+        <div class="sticky top-6 self-start ml-24 w-[409px]">
+          <PredictionSetAction
+            v-if="actionsEnabled(predictionSet.setStatus, predictionSet.endTime)"
+            :contract-address="predictionSet.chainData.contractAddress"
+            :outcome="selectedOutcome"
+            :action="selectedAction"
+            :status="predictionSet.setStatus"
+            :end-time="predictionSet.endTime.toString()"
+            :outcomes="predictionSet.outcomes"
+          >
+          </PredictionSetAction>
+
+          <PredictionSetPhase
+            v-if="predictionSet.setStatus !== PredictionSetStatus.FINALIZED"
+            :prediction-set="predictionSet"
+          >
+          </PredictionSetPhase>
+
+          <PredictionSetResults
+            v-if="predictionSet.setStatus === PredictionSetStatus.FINALIZED"
+            :outcome="winningOutcome"
+            :contract-address="predictionSet.chainData.contractAddress"
+            :condition-id="predictionSet.chainData.conditionId"
+          >
+          </PredictionSetResults>
+        </div>
       </div>
     </div>
   </Dashboard>
@@ -207,6 +244,7 @@ const REFRESH_INTERVAL = 10_000;
 const { params } = useRoute();
 const router = useRouter();
 const config = useRuntimeConfig();
+const { loggedIn } = useUserStore();
 
 const loading = ref<boolean>(true);
 const refreshInterval = ref<NodeJS.Timeout>();
@@ -215,10 +253,15 @@ const selectedOutcome = ref();
 const selectedAction = ref();
 const winningOutcome = ref();
 const graphOutcomes = ref();
+const watclistLoading = ref(false);
 
 onMounted(async () => {
   await sleep(10);
   await getPredictionSet();
+});
+
+onUnmounted(() => {
+  clearInterval(refreshInterval.value);
 });
 
 async function selectOutcome(transaction: TransactionType, outcome: OutcomeInterface) {
@@ -263,5 +306,34 @@ async function getPredictionSet(silent: boolean = false) {
   } finally {
     loading.value = false;
   }
+}
+
+async function toggleWatchlist() {
+  if (!predictionSet.value || !loggedIn || watclistLoading.value) {
+    return;
+  }
+  watclistLoading.value = true;
+  if (predictionSet.value.isWatched) {
+    // Delete if already watched
+    try {
+      await $api.delete(Endpoints.predictionSetUserWatchlist(predictionSet.value.id));
+      predictionSet.value.isWatched = false;
+    } catch (error) {
+      console.error(error);
+    }
+  } else {
+    // Add to watchlist
+    try {
+      await $api.post(Endpoints.predictionSetUserWatchlist(predictionSet.value.id));
+      predictionSet.value.isWatched = true;
+    } catch (error) {
+      console.error(error);
+    }
+  }
+  watclistLoading.value = false;
+}
+
+function copyLink() {
+  copyToClipboard(window.location.href);
 }
 </script>
