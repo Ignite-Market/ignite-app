@@ -437,11 +437,15 @@ async function updateSellAmount() {
 }
 
 async function fund() {
+  if (!amount.value) {
+    return;
+  }
+
   loading.value = true;
   try {
     await refreshCollateralBalance();
 
-    if (!amount.value || !enoughCollateralBalance.value) {
+    if (!enoughCollateralBalance.value) {
       return;
     }
 
@@ -461,11 +465,14 @@ async function fund() {
 }
 
 async function sellOutcome() {
+  if (!amount.value) {
+    return;
+  }
+
   loading.value = true;
   try {
     conditionalBalance.value = await getConditionalBalance(props.outcome.positionId);
-
-    if (!amount.value || !enoughConditionalBalance.value) {
+    if (!enoughConditionalBalance.value) {
       return;
     }
 
@@ -499,11 +506,14 @@ async function sellOutcome() {
 }
 
 async function buyOutcome() {
+  if (!amount.value) {
+    return;
+  }
+
   loading.value = true;
   try {
     await refreshCollateralBalance();
-
-    if (!amount.value || !enoughCollateralBalance.value) {
+    if (!enoughCollateralBalance.value) {
       return;
     }
 
