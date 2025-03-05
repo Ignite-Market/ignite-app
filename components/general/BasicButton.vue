@@ -6,7 +6,7 @@
     :href="href || undefined"
     :target="href ? '_blank' : undefined"
     :class="btnClass"
-    class=""
+    class="inline-block content-center"
     @click="onClick"
   >
     <span v-if="loading" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">

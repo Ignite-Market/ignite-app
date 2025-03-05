@@ -12,7 +12,9 @@
       </BasicButton>
     </div>
   </div>
-  <client-only> <VChart :option="options" autoresize class="h-[400px] w-[calc(100%+70px)] -ml-[20px]" /></client-only>
+  <client-only>
+    <VChart :option="options" autoresize class="h-[300px] md:h-[400px] lg:w-[calc(100%+70px)] lg:-ml-[20px]"
+  /></client-only>
 </template>
 
 <script lang="ts" setup>

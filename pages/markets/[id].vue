@@ -1,13 +1,13 @@
 <template>
   <Dashboard :loading="loading">
-    <div v-if="predictionSet" class="px-4 flex flex-col justify-self-center">
+    <div v-if="predictionSet" class="px-4 max-w-[1241px] m-auto">
       <!-- HEADER -->
-      <div class="flex max-w-[1241px] mb-10 justify-between">
-        <div class="flex">
+      <div class="flex mb-10 justify-between flex-wrap gap-4">
+        <div class="flex flex-wrap gap-x-8 gap-y-4">
           <div class="w-[80px] h-[80px] flex-shrink-0">
             <img class="rounded-[8px] w-full h-full object-cover" src="https://app-dev.ignitemarket.xyz/favicon.png" />
           </div>
-          <div class="flex flex-col ml-8">
+          <div class="flex flex-col">
             <div class="text-[24px] leading-[34px] font-bold text-white mt-[5px]">
               {{ predictionSet.question }}
             </div>
@@ -49,9 +49,9 @@
       </div>
 
       <!-- CONTENT -->
-      <div class="flex flex-row justify-center">
+      <div class="flex flex-col-reverse md:flex-row justify-center">
         <!-- LEFT -->
-        <div class="flex flex-col max-w-[736px]">
+        <div class="flex flex-col min-w-[250px] max-w-[736px]">
           <!-- GRAPH -->
           <div v-if="predictionSet.setStatus !== PredictionSetStatus.FUNDING">
             <PredictionSetGraph
@@ -67,73 +67,77 @@
           <div class="flex flex-col gap-y-[6px] mt-10">
             <div
               v-for="(outcome, i) in predictionSet.outcomes"
-              class="flex bg-grey rounded-lg pl-3 py-[6px] items-center w-full relative"
+              class="flex flex-wrap bg-grey rounded-lg pl-3 pr-4 py-[6px] items-center w-full relative gap-x-9 gap-y-4"
               :class="{ 'border-1 border-primary': winningOutcome?.id === outcome.id }"
             >
               <div
                 class="absolute w-0.5 h-6 left-0 top-1/2 bottom-1/2 -translate-y-1/2"
                 :style="{ backgroundColor: outcomeColors[i] }"
               ></div>
-              <div class="flex">
-                <div class="w-[56px] h-[56px] flex-shrink-0">
-                  <img
-                    class="rounded-[78px] w-full h-full object-cover"
-                    src="https://app-dev.ignitemarket.xyz/favicon.png"
-                  />
-                </div>
 
-                <div class="flex flex-col ml-4">
-                  <div class="text-[16px] leading-[24px] font-bold text-white pt-[4px]">
-                    {{ outcome.name }}
+              <div class="flex justify-between items-center flex-grow-[10] gap-8 min-w-[220px]">
+                <div class="flex">
+                  <div class="w-[56px] h-[56px] flex-shrink-0">
+                    <img
+                      class="rounded-[78px] w-full h-full object-cover"
+                      src="https://app-dev.ignitemarket.xyz/favicon.png"
+                    />
                   </div>
 
-                  <div class="text-[14px] leading-[20px] font-medium text-grey-lightest mt-[4px]">
-                    {{ formatTokenAmount(outcome.volume, 2) }} USDC
+                  <div class="flex flex-col ml-4">
+                    <div class="text-[16px] leading-[24px] font-bold text-white pt-[4px]">
+                      {{ outcome.name }}
+                    </div>
+
+                    <div class="text-[14px] leading-[20px] font-medium text-grey-lightest mt-[4px]">
+                      {{ formatTokenAmount(outcome.volume, 2) }} USDC
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div class="flex items-center ml-auto pr-4">
                 <div
                   class="font-bold text-[16px] leading-[24px]"
                   v-if="predictionSet.setStatus !== PredictionSetStatus.FINALIZED"
                 >
                   {{ Number(outcome.latestChance.chance * 100).toFixed(0) }} %
                 </div>
-
                 <div v-if="winningOutcome?.id === outcome.id" class="flex items-center justify-center">
                   <NuxtIcon class="text-primary text-[24px]" name="icon/complete" />
                 </div>
+              </div>
 
-                <div class="flex ml-auto pl-9" v-if="tradeEnabled(predictionSet.setStatus, predictionSet.endTime)">
-                  <BasicButton
-                    class="mr-3"
-                    size="large"
-                    type="secondary"
-                    :btnClass="['bg-statusGreen/20 border-statusGreen hover:bg-statusGreen']"
-                    @click="selectOutcome(TransactionType.BUY, outcome)"
-                    :selected="selectedOutcome.id === outcome.id && selectedAction === TransactionType.BUY"
-                    :selectedClass="['!bg-statusGreen !border-statusGreen']"
-                  >
-                    Buy
-                  </BasicButton>
-                  <BasicButton
-                    size="large"
-                    type="secondary"
-                    :btnClass="['bg-statusRed/20 border-statusRed hover:bg-statusRed']"
-                    @click="selectOutcome(TransactionType.SELL, outcome)"
-                    :selected="selectedOutcome.id === outcome.id && selectedAction === TransactionType.SELL"
-                    :selectedClass="['!bg-statusRed !border-statusRed']"
-                  >
-                    Sell
-                  </BasicButton>
-                </div>
+              <div
+                v-if="tradeEnabled(predictionSet.setStatus, predictionSet.endTime)"
+                class="flex items-center flex-grow-[1]"
+              >
+                <BasicButton
+                  class="mr-3 w-full"
+                  size="large"
+                  type="secondary"
+                  :btnClass="['bg-statusGreen/20 border-statusGreen hover:bg-statusGreen']"
+                  @click="selectOutcome(TransactionType.BUY, outcome)"
+                  :selected="selectedOutcome.id === outcome.id && selectedAction === TransactionType.BUY"
+                  :selectedClass="['!bg-statusGreen !border-statusGreen']"
+                >
+                  Buy
+                </BasicButton>
+                <BasicButton
+                  class="w-full"
+                  size="large"
+                  type="secondary"
+                  :btnClass="['bg-statusRed/20 border-statusRed hover:bg-statusRed']"
+                  @click="selectOutcome(TransactionType.SELL, outcome)"
+                  :selected="selectedOutcome.id === outcome.id && selectedAction === TransactionType.SELL"
+                  :selectedClass="['!bg-statusRed !border-statusRed']"
+                >
+                  Sell
+                </BasicButton>
               </div>
             </div>
           </div>
 
           <!-- RULES -->
-          <div class="border-1 border-grey-lighter rounded-lg mt-10 flex-col p-6">
+          <div class="border-1 border-grey-lighter rounded-lg mt-10 flex-col p-6 text-wrap break-words">
             <div class="font-bold text-[14px] leading-[20px] mb-4 text-white">Rules</div>
             <div class="font-medium text-[14px] leading-[20px] mb-4 text-white/80">
               {{ predictionSet.outcomeResolutionDef }}
@@ -142,30 +146,35 @@
 
           <!-- CONTRACTS -->
           <div
-            class="border-1 border-grey-lighter rounded-lg mt-10 p-6 grid grid-cols-2 font-medium text-[14px] leading-[20px]"
+            class="border-1 border-grey-lighter rounded-lg mt-10 p-6 flex font-medium text-[14px] leading-[20px] justify-between sm:flex-row flex-col gap-x-11 gap-y-6"
           >
-            <div class="flex border-r-[0.5px] border-r-grey-lighter pr-11 items-center">
+            <div class="flex border-r-grey-lighter sm:pr-2 items-center flex-grow flex-wrap justify-between gap-2">
               <div class="text-white/80">Contract</div>
-              <div class="ml-auto font-bold hover:text-primary cursor-pointer">
-                {{ shortenAddress(predictionSet.chainData.contractAddress) }}
+              <div class="flex items-center">
+                <div class="ml-auto font-bold hover:text-primary cursor-pointer">
+                  {{ shortenAddress(predictionSet.chainData.contractAddress) }}
+                </div>
+                <NuxtIcon
+                  class="ml-2 text-white cursor-pointer"
+                  name="icon/copy"
+                  @click="copyToClipboard(predictionSet.chainData.contractAddress)"
+                />
               </div>
-              <NuxtIcon
-                class="ml-2 text-white cursor-pointer"
-                name="icon/copy"
-                @click="copyToClipboard(predictionSet.chainData.contractAddress)"
-              />
             </div>
+            <div class="border-[0.5px] border-grey-lighter w-[1px] hidden sm:block"></div>
 
-            <div class="flex border-l-[0.5px] border-l-grey-lighter pl-11 items-center">
+            <div class="flex border-l-grey-lighter sm:pl-2 items-center flex-grow flex-wrap justify-between gap-2">
               <div class="text-white/80">Resolver</div>
-              <div class="ml-auto font-bol hover:text-primary cursor-pointer">
-                {{ shortenAddress(config.public.ORACLE_CONTRACT) }}
+              <div class="flex items-center">
+                <div class="ml-auto font-bol hover:text-primary cursor-pointer">
+                  {{ shortenAddress(config.public.ORACLE_CONTRACT) }}
+                </div>
+                <NuxtIcon
+                  class="ml-2 text-white cursor-pointer"
+                  name="icon/copy"
+                  @click="copyToClipboard(config.public.ORACLE_CONTRACT)"
+                />
               </div>
-              <NuxtIcon
-                class="ml-2 text-white cursor-pointer"
-                name="icon/copy"
-                @click="copyToClipboard(config.public.ORACLE_CONTRACT)"
-              />
             </div>
           </div>
 
@@ -180,7 +189,7 @@
               <n-tab-pane name="Comments" tab="Comments">
                 <PredictionSetComments :prediction-set-id="predictionSet.id"></PredictionSetComments>
               </n-tab-pane>
-              <n-tab-pane name="Top holders" tab="Top holder">
+              <n-tab-pane name="Top holders" tab="Top holders">
                 <PredictionSetHolders
                   :prediction-set-id="predictionSet.id"
                   :outcomes="predictionSet.outcomes"
@@ -194,7 +203,7 @@
         </div>
 
         <!-- RIGHT -->
-        <div class="sticky top-6 self-start ml-24 w-[409px]">
+        <div class="md:sticky top-6 self-start md:ml-8 lg:ml-24 w-full min-w-[260px] md:w-[409px] mb-6">
           <PredictionSetAction
             v-if="actionsEnabled(predictionSet.setStatus, predictionSet.endTime)"
             :contract-address="predictionSet.chainData.contractAddress"

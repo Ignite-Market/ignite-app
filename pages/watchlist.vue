@@ -1,6 +1,6 @@
 <template>
   <Dashboard>
-    <PredictionSetListing :category="'top'"></PredictionSetListing>
+    <PredictionSetListing :category="'top'" watchlist></PredictionSetListing>
   </Dashboard>
 </template>
 

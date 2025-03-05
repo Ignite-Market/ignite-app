@@ -4,24 +4,29 @@
       <Spinner />
     </div>
     <div v-else>
-      <div class="flex items-center gap-4">
-        <div>
+      <div class="flex justify-between">
+        <div class="flex items-center gap-4">
           <jazzicon
             class="cursor-pointer rounded-[50%] w-[80px] h-[80px]"
             :address="user?.walletAddress"
             :diameter="80"
           />
+          <div class="flex flex-col gap-2">
+            <div class="text-lg">{{ user?.username }}</div>
+            <button
+              @click="copyToClipboard(user?.walletAddress || '')"
+              class="flex gap-1 items-center px-2 rounded-lg bg-grey-light"
+            >
+              {{ shortenAddress(user?.walletAddress || '') }}
+              <NuxtIcon class="ml-2 text-white cursor-pointer" name="icon/copy" />
+            </button>
+            <div v-if="user?.createTime" class="text-sm">
+              Joined {{ new Date(user.createTime).toLocaleDateString() }}
+            </div>
+          </div>
         </div>
-        <div class="flex flex-col gap-2">
-          <div class="text-lg">{{ user?.username }}</div>
-          <button
-            @click="copyToClipboard(user?.walletAddress || '')"
-            class="flex gap-1 items-center px-2 rounded-lg bg-grey-light"
-          >
-            {{ shortenAddress(user?.walletAddress || '') }}
-            <NuxtIcon class="ml-2 text-white cursor-pointer" name="icon/copy" />
-          </button>
-          <div v-if="user?.createTime" class="text-sm">Joined {{ new Date(user.createTime).toLocaleDateString() }}</div>
+        <div>
+          <BasicButton to="/profile/edit">Edit Profile</BasicButton>
         </div>
       </div>
       <div class="mt-4" v-if="user">
@@ -40,7 +45,9 @@ const props = defineProps({
 
 const message = useMessage();
 const router = useRouter();
-const { loggedIn } = useUserStore();
+const { loggedIn, user: authUser } = useUserStore();
+
+const isCurrentUser = computed(() => user.value?.id === authUser.id);
 
 const loading = ref(false);
 const user = ref<UserInterface | null>(null);

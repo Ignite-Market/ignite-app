@@ -31,7 +31,7 @@
     </div>
     <div v-else>
       <div class="flex flex-auto w-full flex-col md:flex-row bg-grey-dark">
-        <n-layout class="has-scrollbar">
+        <n-layout class="">
           <n-layout-content>
             <n-scrollbar y-scrollable :style="scrollScreen">
               <div class="flex flex-col gap-4 justify-between pt-4" :style="fullHeight ? heightScreen : {}">

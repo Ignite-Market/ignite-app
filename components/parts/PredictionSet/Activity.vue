@@ -1,11 +1,16 @@
 <template>
   <div class="mt-5 pb-[33vh]">
-    <div v-if="loading">
-      <Spinner />
-    </div>
-    <div v-else-if="!items.length" class="text-center">No activity</div>
+    <div v-if="!loading && !items.length" class="text-center mt-6">No activity</div>
     <div v-else class="flex flex-col mt-6 gap-y-5">
       <PredictionSetActivityItem :item="item" v-for="item of items" />
+      <div v-if="pagination.itemCount! > pagination.page! * pagination.pageSize" class="flex">
+        <BasicButton :disabled="loading" @click="() => getActivity(pagination.page! + 1)" class="m-auto"
+          >Show More</BasicButton
+        >
+      </div>
+    </div>
+    <div v-if="loading">
+      <Spinner />
     </div>
   </div>
 </template>
@@ -40,7 +45,7 @@ async function getActivity(page: number = 1) {
         desc: true,
       });
 
-      items.value = res.data.items;
+      items.value = [...items.value, ...res.data.items];
       pagination.value.itemCount = res.data.total;
     } catch (error) {
       console.log(error);
