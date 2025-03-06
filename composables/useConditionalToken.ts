@@ -5,7 +5,7 @@ import { ContractType } from '~/lib/config/contracts';
 export default function useConditionalToken() {
   const { getTokenStore } = useCollateralToken();
   const { initContract } = useContracts();
-  const { address } = useAccount();
+  const { address, isConnected } = useAccount();
   const txWait = useTxWait();
   const message = useMessage();
   const config = useRuntimeConfig();
@@ -17,8 +17,11 @@ export default function useConditionalToken() {
    * @returns Boolean.
    */
   async function checkConditionalApprove(fpmmContractAddress: Address): Promise<boolean> {
-    const contract = await initContract(ContractType.CONDITIONAL_TOKEN);
+    if (!isConnected.value) {
+      return false;
+    }
 
+    const contract = await initContract(ContractType.CONDITIONAL_TOKEN);
     try {
       const isApproved = await contract.read.isApprovedForAll([address.value, fpmmContractAddress]);
       if (!isApproved) {
@@ -42,8 +45,11 @@ export default function useConditionalToken() {
    * @returns Conditional tokens balance.
    */
   async function getConditionalBalance(outcomePositionId: string) {
-    const contract = await initContract(ContractType.CONDITIONAL_TOKEN);
+    if (!isConnected.value) {
+      return BigInt(0);
+    }
 
+    const contract = await initContract(ContractType.CONDITIONAL_TOKEN);
     return await contract.read.balanceOf([address.value, outcomePositionId]);
   }
 
@@ -68,6 +74,9 @@ export default function useConditionalToken() {
    * @returns Redeem positions transaction.
    */
   async function claim(conditionId: string, winningIndex: number) {
+    if (!isConnected.value) {
+      return;
+    }
     const contract = await initContract(ContractType.CONDITIONAL_TOKEN);
 
     // Bit representation of the winning index.

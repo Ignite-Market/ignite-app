@@ -17,7 +17,7 @@ export const useUserStore = defineStore('user', {
     collateralToken: {
       balance: BigInt(0),
       parsedBalance: '0.0',
-      decimals: 0,
+      decimals: 6,
       symbol: '',
       loaded: false,
       loading: false,

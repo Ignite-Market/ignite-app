@@ -14,7 +14,7 @@
         </div>
         <div class="ml-2 text-[12px] leading-[16px] font-bold">{{ outcome.name }}</div>
         <div class="text-[12px] leading-[16px] font-bold ml-auto">
-          {{ outcome.latestChance.chance ? (outcome.latestChance.chance * 100).toFixed(0) : 0.0 }} %
+          {{ pricePerShare ? (pricePerShare * 100).toFixed(0) : 0.0 }} %
         </div>
 
         <div
@@ -147,9 +147,7 @@
           <div class="text-[16px] leading-[24px] text-grey-lightest font-normal mt-6">
             <div class="flex items-center justify-center">
               <div>Avg price</div>
-              <div class="ml-auto text-primary">
-                {{ outcome.latestChance.chance ? outcome.latestChance.chance.toFixed(3) : 0.0 }} USDC
-              </div>
+              <div class="ml-auto text-primary">{{ pricePerShare ? pricePerShare.toFixed(3) : 0.0 }} USDC</div>
             </div>
             <div class="flex items-center justify-center mt-2">
               <div>Shares (receive at least)</div>
@@ -222,9 +220,7 @@
           <div class="text-[16px] leading-[24px] text-grey-lightest font-normal mt-6">
             <div class="flex items-center justify-center">
               <div>Avg price</div>
-              <div class="ml-auto text-primary">
-                {{ outcome.latestChance.chance ? outcome.latestChance.chance.toFixed(3) : 0.0 }} USDC
-              </div>
+              <div class="ml-auto text-primary">{{ pricePerShare ? pricePerShare.toFixed(3) : 0.0 }} USDC</div>
             </div>
             <div class="flex items-center justify-center mt-2">
               <div>Potential return</div>
@@ -298,7 +294,7 @@ import { PredictionSetStatus, TransactionType } from '~/lib/types/prediction-set
 import { useAccount } from '@wagmi/vue';
 
 const props = defineProps({
-  contractAddress: { type: String, default: null, required: true },
+  contractAddress: { type: String as PropType<Address>, default: null, required: true },
   outcome: { type: Object as PropType<OutcomeInterface>, default: {}, required: true },
   status: { type: Number as PropType<PredictionSetStatus>, default: null, required: true },
   action: { type: Number as PropType<TransactionType>, default: null, required: false },
@@ -306,7 +302,7 @@ const props = defineProps({
   outcomes: { type: Array as PropType<OutcomeInterface[]>, default: [], required: true },
 });
 
-const { getMaxTokensToSell, getMinTokensToBuy, addFunding, buy, sell, calcSellAmountInCollateral } =
+const { getMinTokensToBuy, addFunding, buy, sell, calcSellAmountInCollateral, getPricePerShare } =
   useFixedMarketMaker();
 const { refreshCollateralBalance, getTokenStore } = useCollateralToken();
 const { getConditionalBalance, parseConditionalBalance } = useConditionalToken();
@@ -324,6 +320,7 @@ const amount = ref<number>();
 const returnAmount = ref<string>('0.0');
 const potentialReturn = ref<string>('0.0');
 const conditionalBalance = ref(BigInt(0));
+const pricePerShare = ref(0.0);
 
 const enoughConditionalBalance = computed(() => {
   const scaledAmount = BigInt(Math.round((amount.value || 0) * 10 ** tokenStore.decimals));
@@ -348,6 +345,7 @@ onMounted(async () => {
 watchEffect(async () => {
   if (props.outcome.positionId) {
     conditionalBalance.value = await getConditionalBalance(props.outcome.positionId);
+    pricePerShare.value = await getPricePerShare(props.contractAddress, props.outcome.outcomeIndex);
   }
 });
 
@@ -412,7 +410,7 @@ async function updateBuyAmount() {
   }
 
   const result = await getMinTokensToBuy(
-    props.contractAddress as Address,
+    props.contractAddress,
     amount.value,
     props.outcome.outcomeIndex,
     slippage.value
@@ -429,7 +427,7 @@ async function updateSellAmount() {
   const result = await calcSellAmountInCollateral(
     amount.value,
     props.outcome.outcomeIndex,
-    props.contractAddress as Address,
+    props.contractAddress,
     props.outcomes.map(o => o.positionId)
   );
 
@@ -451,7 +449,7 @@ async function fund() {
 
     await ensureCorrectNetwork();
 
-    txWait.hash.value = await addFunding(props.contractAddress as Address, amount.value);
+    txWait.hash.value = await addFunding(props.contractAddress, amount.value);
     await txWait.wait();
 
     amount.value = '' as any;
@@ -481,16 +479,11 @@ async function sellOutcome() {
     const collateralAmount = await calcSellAmountInCollateral(
       amount.value,
       props.outcome.outcomeIndex,
-      props.contractAddress as Address,
+      props.contractAddress,
       props.outcomes.map(o => o.positionId)
     );
 
-    txWait.hash.value = await sell(
-      props.contractAddress as Address,
-      collateralAmount,
-      props.outcome.outcomeIndex,
-      slippage.value
-    );
+    txWait.hash.value = await sell(props.contractAddress, collateralAmount, props.outcome.outcomeIndex, slippage.value);
     await txWait.wait();
 
     console.log(collateralAmount);
@@ -519,12 +512,7 @@ async function buyOutcome() {
 
     await ensureCorrectNetwork();
 
-    txWait.hash.value = await buy(
-      props.contractAddress as Address,
-      amount.value,
-      props.outcome.outcomeIndex,
-      slippage.value
-    );
+    txWait.hash.value = await buy(props.contractAddress, amount.value, props.outcome.outcomeIndex, slippage.value);
     await txWait.wait();
 
     amount.value = '' as any;
@@ -538,10 +526,10 @@ async function buyOutcome() {
 }
 
 async function refreshBalances() {
-  // TODO: Add price refreshing.
   try {
     await refreshCollateralBalance();
     conditionalBalance.value = await getConditionalBalance(props.outcome.positionId);
+    pricePerShare.value = await getPricePerShare(props.contractAddress, props.outcome.outcomeIndex);
   } catch (error) {}
 }
 </script>

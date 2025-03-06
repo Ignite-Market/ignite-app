@@ -3,8 +3,8 @@ import { maxUint256, type Address } from 'viem';
 import { ContractType } from '~/lib/config/contracts';
 
 export default function useCollateralToken() {
-  const { ensureCorrectNetwork, initContract } = useContracts();
-  const { address } = useAccount();
+  const { ensureCorrectNetwork, initContract, initReadContract } = useContracts();
+  const { address, isConnected } = useAccount();
   const txWait = useTxWait();
   const message = useMessage();
   const userStore = useUserStore();
@@ -16,8 +16,11 @@ export default function useCollateralToken() {
    * @returns Boolean.
    */
   async function checkCollateralAllowance(fpmmContractAddress: Address): Promise<boolean> {
-    const contract = await initContract(ContractType.COLLATERAL_TOKEN);
+    if (!isConnected.value) {
+      return false;
+    }
 
+    const contract = await initContract(ContractType.COLLATERAL_TOKEN);
     try {
       await ensureCorrectNetwork();
 
@@ -42,6 +45,10 @@ export default function useCollateralToken() {
    * @returns Collateral token balance.
    */
   async function getCollateralBalance() {
+    if (!isConnected.value) {
+      return BigInt(0);
+    }
+
     const contract = await initContract(ContractType.COLLATERAL_TOKEN);
     return await contract.read.balanceOf([address.value]);
   }
@@ -52,7 +59,7 @@ export default function useCollateralToken() {
    * @returns Collateral token symbol.
    */
   async function getSymbol(): Promise<string> {
-    const contract = await initContract(ContractType.COLLATERAL_TOKEN);
+    const contract = await initReadContract(ContractType.COLLATERAL_TOKEN);
 
     return await contract.read.symbol([]);
   }
@@ -63,7 +70,7 @@ export default function useCollateralToken() {
    * @returns Collateral token decimals.
    */
   async function getDecimals(): Promise<number> {
-    const contract = await initContract(ContractType.COLLATERAL_TOKEN);
+    const contract = await initReadContract(ContractType.COLLATERAL_TOKEN);
 
     return await contract.read.decimals([]);
   }

@@ -10,32 +10,35 @@ import { ContractType } from '~/lib/config/contracts';
 export default function useFixedMarketMaker() {
   const { checkCollateralAllowance, getTokenStore, loadToken } = useCollateralToken();
   const { checkConditionalApprove } = useConditionalToken();
-  const { initContract } = useContracts();
-  const { address } = useAccount();
+  const { initContract, initReadContract } = useContracts();
+  const { address, isConnected } = useAccount();
   const tokenStore = getTokenStore();
 
   /**
-   *
-   * @param fpmmContractAddress
-   * @param outcomeIndex
-   * @returns
+   * Gets current share price.
+   * @param fpmmContractAddress FPMM contract address.
+   * @param outcomeIndex Outcome index.
+   * @returns Price per share.
    */
   async function getPricePerShare(fpmmContractAddress: Address, outcomeIndex: number) {
-    const amount = BigInt(Math.round(1 * 10 ** tokenStore.decimals));
+    if (!tokenStore.loaded) {
+      await loadToken();
+    }
 
-    const contract = await initContract(ContractType.FPMM, fpmmContractAddress);
+    const amount = BigInt(Math.round(1 * 10 ** tokenStore.decimals));
+    const contract = await initReadContract(ContractType.FPMM, fpmmContractAddress);
     const expectedShares = await contract.read.calcBuyAmount([amount, outcomeIndex]);
 
-    return amount / expectedShares;
+    return Number(amount) / Number(expectedShares);
   }
 
   /**
-   *
-   * @param fpmmContractAddress
-   * @param amount
-   * @param outcomeIndex
-   * @param slippage
-   * @returns
+   * Returns max tokens to sell based on slippage.
+   * @param fpmmContractAddress FPMM contract address.
+   * @param amount Amount of collateral token to return.
+   * @param outcomeIndex Outcome index.
+   * @param slippage Slippage.
+   * @returns Max tokens to sell.
    */
   async function getMaxTokensToSell(
     fpmmContractAddress: Address,
@@ -65,6 +68,10 @@ export default function useFixedMarketMaker() {
     outcomeIndex: number,
     slippage: number
   ) {
+    if (!tokenStore.loaded) {
+      await loadToken();
+    }
+
     const contract = await initContract(ContractType.FPMM, fpmmContractAddress);
 
     const scaledAmount = BigInt(Math.round(amount * 10 ** tokenStore.decimals));
@@ -83,6 +90,10 @@ export default function useFixedMarketMaker() {
    * @returns Buy TX.
    */
   async function buy(fpmmContractAddress: Address, amount: number, outcomeIndex: number, slippage: number) {
+    if (!isConnected.value) {
+      return;
+    }
+
     if (!tokenStore.loaded) {
       await loadToken();
     }
@@ -106,6 +117,10 @@ export default function useFixedMarketMaker() {
    * @returns
    */
   async function sell(fpmmContractAddress: Address, collateralAmount: bigint, outcomeIndex: number, slippage: number) {
+    if (!isConnected.value) {
+      return;
+    }
+
     if (!tokenStore.loaded) {
       await loadToken();
     }
@@ -120,9 +135,6 @@ export default function useFixedMarketMaker() {
         slippage
       );
 
-      console.log('collateralAmount: ', collateralAmount);
-      console.log('maxOutcomeTokensToSell: ', maxOutcomeTokensToSell);
-
       return await contract.write.sell([collateralAmount, outcomeIndex, maxOutcomeTokensToSell]);
     }
   }
@@ -133,6 +145,10 @@ export default function useFixedMarketMaker() {
    * @returns Funding balance.
    */
   async function getFundingBalance(fpmmContractAddress: Address) {
+    if (!isConnected.value) {
+      return;
+    }
+
     const contract = await initContract(ContractType.FPMM, fpmmContractAddress);
     return await contract.read.balanceOf([address.value]);
   }
@@ -143,6 +159,10 @@ export default function useFixedMarketMaker() {
    * @param amount Funding amount in collateral token.
    */
   async function addFunding(fpmmContractAddress: Address, amount: number) {
+    if (!isConnected.value) {
+      return;
+    }
+
     if (!tokenStore.loaded) {
       await loadToken();
     }
@@ -161,8 +181,11 @@ export default function useFixedMarketMaker() {
    * @param shareAmount Amount of shares to return.
    */
   async function removeFunding(fpmmContractAddress: Address, shareAmount: bigint) {
-    const contract = await initContract(ContractType.FPMM, fpmmContractAddress);
+    if (!isConnected.value) {
+      return;
+    }
 
+    const contract = await initContract(ContractType.FPMM, fpmmContractAddress);
     return await contract.write.removeFunding([Number(shareAmount)]);
   }
 
