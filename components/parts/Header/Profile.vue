@@ -11,7 +11,7 @@
   >
     <div class="flex items-center bg-grey-light py-2 px-[6px] cursor-pointer rounded-lg">
       <jazzicon class="cursor-pointer rounded-[50%] w-[40px] h-[40px]" :address="address" :diameter="40" />
-      <div class="ml-2 font-medium text-[14px] leading-[20px]">
+      <div class="ml-2 font-medium text-[14px] leading-[20px] md:block hidden">
         {{ truncateWallet(address as string) }}
       </div>
       <NuxtIcon

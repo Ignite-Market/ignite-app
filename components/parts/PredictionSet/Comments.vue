@@ -19,9 +19,18 @@
         />
       </template>
     </n-input>
+    <div v-if="!loading && !comments.length" class="text-center mt-6">No comments</div>
 
-    <div class="flex flex-col mt-6 gap-y-5">
+    <div v-else class="flex flex-col mt-6 gap-y-5">
       <PredictionSetComment :comment="comment" v-for="comment of comments"></PredictionSetComment>
+    </div>
+    <div v-if="!!comments.length && pagination.itemCount! > pagination.page! * pagination.pageSize" class="mt-4 flex">
+      <BasicButton :disabled="loading" @click="() => getComments(pagination.page! + 1)" class="m-auto"
+        >Show More</BasicButton
+      >
+    </div>
+    <div v-if="loading">
+      <Spinner />
     </div>
   </div>
 </template>
@@ -42,25 +51,29 @@ const comments = ref<any>([]);
 
 const { isConnected } = useAccount();
 
+const pagination = ref({ ...createPagination(), pageSize: 10 });
+
 onMounted(async () => {
   await getComments();
 });
 
-async function getComments() {
+async function getComments(page: number = 1) {
   loading.value = true;
   try {
+    pagination.value.page = page;
     const res = await $api.get<GeneralItemsResponse<any>>(Endpoints.predictionSetComments(props.predictionSetId), {
       orderBy: ['id'],
+      page,
+      limit: pagination.value.pageSize,
       desc: [true],
     });
 
     comments.value = res.data.items;
-
-    console.log(comments.value);
+    pagination.value.itemCount = res.data.total;
   } catch (error) {
     console.log(error);
   } finally {
-    loading.value = true;
+    loading.value = false;
   }
 }
 

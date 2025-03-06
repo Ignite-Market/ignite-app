@@ -24,6 +24,12 @@ const menuOptions = [
     iconName: 'icon/fire',
   },
   {
+    label: 'Watchlist',
+    key: 'watchlist',
+    to: 'watchlist',
+    iconName: 'icon/star',
+  },
+  {
     label: 'Sports',
     key: 'sports',
     to: 'sports',
@@ -74,7 +80,7 @@ function renderMenuLabel(option: MenuOption) {
   } else if ('to' in option) {
     return h(
       resolveComponent('NuxtLink'),
-      { to: { name: option.to }, class: 'font-medium' },
+      { to: { name: option.to, query: option.query }, class: 'font-medium' },
       () => option.label as string
     );
   }

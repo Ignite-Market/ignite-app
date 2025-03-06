@@ -22,8 +22,7 @@
       :data="items"
       :loading="loading"
       :pagination="pagination"
-      :row-key="row => row.id"
-      :row-props="rowProps"
+      :row-props="() => rowProps"
       @update:page="(page: number) => getItems(page, pagination.pageSize)"
       @update:page-size="(pageSize: number) => getItems(1, pageSize)"
       @update:sorter="handleSorterChange"
@@ -36,15 +35,17 @@
 
 <script lang="ts" setup>
 import type { DataTableColumns, DataTableInst, DataTableSortState } from 'naive-ui';
-import type { BaseStore, PaginationConfig, TableFilters } from '~/lib/types/config';
+import type { PropType } from 'vue';
+import type { PaginationConfig, TableFilters } from '~/lib/types/config';
 import { PAGINATION_LIMIT } from '~/lib/values/general.values';
 
 const props = defineProps({
   columns: { type: Array as PropType<DataTableColumns<any>>, default: [] },
   rowProps: { type: Function as PropType<any>, default: () => {} },
   endpoint: { type: String, required: true },
-  tableFilters: { type: Object as PropType<TableFilters>, default: null },
+  tableFilters: { type: Object as PropType<TableFilters>, default: () => null },
   title: { type: String, default: '' },
+  tableSorter: { type: Object as PropType<DataTableSortState>, default: () => null },
 });
 
 const tableRef = ref<DataTableInst | null>(null);
@@ -57,7 +58,7 @@ const filterValues = computed(
       .filter(filter => filter.show && filter?.options?.length)
       .map(filter => filter.value) || []
 );
-const sorter = ref<DataTableSortState | null>(null);
+const sorter = ref<DataTableSortState | null>(props.tableSorter);
 const pagination = ref<PaginationConfig>(createPagination());
 const loading = ref(false);
 const items = ref([] as any[]);

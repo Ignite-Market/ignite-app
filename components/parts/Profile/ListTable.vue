@@ -1,30 +1,27 @@
 <template>
   <div>
-    <DataTable :columns="columns" :endpoint="endpoint" :table-filters="filters" :title="tab" />
+    <DataTable :columns="columns" :endpoint="endpoint" :table-filters="filters" :title="tab" :tableSorter="sorter" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { type DataTableColumns } from 'naive-ui';
+import { type DataTableColumns, type DataTableSortState } from 'naive-ui';
 import { ProfileTabs } from '~/lib/types';
 import Endpoints from '~/lib/values/endpoints';
 import { TransactionType, type ActivityInterface, type UserPredictionInterface } from '~/lib/types/prediction-set';
 import type { TableFilters } from '~/lib/types/config';
+import { formatDistanceToNow } from 'date-fns';
 
 const props = defineProps({
   tab: { type: String as PropType<ProfileTabs>, required: true },
   userId: { type: Number, required: true },
 });
 
-onMounted(() => {
-  console.log('mounted');
-});
-
 const transactionType = {
-  [TransactionType.BUY]: 'Buy',
-  [TransactionType.SELL]: 'Sell',
-  [TransactionType.FUND]: 'Fund',
-  [TransactionType.REMOVE_FUND]: 'Remove fund',
+  [TransactionType.BUY]: { label: 'Buy', color: '#5DCE46' },
+  [TransactionType.SELL]: { label: 'Sell', color: '#DE4941' },
+  [TransactionType.FUND]: { label: 'Fund', color: '#5272FF' },
+  [TransactionType.REMOVE_FUND]: { label: 'Remove fund', color: '#5272FF' },
 };
 
 const predictionColumns = [
@@ -34,10 +31,7 @@ const predictionColumns = [
     sorter: 'default',
     minWidth: 150,
     render(row: UserPredictionInterface) {
-      return h(resolveComponent('NuxtLink'), { to: { path: `/markets/${row.id}` } }, [
-        // h(resolveComponent('AssetDetails'), {
-        //   asset: row
-        // }),
+      return h(resolveComponent('NuxtLink'), { to: { path: `/markets/${row.id}` } }, () => [
         h('div', {}, row.question),
         h('div', {}, row.outcomeName),
       ]);
@@ -88,10 +82,7 @@ const activitiesColumns = [
     sorter: 'default',
     minWidth: 150,
     render(row: ActivityInterface) {
-      return h(resolveComponent('NuxtLink'), { to: { path: `/markets/${row.id}` } }, [
-        // h(resolveComponent('AssetDetails'), {
-        //   asset: row
-        // }),
+      return h(resolveComponent('NuxtLink'), { to: { path: `/markets/${row.id}` } }, () => [
         h('div', {}, row.question),
         h('div', {}, row.outcomeName),
       ]);
@@ -102,7 +93,7 @@ const activitiesColumns = [
     title: 'Type',
     sorter: 'default',
     render(row: ActivityInterface) {
-      return transactionType[row.type];
+      return h('div', { style: { color: transactionType[row.type].color } }, transactionType[row.type].label);
     },
   },
   {
@@ -131,6 +122,15 @@ const activitiesColumns = [
         { class: 'underline', href: `https://sepolia.basescan.org/tx/${row.txHash}`, target: '_blank' },
         shortenAddress(row.txHash)
       );
+    },
+  },
+  {
+    key: 'transactionTime',
+    title: 'Date',
+    sorter: 'default',
+    align: 'right',
+    render(row: ActivityInterface) {
+      return formatDistanceToNow(new Date(row.transactionTime), { addSuffix: true });
     },
   },
 ] as DataTableColumns<ActivityInterface>;
@@ -166,4 +166,10 @@ const filters = {
       }
     : {}),
 } as TableFilters;
+
+const sorter = {
+  columnKey: props.tab === ProfileTabs.PREDICTIONS ? 'id' : 'transactionTime',
+  order: 'descend',
+  sorter: 'default',
+} as DataTableSortState;
 </script>

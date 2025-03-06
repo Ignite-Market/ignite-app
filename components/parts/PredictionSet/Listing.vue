@@ -1,6 +1,9 @@
 <template>
-  <div ref="grid" class="grid grid-cols-4 gap-4">
+  <div ref="grid" class="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-4 justify-items-center">
     <PredictionSetCard :predictionSet="predictionSet" v-for="predictionSet in predictionSets"></PredictionSetCard>
+  </div>
+  <div v-if="loading">
+    <Spinner />
   </div>
 </template>
 
@@ -10,6 +13,7 @@ import Endpoints from '~/lib/values/endpoints';
 
 const props = defineProps({
   category: { type: String, default: '' },
+  watchlist: { type: Boolean, default: false },
 });
 
 const message = useMessage();
@@ -49,6 +53,7 @@ async function getPredictionSets() {
       limit: limit.value,
       desc: 'true',
       page: page.value,
+      watchlist: props.watchlist,
     });
 
     if (res.data) {

@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-row w-full max-w-[99%] flex-grow">
+  <div class="flex flex-row w-full max-w-[99%] flex-grow items-center">
     <jazzicon
       class="cursor-pointer rounded-[50%] w-[32px] h-[32px] flex-shrink-0"
       :address="item.userWallet!"
@@ -8,7 +8,7 @@
     />
 
     <div class="flex relative ml-4 items-center justify-between flex-grow">
-      <div class="text-[14px] leading-[16px]">
+      <div class="text-[12px] sm:text-[14px] leading-[16px]">
         <span
           class="text-white/80 cursor-pointer hover:text-primary-bright font-bold"
           @click="openUserProfile(item.userId!)"
@@ -39,7 +39,7 @@
         </span>
       </div>
 
-      <div class="ml-[10px] text-[12px] leading-[16px] text-grey-lightest font-medium">
+      <div class="ml-[10px] sm:text-[12px] leading-[16px] text-grey-lightest font-medium text-[10px] text-right">
         {{ formatDistanceToNow(new Date(item.transactionTime), { addSuffix: true }) }}
       </div>
     </div>

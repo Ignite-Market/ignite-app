@@ -1,11 +1,11 @@
 <template>
-  <div class="flex-bc w-full bg-grey px-6">
+  <div class="flex-bc w-full bg-grey px-6 gap-2">
     <div class="mt-2">
       <Logo class="inline-block" />
     </div>
 
     <div>
-      <n-input placeholder="Search markets" size="large" class="min-w-[30vw]">
+      <n-input placeholder="Search markets" size="large" class="md:min-w-[30vw]">
         <template #prefix>
           <NuxtIcon name="icon/search" />
         </template>
