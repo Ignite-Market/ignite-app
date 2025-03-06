@@ -24,7 +24,7 @@
               <div class="mx-4 border-r-1 border-r-white/25 h-[14px]"></div>
 
               <div class="text-white/80 text-[14px] leading-[20px]">
-                {{ formatTokenAmount(predictionSet.volume || 0, 2) }} USDC
+                {{ formatTokenAmount(predictionSet.volume || 0, 2) }} {{ tokenStore.symbol }}
               </div>
             </div>
           </div>
@@ -58,8 +58,8 @@
               v-if="params?.id"
               :prediction-id="+params.id"
               :outcomes="graphOutcomes"
-              :start-time="predictionSet.startTime"
-              :end-time="predictionSet.endTime"
+              :start-time="predictionSet.startTime.toString()"
+              :end-time="predictionSet.endTime.toString()"
             />
           </div>
 
@@ -90,7 +90,7 @@
                     </div>
 
                     <div class="text-[14px] leading-[20px] font-medium text-grey-lightest mt-[4px]">
-                      {{ formatTokenAmount(outcome.volume, 2) }} USDC
+                      {{ formatTokenAmount(outcome.volume, 2) }} {{ tokenStore.symbol }}
                     </div>
                   </div>
                 </div>
@@ -250,10 +250,12 @@ const outcomeColors = ['#F95F85', '#4A61C9', '#639266', '#F1B11B'];
 
 const REFRESH_INTERVAL = 10_000;
 
+const { getTokenStore } = useCollateralToken();
 const { params } = useRoute();
 const router = useRouter();
 const config = useRuntimeConfig();
 const { loggedIn } = useUserStore();
+const tokenStore = getTokenStore();
 
 const loading = ref<boolean>(true);
 const refreshInterval = ref<NodeJS.Timeout>();

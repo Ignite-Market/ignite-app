@@ -99,7 +99,7 @@
               <div class="font-bold">Amount</div>
               <div class="ml-auto flex font-medium">
                 <div class="text-grey-lightest">Balance:</div>
-                <div class="text-white/80 ml-1">{{ tokenStore.parsedBalance }} USDC</div>
+                <div class="text-white/80 ml-1">{{ tokenStore.parsedBalance }} {{ tokenStore.symbol }}</div>
               </div>
             </div>
 
@@ -147,7 +147,9 @@
           <div class="text-[16px] leading-[24px] text-grey-lightest font-normal mt-6">
             <div class="flex items-center justify-center">
               <div>Avg price</div>
-              <div class="ml-auto text-primary">{{ pricePerShare ? pricePerShare.toFixed(3) : 0.0 }} USDC</div>
+              <div class="ml-auto text-primary">
+                {{ pricePerShare ? pricePerShare.toFixed(3) : 0.0 }} {{ tokenStore.symbol }}
+              </div>
             </div>
             <div class="flex items-center justify-center mt-2">
               <div>Shares (receive at least)</div>
@@ -155,7 +157,7 @@
             </div>
             <div class="flex items-center justify-center mt-2">
               <div>Potential return</div>
-              <div class="ml-auto text-statusGreen">{{ potentialReturn }} USDC</div>
+              <div class="ml-auto text-statusGreen">{{ potentialReturn }} {{ tokenStore.symbol }}</div>
             </div>
           </div>
         </n-tab-pane>
@@ -220,11 +222,13 @@
           <div class="text-[16px] leading-[24px] text-grey-lightest font-normal mt-6">
             <div class="flex items-center justify-center">
               <div>Avg price</div>
-              <div class="ml-auto text-primary">{{ pricePerShare ? pricePerShare.toFixed(3) : 0.0 }} USDC</div>
+              <div class="ml-auto text-primary">
+                {{ pricePerShare ? pricePerShare.toFixed(3) : 0.0 }} {{ tokenStore.symbol }}
+              </div>
             </div>
             <div class="flex items-center justify-center mt-2">
               <div>Potential return</div>
-              <div class="ml-auto text-statusGreen">{{ potentialReturn }} USDC</div>
+              <div class="ml-auto text-statusGreen">{{ potentialReturn }} {{ tokenStore.symbol }}</div>
             </div>
           </div>
         </n-tab-pane>
@@ -236,7 +240,7 @@
               <div class="font-bold">Amount</div>
               <div class="ml-auto flex font-medium">
                 <div class="text-grey-lightest">Balance:</div>
-                <div class="text-white/80 ml-1">{{ tokenStore.parsedBalance }} USDC</div>
+                <div class="text-white/80 ml-1">{{ tokenStore.parsedBalance }} {{ tokenStore.symbol }}</div>
               </div>
             </div>
 
@@ -361,11 +365,13 @@ watchDebounced(
   async () => {
     if (amount.value === 0) {
       returnAmount.value = '0.0';
+      potentialReturn.value = '0.0';
       return;
     }
 
     if (!amount.value) {
       returnAmount.value = '0.0';
+      potentialReturn.value = '0.0';
       return;
     }
 
@@ -409,14 +415,22 @@ async function updateBuyAmount() {
     return;
   }
 
-  const result = await getMinTokensToBuy(
+  const { minTokensToBuy, minTokensToBuyNoSlippage } = await getMinTokensToBuy(
     props.contractAddress,
     amount.value,
     props.outcome.outcomeIndex,
     slippage.value
   );
 
-  returnAmount.value = (Number(result) / Math.pow(10, tokenStore.decimals)).toString();
+  const fullSellAmount = await calcSellAmountInCollateral(
+    Number(minTokensToBuyNoSlippage) / Math.pow(10, tokenStore.decimals),
+    props.outcome.outcomeIndex,
+    props.contractAddress,
+    props.outcomes.map(o => o.positionId)
+  );
+
+  returnAmount.value = (Number(minTokensToBuy) / Math.pow(10, tokenStore.decimals)).toString();
+  potentialReturn.value = (Number(fullSellAmount) / Math.pow(10, tokenStore.decimals)).toString(); // TODO: how to get this value?
 }
 
 async function updateSellAmount() {

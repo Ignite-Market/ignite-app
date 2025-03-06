@@ -48,10 +48,10 @@ export default function useFixedMarketMaker() {
   ) {
     const contract = await initContract(ContractType.FPMM, fpmmContractAddress);
 
-    const expectedShares = await contract.read.calcSellAmount([collateralAmount, outcomeIndex]);
-    const maxOutcomeTokensToSell = (expectedShares * BigInt(100 + slippage)) / BigInt(100);
+    const maxTokensToSellNoSlippage = await contract.read.calcSellAmount([collateralAmount, outcomeIndex]);
+    const maxTokensToSell = (maxTokensToSellNoSlippage * BigInt(100 + slippage)) / BigInt(100);
 
-    return maxOutcomeTokensToSell;
+    return { maxTokensToSell, maxTokensToSellNoSlippage };
   }
 
   /**
@@ -75,10 +75,10 @@ export default function useFixedMarketMaker() {
     const contract = await initContract(ContractType.FPMM, fpmmContractAddress);
 
     const scaledAmount = BigInt(Math.round(amount * 10 ** tokenStore.decimals));
-    const expectedShares = await contract.read.calcBuyAmount([scaledAmount, outcomeIndex]);
-    const minOutcomeTokensToBuy = (expectedShares * BigInt(100 - slippage)) / BigInt(100);
+    const minTokensToBuyNoSlippage = await contract.read.calcBuyAmount([scaledAmount, outcomeIndex]);
+    const minTokensToBuy = (minTokensToBuyNoSlippage * BigInt(100 - slippage)) / BigInt(100);
 
-    return minOutcomeTokensToBuy;
+    return { minTokensToBuy, minTokensToBuyNoSlippage };
   }
 
   /**
@@ -101,10 +101,10 @@ export default function useFixedMarketMaker() {
 
     const allowance = await checkCollateralAllowance(fpmmContractAddress);
     if (allowance) {
-      const minOutcomeTokensToBuy = await getMinTokensToBuy(fpmmContractAddress, amount, outcomeIndex, slippage);
+      const { minTokensToBuy } = await getMinTokensToBuy(fpmmContractAddress, amount, outcomeIndex, slippage);
       const scaledAmount = BigInt(Math.round(amount * 10 ** tokenStore.decimals));
 
-      return await contract.write.buy([scaledAmount, outcomeIndex, minOutcomeTokensToBuy]);
+      return await contract.write.buy([scaledAmount, outcomeIndex, minTokensToBuy]);
     }
   }
 
@@ -128,14 +128,14 @@ export default function useFixedMarketMaker() {
 
     const approved = await checkConditionalApprove(fpmmContractAddress);
     if (approved) {
-      const maxOutcomeTokensToSell = await getMaxTokensToSell(
+      const { maxTokensToSell } = await getMaxTokensToSell(
         fpmmContractAddress,
         collateralAmount,
         outcomeIndex,
         slippage
       );
 
-      return await contract.write.sell([collateralAmount, outcomeIndex, maxOutcomeTokensToSell]);
+      return await contract.write.sell([collateralAmount, outcomeIndex, maxTokensToSell]);
     }
   }
 

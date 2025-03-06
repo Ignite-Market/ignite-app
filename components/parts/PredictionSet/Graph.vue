@@ -31,8 +31,8 @@ import VChart from 'vue-echarts';
 
 const props = defineProps({
   predictionId: { type: Number, default: null, required: true },
-  startTime: { type: Date, default: null },
-  endTime: { type: Date, default: null },
+  startTime: { type: String || Date, default: null },
+  endTime: { type: String || Date, default: null },
   outcomes: { type: Array as PropType<{ id: number; name: string; color: string }[]>, default: [] },
 });
 use([CanvasRenderer, LineChart, TooltipComponent, GridComponent]);

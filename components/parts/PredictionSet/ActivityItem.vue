@@ -20,13 +20,13 @@
           <span class="text-primary"
             >{{ formatTokenAmount(item.outcomeTokens) }} <span class="font-bold">{{ item.outcomeName }}</span></span
           >
-          for <span class="font-bold">{{ formatTokenAmount(item.userAmount) }} USDC</span>
+          for <span class="font-bold">{{ formatTokenAmount(item.userAmount) }} {{ tokenStore.symbol }}</span>
         </span>
         <span v-else>
           {{ item.type === TransactionType.FUND ? ' funded ' : ' removed funding ' }}
           <span v-if="item.type === TransactionType.FUND">
             for
-            <span class="font-bold">{{ formatTokenAmount(item.userAmount) }} USDC </span>
+            <span class="font-bold">{{ formatTokenAmount(item.userAmount) }} {{ tokenStore.symbol }} </span>
           </span>
           <a
             :href="`https://sepolia.basescan.org/tx/${item.txHash}`"
@@ -54,8 +54,10 @@ defineProps({
   item: { type: Object as PropType<ActivityInterface>, default: {}, required: true },
 });
 
+const { getTokenStore } = useCollateralToken();
 const router = useRouter();
 const userStore = useUserStore();
+const tokenStore = getTokenStore();
 
 function openUserProfile(userId: number) {
   if (userId === userStore.user.id) {
