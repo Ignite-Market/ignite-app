@@ -1,5 +1,5 @@
 import { http, createConfig, WagmiPlugin, createStorage } from '@wagmi/vue';
-import { baseSepolia, songbird } from '@wagmi/vue/chains';
+import { songbird, flareTestnet } from '@wagmi/vue/chains';
 import { type Chain } from '@wagmi/vue/chains';
 import { VueQueryPlugin } from '@tanstack/vue-query';
 import { injected, metaMask, coinbaseWallet, walletConnect } from '@wagmi/vue/connectors';
@@ -7,7 +7,7 @@ import { AppEnv } from '~/lib/types/config';
 
 export default defineNuxtPlugin(nuxtApp => {
   const chains: readonly [Chain, ...Chain[]] =
-    useRuntimeConfig().public.ENV === AppEnv.PROD ? [songbird] : [baseSepolia]; // TODO: change to appropriate networks or figure out how to get network by
+    useRuntimeConfig().public.ENV === AppEnv.PROD ? [songbird] : [flareTestnet];
 
   const transports = chains.reduce((acc, chain) => {
     acc[chain.id] = http();

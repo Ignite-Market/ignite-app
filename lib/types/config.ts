@@ -41,8 +41,6 @@ declare global {
     VERSION: string;
     url: string;
     apiUrl: string;
-
-    CHAIN_ID: number;
     COLLATERAL_TOKEN_CONTRACT: Address;
     CONDITIONAL_TOKEN_CONTRACT: Address;
     FPMM_FACTORY_CONTRACT: Address;
