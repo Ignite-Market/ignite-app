@@ -19,17 +19,18 @@
           <div>Holder</div>
           <div>Shares</div>
         </div>
-        <PredictionSetHolder :item="item" v-for="item of items" />
+        <n-skeleton v-if="loading" v-for="i in 10" :key="i" height="32px" width="100%" class="rounded-[8px]" />
+        <PredictionSetHolder v-else :item="item" v-for="item of items" />
       </div>
       <div v-if="pagination.itemCount! > pagination.page! * pagination.pageSize" class="mt-4 flex">
-        <BasicButton :disabled="loading" @click="() => getHolders(pagination.page! + 1, lastOutcome!)" class="m-auto"
-          >Show More</BasicButton
+        <button
+          :disabled="loading"
+          @click="() => getHolders(pagination.page! + 1, lastOutcome!)"
+          class="m-auto underline"
         >
+          Show More
+        </button>
       </div>
-    </div>
-
-    <div v-if="loading">
-      <Spinner />
     </div>
   </div>
 </template>

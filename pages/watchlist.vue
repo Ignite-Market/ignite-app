@@ -4,4 +4,11 @@
   </Dashboard>
 </template>
 
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+const { loggedIn } = useUserStore();
+const router = useRouter();
+
+onMounted(() => {
+  if (!loggedIn) router.replace('/');
+});
+</script>

@@ -35,7 +35,7 @@ const userStore = useUserStore();
 
 function openUserProfile(userId: number) {
   if (userId === userStore.user.id) {
-    router.push('profile');
+    router.push('/profile');
     return;
   }
 

@@ -87,6 +87,7 @@ export default {
     screens: {
       mobile: { max: '767px' },
       tablet: { max: '1023px' },
+      xs: '500px',
       sm: '640px',
       md: '768px',
       lg: '1024px',
@@ -123,6 +124,10 @@ export default {
         gradientBorder: 'linear-gradient(180deg, #E3E3E3 0%, #00AEAE 100%)',
         gradientCard: 'linear-gradient(180deg, #192D59 0%, #1A2539 100%)',
         gradientCardDark: 'linear-gradient(180deg, rgba(25, 45, 89, 0.5) 0%, rgba(26, 37, 57, 0.5) 100%)',
+
+        gradientBannerRed: 'linear-gradient(180deg, #F95F85 0%, #93384F 100%)',
+        gradientBannerGreen: 'linear-gradient(180deg, #639266 0%, #1E2C1F 100%)',
+        gradientBannerBlue: 'linear-gradient(180deg, #4A61C9 0%, #243063 100%)',
       },
       borderWidth: {
         1: '1px',

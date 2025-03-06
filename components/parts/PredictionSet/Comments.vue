@@ -22,15 +22,16 @@
     <div v-if="!loading && !comments.length" class="text-center mt-6">No comments</div>
 
     <div v-else class="flex flex-col mt-6 gap-y-5">
-      <PredictionSetComment :comment="comment" v-for="comment of comments"></PredictionSetComment>
+      <div v-if="loading" v-for="i in 10" :key="i" class="flex">
+        <n-skeleton height="32px" width="32px" class="rounded-full" />
+        <n-skeleton height="68px" width="100%" class="rounded-[8px] ml-4" />
+      </div>
+      <PredictionSetComment v-else :comment="comment" v-for="comment of comments"></PredictionSetComment>
     </div>
     <div v-if="!!comments.length && pagination.itemCount! > pagination.page! * pagination.pageSize" class="mt-4 flex">
-      <BasicButton :disabled="loading" @click="() => getComments(pagination.page! + 1)" class="m-auto"
-        >Show More</BasicButton
-      >
-    </div>
-    <div v-if="loading">
-      <Spinner />
+      <button :disabled="loading" @click="() => getComments(pagination.page! + 1)" class="m-auto underline">
+        Show More
+      </button>
     </div>
   </div>
 </template>
@@ -67,8 +68,9 @@ async function getComments(page: number = 1) {
       limit: pagination.value.pageSize,
       desc: [true],
     });
+    await sleep(4000);
 
-    comments.value = res.data.items;
+    comments.value = [...comments.value, ...res.data.items];
     pagination.value.itemCount = res.data.total;
   } catch (error) {
     console.log(error);

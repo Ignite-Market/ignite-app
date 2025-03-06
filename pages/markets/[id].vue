@@ -205,6 +205,7 @@
         <!-- RIGHT -->
         <div class="md:sticky top-6 self-start md:ml-8 lg:ml-24 w-full min-w-[260px] md:w-[409px] mb-6">
           <PredictionSetAction
+            class="mobile:hidden"
             v-if="actionsEnabled(predictionSet.setStatus, predictionSet.endTime)"
             :contract-address="predictionSet.chainData.contractAddress"
             :outcome="selectedOutcome"
@@ -232,6 +233,18 @@
       </div>
     </div>
   </Dashboard>
+  <n-drawer v-if="predictionSet && !isMd" v-model:show="actionModal" placement="bottom" default-height="410">
+    <PredictionSetAction
+      v-if="actionsEnabled(predictionSet.setStatus, predictionSet.endTime)"
+      :contract-address="predictionSet.chainData.contractAddress"
+      :outcome="selectedOutcome"
+      :action="selectedAction"
+      :status="predictionSet.setStatus"
+      :end-time="predictionSet.endTime.toString()"
+      :outcomes="predictionSet.outcomes"
+    >
+    </PredictionSetAction>
+  </n-drawer>
 </template>
 
 <script lang="ts" setup>
@@ -254,6 +267,7 @@ const { params } = useRoute();
 const router = useRouter();
 const config = useRuntimeConfig();
 const { loggedIn } = useUserStore();
+const { isMd } = useScreen();
 
 const loading = ref<boolean>(true);
 const refreshInterval = ref<NodeJS.Timeout>();
@@ -262,7 +276,8 @@ const selectedOutcome = ref();
 const selectedAction = ref();
 const winningOutcome = ref();
 const graphOutcomes = ref();
-const watclistLoading = ref(false);
+const watchlistLoading = ref(false);
+const actionModal = ref(false);
 
 onMounted(async () => {
   await sleep(10);
@@ -276,6 +291,7 @@ onUnmounted(() => {
 async function selectOutcome(transaction: TransactionType, outcome: OutcomeInterface) {
   selectedAction.value = transaction;
   selectedOutcome.value = outcome;
+  actionModal.value = true;
 }
 
 async function getPredictionSet(silent: boolean = false) {
@@ -318,10 +334,10 @@ async function getPredictionSet(silent: boolean = false) {
 }
 
 async function toggleWatchlist() {
-  if (!predictionSet.value || !loggedIn || watclistLoading.value) {
+  if (!predictionSet.value || !loggedIn || watchlistLoading.value) {
     return;
   }
-  watclistLoading.value = true;
+  watchlistLoading.value = true;
   if (predictionSet.value.isWatched) {
     // Delete if already watched
     try {
@@ -339,7 +355,7 @@ async function toggleWatchlist() {
       console.error(error);
     }
   }
-  watclistLoading.value = false;
+  watchlistLoading.value = false;
 }
 
 function copyLink() {

@@ -3,7 +3,7 @@
     <!--  Username -->
     <n-form-item path="name" :label="'Username'" :label-props="{ for: 'username' }">
       <n-input
-        v-model:value="formData.name"
+        v-model:value="formData.username"
         :input-props="{ id: 'username' }"
         :placeholder="'Username'"
         :loading="loadingForm"
@@ -11,14 +11,14 @@
     </n-form-item>
 
     <!--  Email -->
-    <n-form-item path="email" :label="'Email address'" :label-props="{ for: 'email' }">
+    <!-- <n-form-item path="email" :label="'Email address'" :label-props="{ for: 'email' }">
       <n-input
         v-model:value="formData.email"
         :input-props="{ id: 'email', type: 'email' }"
         :placeholder="$t('form.placeholder.email', { afna: '@' })"
         :loading="loadingForm"
       />
-    </n-form-item>
+    </n-form-item> -->
 
     <!--  Submit -->
     <n-form-item :show-label="false">
@@ -36,8 +36,8 @@ import { ruleRequired } from '~/lib/misc/validation';
 import Endpoints from '~/lib/values/endpoints';
 
 type FormUserProfile = {
-  name: string;
-  email: string;
+  username: string;
+  // email: string;
 };
 
 const message = useMessage();
@@ -49,8 +49,8 @@ const loadingForm = ref<boolean>(true);
 const formRef = ref<FormInst | null>(null);
 
 const formData = ref<FormUserProfile>({
-  name: userStore.name,
-  email: userStore.email,
+  username: userStore.user.username,
+  // email: userStore.user.email,
 });
 
 const rules: FormRules = {
@@ -68,7 +68,7 @@ onMounted(async () => {
   await sleep(500);
   await Promise.all(Object.values(userStore.promises));
 
-  formData.value.email = userStore.email;
+  // formData.value.email = userStore.user.email;
   loadingForm.value = false;
 });
 
@@ -87,7 +87,7 @@ async function updateUserProfile() {
   loading.value = true;
 
   try {
-    const res = await $api.patch<UserProfileResponse>(Endpoints.me, formData.value);
+    const res = await $api.put<UserProfileResponse>(Endpoints.userUpdate, formData.value);
 
     if (res.data) {
       userStore.saveUser(res.data);

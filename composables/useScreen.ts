@@ -10,35 +10,35 @@ export default function useScreen() {
 
   return {
     breakpoints,
+    // *: or equal to match tailwind breakpoints
+    /**
+     * Above* 640px
+     */
+    isSm: breakpoints.greaterOrEqual('sm'),
 
     /**
-     * Above 640px
+     * Above* 768px
      */
-    isSm: breakpoints.greater('sm'),
+    isMd: breakpoints.greaterOrEqual('md'),
 
     /**
-     * Above 768px
+     * Above* 1024px
      */
-    isMd: breakpoints.greater('md'),
+    isLg: breakpoints.greaterOrEqual('lg'),
 
     /**
-     * Above 1024px
+     * Above* 1440px
      */
-    isLg: breakpoints.greater('lg'),
+    isXl: breakpoints.greaterOrEqual('xl'),
 
     /**
-     * Above 1440px
+     * Above* 1680px
      */
-    isXl: breakpoints.greater('xl'),
+    isXxl: breakpoints.greaterOrEqual('xxl'),
 
     /**
-     * Above 1680px
+     * Above* 1920px
      */
-    isXxl: breakpoints.greater('xxl'),
-
-    /**
-     * Above 1920px
-     */
-    isHd: breakpoints.greater('hd'),
+    isHd: breakpoints.greaterOrEqual('hd'),
   };
 }
