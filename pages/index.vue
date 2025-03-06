@@ -1,6 +1,7 @@
 <template>
   <Dashboard>
-    <PredictionSetListing :category="'top'"></PredictionSetListing>
+    <BannerListing />
+    <PredictionSetListing :category="'top'" />
   </Dashboard>
 </template>
 

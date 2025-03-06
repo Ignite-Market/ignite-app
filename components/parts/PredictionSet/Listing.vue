@@ -1,9 +1,21 @@
 <template>
-  <div ref="grid" class="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-4 justify-items-center">
+  <div
+    ref="grid"
+    class="grid xl:grid-cols-4 lg:grid-cols-[repeat(auto-fill,minmax(270px,1fr))] grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-4 justify-items-center"
+  >
     <PredictionSetCard :predictionSet="predictionSet" v-for="predictionSet in predictionSets"></PredictionSetCard>
   </div>
-  <div v-if="loading">
-    <Spinner />
+  <div
+    v-if="loading"
+    class="grid xl:grid-cols-4 lg:grid-cols-[repeat(auto-fill,minmax(270px,1fr))] grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-4 justify-items-center"
+  >
+    <n-skeleton
+      v-for="i in 12"
+      :key="i"
+      height="158px"
+      width="100%"
+      class="rounded-[8px] max-w-[360px] max-h-[220px]"
+    />
   </div>
 </template>
 
@@ -55,7 +67,7 @@ async function getPredictionSets() {
       page: page.value,
       watchlist: props.watchlist,
     });
-
+    await sleep(5000);
     if (res.data) {
       predictionSets.value.push(...(res.data.items as any[]));
     }

@@ -46,6 +46,10 @@ const options = computed(() => [
     label: t('profile.profile'),
   },
   {
+    key: 'watchlist',
+    label: 'Watchlist',
+  },
+  {
     key: 'logout',
     label: t('profile.logout'),
   },

@@ -6,6 +6,7 @@ const Endpoints = {
   user: (id: number) => `/users/${id}`,
   walletMessage: '/users/wallet-message',
   walletLogin: '/users/wallet-login',
+  userUpdate: '/users/update-profile',
 
   /** User predictions */
   userPredictions: (id: number) => `/users/${id}/predictions`,
@@ -29,6 +30,9 @@ const Endpoints = {
 
   /** User prediction watchlist */
   predictionSetUserWatchlist: (id: number) => `/prediction-sets/${id}/watchlist`,
+
+  /** Banners */
+  banners: '/prediction-sets/banners',
 };
 
 export default Endpoints;

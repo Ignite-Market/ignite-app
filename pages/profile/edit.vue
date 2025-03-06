@@ -17,10 +17,6 @@
 const { t } = useI18n();
 const userStore = useUserStore();
 
-useHead({
-  title: t('profile.mySettings'),
-});
-
 onMounted(async () => {});
 
 /** Modal Change password */

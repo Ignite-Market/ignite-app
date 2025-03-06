@@ -26,6 +26,7 @@
     "nuxt-icons": "^3.2.1",
     "pinia": "^2.2.7",
     "pinia-plugin-persistedstate": "^4.2.0",
+    "swiper": "^11.2.5",
     "v-lazy-image": "^2.1.1",
     "viem": "^2.21.52",
     "vue-cookie-accept-decline": "^6.1.0",

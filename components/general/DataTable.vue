@@ -1,12 +1,12 @@
 <template>
   <div class="card !px-6 !pt-8">
-    <div class="flex-bc mb-4">
+    <div class="flex-bc mb-4 gap-2 flex-wrap">
       <h2>{{ title }}</h2>
-      <div class="flex-cc gap-4">
+      <div class="flex gap-4 flex-wrap">
         <FormInputSearch
           v-if="filters?.search"
           v-model:value="filters.search.value"
-          class="min-w-32 w-[12vw] max-w-xs"
+          class="min-w-32 w-full xs:w-[12vw] max-w-xs"
         />
         <TableFilters v-if="filters" :filters="filters" :loading="loading" />
       </div>

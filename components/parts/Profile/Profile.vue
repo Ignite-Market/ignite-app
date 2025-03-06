@@ -4,7 +4,7 @@
       <Spinner />
     </div>
     <div v-else>
-      <div class="flex justify-between">
+      <div class="flex justify-between flex-wrap gap-4">
         <div class="flex items-center gap-4">
           <jazzicon
             class="cursor-pointer rounded-[50%] w-[80px] h-[80px]"

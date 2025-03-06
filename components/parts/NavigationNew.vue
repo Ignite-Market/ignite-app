@@ -24,12 +24,6 @@ const menuOptions = [
     iconName: 'icon/fire',
   },
   {
-    label: 'Watchlist',
-    key: 'watchlist',
-    to: 'watchlist',
-    iconName: 'icon/star',
-  },
-  {
     label: 'Sports',
     key: 'sports',
     to: 'sports',

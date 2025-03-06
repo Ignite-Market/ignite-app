@@ -12,17 +12,17 @@
 
     <div v-if="loading">
       <transition name="fade" appear>
-        <div v-if="loadingAnimation" class="w-full flex flex-col gap-2 h-screen">
-          <div class="w-full flex flex-col gap-2 pt-4" :style="heightScreen">
+        <div v-if="loadingAnimation" class="w-full flex flex-col gap-2 h-screen items-center">
+          <div class="w-full flex flex-col gap-2 pt-4 max-w-[1241px] px-8" :style="heightScreen">
             <!-- Loading skeleton - on long page load show skeleton -->
-            <n-skeleton height="40px" width="100%" />
-            <n-skeleton height="40px" width="100%" />
-            <div class="flex gap-2 h-full">
-              <div style="width: 100%">
-                <n-skeleton height="80%" width="100%" />
+            <n-skeleton height="80px" width="100%" class="rounded-[8px] min-h-[80px]" />
+            <div class="flex md:gap-8 lg:gap-24 h-full mt-10">
+              <div style="" class="w-full min-w-[250px] max-w-[736px]">
+                <n-skeleton height="100vh" width="100%" class="rounded-[8px]" />
               </div>
-              <div style="width: 320px">
-                <n-skeleton height="80%" width="100%" />
+              <div style="" class="hidden md:block min-w-[260px] max-w-[409px] flex-grow">
+                <n-skeleton height="400px" width="100%" class="rounded-[8px]" />
+                <n-skeleton height="230px" width="100%" class="rounded-[8px] mt-6" />
               </div>
             </div>
           </div>
