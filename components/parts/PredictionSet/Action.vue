@@ -306,7 +306,7 @@ const props = defineProps({
   outcomes: { type: Array as PropType<OutcomeInterface[]>, default: [], required: true },
 });
 
-const { getMinTokensToBuy, addFunding, buy, sell, calcSellAmountInCollateral, getPricePerShare } =
+const { getMinTokensToBuy, addFunding, buy, sell, calcSellAmountInCollateral, getPricePerShare, removeFraction } =
   useFixedMarketMaker();
 const { refreshCollateralBalance, getTokenStore } = useCollateralToken();
 const { getConditionalBalance, parseConditionalBalance } = useConditionalToken();
@@ -410,6 +410,17 @@ watchDebounced(
   { debounce: 500, maxWait: 1000 }
 );
 
+watch(
+  () => selectedTab.value,
+  async () => {
+    if (selectedTab.value === TransactionType.BUY) {
+      await updateBuyAmount();
+    } else if (selectedTab.value === TransactionType.SELL) {
+      await updateSellAmount();
+    }
+  }
+);
+
 async function updateBuyAmount() {
   if (!amount.value) {
     return;
@@ -422,15 +433,8 @@ async function updateBuyAmount() {
     slippage.value
   );
 
-  const fullSellAmount = await calcSellAmountInCollateral(
-    Number(minTokensToBuyNoSlippage) / Math.pow(10, tokenStore.decimals),
-    props.outcome.outcomeIndex,
-    props.contractAddress,
-    props.outcomes.map(o => o.positionId)
-  );
-
   returnAmount.value = (Number(minTokensToBuy) / Math.pow(10, tokenStore.decimals)).toString();
-  potentialReturn.value = (Number(fullSellAmount) / Math.pow(10, tokenStore.decimals)).toString(); // TODO: how to get this value?
+  potentialReturn.value = (Number(minTokensToBuyNoSlippage) / Math.pow(10, tokenStore.decimals)).toFixed(3);
 }
 
 async function updateSellAmount() {

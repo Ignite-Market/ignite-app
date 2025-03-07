@@ -110,6 +110,7 @@ async function evmWalletLogin(data: Record<string, any>) {
     success(t('wallet.login.success'));
   } catch (e) {
     // TODO: handle canceled signature.
+    // TODO: handle wallet switch - user needs to sign the message again!
 
     console.error(e);
     error(apiError(e));

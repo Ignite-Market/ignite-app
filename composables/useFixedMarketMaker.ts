@@ -78,6 +78,8 @@ export default function useFixedMarketMaker() {
     const minTokensToBuyNoSlippage = await contract.read.calcBuyAmount([scaledAmount, outcomeIndex]);
     const minTokensToBuy = (minTokensToBuyNoSlippage * BigInt(100 - slippage)) / BigInt(100);
 
+    // TODO: FIX FRACTIONS:
+    // new Big(amount.toString()).mul(keepFraction).toFixed(0);
     return { minTokensToBuy, minTokensToBuyNoSlippage };
   }
 
@@ -265,6 +267,24 @@ export default function useFixedMarketMaker() {
     return BigInt(r.toFixed(0)) as any;
   }
 
+  // Removes the given fraction from the given integer-bounded amount and returns the value as an original type.
+  function removeFraction(amount: bigint, fraction: number): bigint {
+    if (fraction >= 1 || fraction <= 0) throw `The given basisPoints ${fraction} is not in the range [0, 1].`;
+
+    const keepFraction = 1 - fraction;
+
+    return BigInt(new Big(amount.toString()).mul(keepFraction).toFixed(0));
+  }
+
+  // Adds the given fraction from the given integer-bounded amount and returns the value as an original type.
+  function addFraction(amount: bigint, fraction: number): bigint {
+    if (fraction >= 1 || fraction <= 0) throw `The given basisPoints ${fraction} is not in the range [0, 1].`;
+
+    const keepFraction = 1 + fraction;
+
+    return BigInt(new Big(amount.toString()).mul(keepFraction).toFixed(0));
+  }
+
   return {
     getMaxTokensToSell,
     getMinTokensToBuy,
@@ -275,5 +295,6 @@ export default function useFixedMarketMaker() {
     getFundingBalance,
     removeFunding,
     calcSellAmountInCollateral,
+    removeFraction,
   };
 }
