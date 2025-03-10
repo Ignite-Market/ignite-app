@@ -31,9 +31,28 @@ export enum TransactionType {
   REMOVE_FUND = 4,
 }
 
-export interface PredictionSetResponse extends GeneralResponse<PredictionSetInterface> {}
-export interface PredictionSetsResponse extends GeneralItemsResponse<any> {}
+export interface OutcomeChance extends GeneralInterface {
+  chance: number;
+  supply: number;
+  totalSupply: number;
+}
 
+export interface OutcomeInterface extends GeneralInterface {
+  outcomeIndex: number;
+  positionId: string;
+  name: string;
+  latestChance: OutcomeChance;
+  volume: number;
+}
+
+export interface ChainDataInterface extends GeneralInterface {
+  questionId: string;
+  conditionId: string;
+  txHash: string;
+  contractAddress: Address;
+  lastProcessedBlock: number;
+  parseBlockSize: number;
+}
 export interface PredictionSetInterface extends GeneralInterface {
   winner_outcome_id: number;
   setId: string;
@@ -53,29 +72,8 @@ export interface PredictionSetInterface extends GeneralInterface {
   isWatched?: boolean;
   volume?: number;
 }
-
-export interface OutcomeInterface extends GeneralInterface {
-  outcomeIndex: number;
-  positionId: string;
-  name: string;
-  latestChance: OutcomeChance;
-  volume: number;
-}
-
-export interface ChainDataInterface extends GeneralInterface {
-  questionId: string;
-  conditionId: string;
-  txHash: string;
-  contractAddress: Address;
-  lastProcessedBlock: number;
-  parseBlockSize: number;
-}
-
-export interface OutcomeChance extends GeneralInterface {
-  chance: number;
-  supply: number;
-  totalSupply: number;
-}
+export interface PredictionSetResponse extends GeneralResponse<PredictionSetInterface> {}
+export interface PredictionSetsResponse extends GeneralItemsResponse<any> {}
 
 export interface CommentInterface extends GeneralInterface {
   user_id: number;
@@ -89,8 +87,6 @@ export interface CommentInterface extends GeneralInterface {
   replies: CommentInterface[];
 }
 
-export interface PredictionSetChanceHistoryResponse extends GeneralResponse<PredictionSetOutcomeChanceInterface> {}
-
 export interface PredictionSetOutcomeChanceInterface {
   [outcomeId: number]: {
     outcomeId: number;
@@ -98,6 +94,8 @@ export interface PredictionSetOutcomeChanceInterface {
     date: Date;
   }[];
 }
+
+export interface PredictionSetChanceHistoryResponse extends GeneralResponse<PredictionSetOutcomeChanceInterface> {}
 
 /**
  * Activity

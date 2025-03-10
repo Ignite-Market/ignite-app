@@ -18,8 +18,8 @@
         </div>
 
         <div
-          @click="refreshBalances"
           class="min-w-[20px] min-h-[20px] rounded-[4px] flex items-center justify-center bg-none hover:bg-grey-dark ml-[10px] cursor-pointer"
+          @click="refreshBalances"
         >
           <NuxtIcon class="opacity-[24%] hover:opacity-[100%] text-white" name="icon/refresh" />
         </div>
@@ -39,10 +39,10 @@
                 class=""
                 size="large"
                 type="secondary"
-                :btnClass="['w-[70px] flex justify-center items-center']"
-                @click="slippage = 0.5"
+                :btn-class="['w-[70px] flex justify-center items-center']"
                 :selected="slippage === 0.5"
-                :selectedClass="['!bg-primary !border-primary']"
+                :selected-class="['!bg-primary !border-primary']"
+                @click="slippage = 0.5"
               >
                 0.5%
               </BasicButton>
@@ -50,10 +50,10 @@
               <BasicButton
                 size="large"
                 type="secondary"
-                :btnClass="['w-[70px] flex justify-center items-center']"
-                @click="slippage = 1"
+                :btn-class="['w-[70px] flex justify-center items-center']"
                 :selected="slippage === 1"
-                :selectedClass="['!bg-primary !border-primary']"
+                :selected-class="['!bg-primary !border-primary']"
+                @click="slippage = 1"
               >
                 1%
               </BasicButton>
@@ -62,15 +62,15 @@
                 class=""
                 size="large"
                 type="secondary"
-                :btnClass="['w-[70px] flex justify-center items-center']"
-                @click="slippage = 3"
+                :btn-class="['w-[70px] flex justify-center items-center']"
                 :selected="slippage === 3"
-                :selectedClass="['!bg-primary !border-primary']"
+                :selected-class="['!bg-primary !border-primary']"
+                @click="slippage = 3"
               >
                 3%
               </BasicButton>
 
-              <n-input-number :show-button="false" :max="100" :min="0" class="w-[70px]" v-model:value="slippage">
+              <n-input-number v-model:value="slippage" :show-button="false" :max="100" :min="0" class="w-[70px]">
                 <template #suffix>%</template>
               </n-input-number>
             </div>
@@ -80,9 +80,9 @@
     </template>
     <div class="tabs-wrapper">
       <n-tabs
+        v-model:value="selectedTab"
         type="line"
         animated
-        v-model:value="selectedTab"
         :theme-overrides="{
           tabTextColorActiveLine: '#F5F5F5',
         }"
@@ -104,9 +104,9 @@
             </div>
 
             <n-input-number
+              v-model:value="amount"
               placeholder="0"
               min="0"
-              v-model:value="amount"
               size="large"
               class="min-w-full text-center"
               type="number"
@@ -135,7 +135,7 @@
 
           <BasicButton
             class="w-full"
-            :btnClass="[' !font-bold']"
+            :btn-class="[' !font-bold']"
             :size="'large'"
             :disabled="!isConnected || !enoughCollateralBalance"
             :loading="loading"
@@ -179,9 +179,9 @@
             </div>
 
             <n-input-number
+              v-model:value="amount"
               placeholder="0"
               min="0"
-              v-model:value="amount"
               size="large"
               class="min-w-full text-center"
               type="number"
@@ -211,7 +211,7 @@
           <BasicButton
             :disabled="!isConnected || !enoughConditionalBalance"
             class="w-full"
-            :btnClass="[' !font-bold']"
+            :btn-class="[' !font-bold']"
             :size="'large'"
             :loading="loading"
             @click="sellOutcome"
@@ -245,9 +245,9 @@
             </div>
 
             <n-input-number
+              v-model:value="amount"
               placeholder="0"
               min="0"
-              v-model:value="amount"
               size="large"
               class="min-w-full text-center"
               type="number"
@@ -276,7 +276,7 @@
 
           <BasicButton
             class="w-full"
-            :btnClass="['bg-statusBlue hover:bg-statusBlue-hover !font-bold']"
+            :btn-class="['bg-statusBlue hover:bg-statusBlue-hover !font-bold']"
             :size="'large'"
             :disabled="!isConnected || !enoughCollateralBalance || !isFundEnabled"
             :loading="loading"
@@ -288,25 +288,54 @@
       </n-tabs>
     </div>
   </n-card>
+
+  <Modal v-model:show="showSuccessModal" class="w-[320px] border-none">
+    <div class="flex flex-col">
+      <div class="flex w-full items-center justify-center mb-2">
+        <NuxtIcon name="icon/check" class="text-primary text-[40px]" />
+      </div>
+      <div class="flex items-center justify-center text-[14px] leading-[20px] font-bold">Success!</div>
+
+      <div class="flex flex-col items-center justify-center mt-5">
+        <div v-if="selectedTab === TransactionType.FUND" class="text-center">
+          You have successfully funded this market.
+        </div>
+        <div v-else class="flex flex-col items-center justify-center text-center">
+          <div>You have successfully {{ selectedTab === TransactionType.BUY ? 'bought' : 'sold' }} outcome:</div>
+          <div class="my-4 uppercase font-extrabold text-[18px]">{{ outcome.name }}</div>
+        </div>
+      </div>
+
+      <BasicButton
+        v-if="transactionHash"
+        class="w-full font-bold mt-5"
+        :size="'large'"
+        @click="openExplorer(transactionHash)"
+      >
+        Transaction
+      </BasicButton>
+    </div>
+  </Modal>
 </template>
 
 <script setup lang="ts">
 import { watchDebounced } from '@vueuse/core';
 import type { Address } from 'viem';
+import { useAccount } from '@wagmi/vue';
 import type { OutcomeInterface } from '~/lib/types/prediction-set';
 import { PredictionSetStatus, TransactionType } from '~/lib/types/prediction-set';
-import { useAccount } from '@wagmi/vue';
 
 const props = defineProps({
   contractAddress: { type: String as PropType<Address>, default: null, required: true },
-  outcome: { type: Object as PropType<OutcomeInterface>, default: {}, required: true },
+  outcome: { type: Object as PropType<OutcomeInterface>, default: () => {}, required: true },
   status: { type: Number as PropType<PredictionSetStatus>, default: null, required: true },
   action: { type: Number as PropType<TransactionType>, default: null, required: false },
   endTime: { type: String, default: null, required: false },
-  outcomes: { type: Array as PropType<OutcomeInterface[]>, default: [], required: true },
+  outcomes: { type: Array as PropType<OutcomeInterface[]>, default: () => [], required: true },
+  defaultValue: { type: Number, default: 0 },
 });
 
-const { getMinTokensToBuy, addFunding, buy, sell, calcSellAmountInCollateral, getPricePerShare, removeFraction } =
+const { getMinTokensToBuy, addFunding, buy, sell, calcSellAmountInCollateral, getPricePerShare } =
   useFixedMarketMaker();
 const { refreshCollateralBalance, getTokenStore } = useCollateralToken();
 const { getConditionalBalance, parseConditionalBalance } = useConditionalToken();
@@ -320,11 +349,21 @@ const selectedTab = ref(TransactionType.BUY);
 const isFundEnabled = ref(true);
 const slippage = ref(3);
 const loading = ref(false);
-const amount = ref<number>();
+const amount = ref<number>(props.defaultValue);
 const returnAmount = ref<string>('0.0');
 const potentialReturn = ref<string>('0.0');
 const conditionalBalance = ref(BigInt(0));
 const pricePerShare = ref(0.0);
+
+const showSuccessModal = ref(false);
+const transactionHash = ref('');
+
+watch(
+  () => props.defaultValue,
+  defaultValue => {
+    amount.value = defaultValue;
+  }
+);
 
 const enoughConditionalBalance = computed(() => {
   const scaledAmount = BigInt(Math.round((amount.value || 0) * 10 ** tokenStore.decimals));
@@ -468,7 +507,14 @@ async function fund() {
     await ensureCorrectNetwork();
 
     txWait.hash.value = await addFunding(props.contractAddress, amount.value);
-    await txWait.wait();
+    const receipt = await txWait.wait();
+
+    if (receipt.status === 'success') {
+      showSuccessModal.value = true;
+      transactionHash.value = receipt?.data?.transactionHash || '';
+    } else if (receipt.status === 'error') {
+      message.error(contractError(receipt.error));
+    }
 
     amount.value = '' as any;
     await refreshCollateralBalance();
@@ -502,7 +548,14 @@ async function sellOutcome() {
     );
 
     txWait.hash.value = await sell(props.contractAddress, collateralAmount, props.outcome.outcomeIndex, slippage.value);
-    await txWait.wait();
+    const receipt = await txWait.wait();
+
+    if (receipt.status === 'success') {
+      showSuccessModal.value = true;
+      transactionHash.value = receipt?.data?.transactionHash || '';
+    } else if (receipt.status === 'error') {
+      message.error(contractError(receipt.error));
+    }
 
     console.log(collateralAmount);
 
@@ -531,16 +584,29 @@ async function buyOutcome() {
     await ensureCorrectNetwork();
 
     txWait.hash.value = await buy(props.contractAddress, amount.value, props.outcome.outcomeIndex, slippage.value);
-    await txWait.wait();
+    const receipt = await txWait.wait();
+    console.log(receipt);
+
+    if (receipt.status === 'success') {
+      showSuccessModal.value = true;
+      transactionHash.value = receipt?.data?.transactionHash || '';
+    } else if (receipt.status === 'error') {
+      message.error(contractError(receipt.error));
+    }
 
     amount.value = '' as any;
     await refreshBalances();
   } catch (error) {
     console.error(error);
-    message.error(contractError(error));
   } finally {
     loading.value = false;
   }
+}
+
+function openExplorer(txHash: string) {
+  const explorer = getExplorer();
+
+  window.open(`${explorer}/tx/${txHash}`, '_blank');
 }
 
 async function refreshBalances() {

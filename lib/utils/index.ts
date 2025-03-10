@@ -1,3 +1,4 @@
+import { flareTestnet, songbird } from 'viem/chains';
 import dev from '../config/development';
 import local from '../config/local';
 import prod from '../config/production';
@@ -84,7 +85,7 @@ export function canOpenColumnCell(path: EventTarget[]) {
 const json = (param: any): any => {
   return JSON.stringify(
     param,
-    (key, value) => (typeof value === 'bigint' ? value.toString() : value) // return everything else unchanged
+    (_key, value) => (typeof value === 'bigint' ? value.toString() : value) // return everything else unchanged
   );
 };
 export default json;
@@ -119,10 +120,17 @@ export function createPagination(remote = true): PaginationConfig {
 }
 
 export function downloadURI(uri: string, name: string) {
-  let link = document.createElement('a');
+  const link = document.createElement('a');
   link.download = name;
   link.href = uri;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+}
+
+export function getExplorer() {
+  const config = useRuntimeConfig();
+  return ['local', 'development', 'staging'].includes(config.public.ENV)
+    ? flareTestnet.blockExplorers.default.url
+    : songbird.blockExplorers.default.url;
 }

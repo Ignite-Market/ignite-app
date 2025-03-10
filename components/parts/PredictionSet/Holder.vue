@@ -27,7 +27,7 @@
 import { type UserPredictionInterface } from '~/lib/types/prediction-set';
 
 defineProps({
-  item: { type: Object as PropType<UserPredictionInterface>, default: {}, required: true },
+  item: { type: Object as PropType<UserPredictionInterface>, default: () => {}, required: true },
 });
 
 const router = useRouter();

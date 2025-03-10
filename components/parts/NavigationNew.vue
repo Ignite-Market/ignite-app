@@ -1,10 +1,10 @@
 <template>
   <div class="bg-grey-dark pt-4">
     <n-menu
+      v-model:value="selectedMenu"
       class="text-[14px] leading-[20px] font-medium"
       mode="horizontal"
       :options="menuOptions"
-      v-model:value="selectedMenu"
       :render-icon="renderMenuIcon"
       :render-label="renderMenuLabel"
       :render-extra="renderMenuExtra"
@@ -88,7 +88,7 @@ function renderMenuIcon(option: MenuOption) {
   return null;
 }
 
-function renderMenuExtra(option: MenuOption) {
+function renderMenuExtra(_option: MenuOption) {
   return null;
 }
 </script>

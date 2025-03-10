@@ -10,7 +10,7 @@ const protectedRoutes: Array<ProtectedRouteInterface> = [{ regex: /^\/dashboard/
 /**
  * Redirect user to landing page if not logged in and trying to access protected routes
  */
-export default defineNuxtRouteMiddleware((to, from) => {
+export default defineNuxtRouteMiddleware((to, _from) => {
   const decodedUrl = removeLastSlash(decodeURI(to.path));
   const userStore = useUserStore();
 

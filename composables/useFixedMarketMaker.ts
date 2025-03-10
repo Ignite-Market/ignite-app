@@ -269,7 +269,8 @@ export default function useFixedMarketMaker() {
 
   // Removes the given fraction from the given integer-bounded amount and returns the value as an original type.
   function removeFraction(amount: bigint, fraction: number): bigint {
-    if (fraction >= 1 || fraction <= 0) throw `The given basisPoints ${fraction} is not in the range [0, 1].`;
+    if (fraction >= 1 || fraction <= 0)
+      throw new Error(`The given basisPoints ${fraction} is not in the range [0, 1].`);
 
     const keepFraction = 1 - fraction;
 
@@ -278,7 +279,8 @@ export default function useFixedMarketMaker() {
 
   // Adds the given fraction from the given integer-bounded amount and returns the value as an original type.
   function addFraction(amount: bigint, fraction: number): bigint {
-    if (fraction >= 1 || fraction <= 0) throw `The given basisPoints ${fraction} is not in the range [0, 1].`;
+    if (fraction >= 1 || fraction <= 0)
+      throw new Error(`The given basisPoints ${fraction} is not in the range [0, 1].`);
 
     const keepFraction = 1 + fraction;
 
@@ -296,5 +298,6 @@ export default function useFixedMarketMaker() {
     removeFunding,
     calcSellAmountInCollateral,
     removeFraction,
+    addFraction,
   };
 }

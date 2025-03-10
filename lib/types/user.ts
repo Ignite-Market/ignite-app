@@ -1,5 +1,3 @@
-import type { PredictionSetInterface, TransactionType } from './prediction-set';
-
 export {};
 
 export enum NotificationType {

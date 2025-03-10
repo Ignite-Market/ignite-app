@@ -69,7 +69,7 @@ enum Phase {
 }
 
 const props = defineProps({
-  predictionSet: { type: Object as PropType<PredictionSetInterface>, default: {}, required: true },
+  predictionSet: { type: Object as PropType<PredictionSetInterface>, default: () => {}, required: true },
 });
 
 const activePhase = computed(() => {

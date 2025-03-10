@@ -1,16 +1,16 @@
 <template>
   <div>
-    <DataTable :columns="columns" :endpoint="endpoint" :table-filters="filters" :title="tab" :tableSorter="sorter" />
+    <DataTable :columns="columns" :endpoint="endpoint" :table-filters="filters" :title="tab" :table-sorter="sorter" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { type DataTableColumns, type DataTableSortState } from 'naive-ui';
+import { formatDistanceToNow } from 'date-fns';
 import { ProfileTabs } from '~/lib/types';
 import Endpoints from '~/lib/values/endpoints';
 import { TransactionType, type ActivityInterface, type UserPredictionInterface } from '~/lib/types/prediction-set';
 import type { TableFilters } from '~/lib/types/config';
-import { formatDistanceToNow } from 'date-fns';
 
 const props = defineProps({
   tab: { type: String as PropType<ProfileTabs>, required: true },
@@ -119,7 +119,7 @@ const activitiesColumns = [
     render(row: ActivityInterface) {
       return h(
         'a',
-        { class: 'underline', href: `https://sepolia.basescan.org/tx/${row.txHash}`, target: '_blank' },
+        { class: 'underline', href: `${getExplorer()}/tx/${row.txHash}`, target: '_blank' },
         shortenAddress(row.txHash)
       );
     },

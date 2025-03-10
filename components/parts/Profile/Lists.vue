@@ -1,10 +1,10 @@
 <template>
   <div>
     <n-tabs
+      v-model:value="selectedTab"
       type="line"
       animated
       size="large"
-      v-model:value="selectedTab"
       :theme-overrides="{
         tabTextColorActiveLine: '#F5F5F5',
       }"

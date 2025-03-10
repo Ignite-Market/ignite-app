@@ -13,6 +13,6 @@
 <script lang="ts" setup>
 defineProps({
   status: { type: Number, default: null, required: true },
-  endTime: { type: String || Date, default: null, required: true },
+  endTime: { type: Date, default: null, required: true },
 });
 </script>

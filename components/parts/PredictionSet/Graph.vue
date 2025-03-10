@@ -13,13 +13,11 @@
     </div>
   </div>
   <client-only>
-    <VChart :option="options" autoresize class="h-[300px] md:h-[400px] lg:w-[calc(100%+70px)] lg:-ml-[20px]"
-  /></client-only>
+    <VChart :option="options" autoresize class="h-[300px] md:h-[400px] lg:w-[calc(100%+70px)] lg:-ml-[20px]" />
+  </client-only>
 </template>
 
 <script lang="ts" setup>
-import Endpoints from '~/lib/values/endpoints';
-import type { PredictionSetChanceHistoryResponse } from '~/lib/types/prediction-set';
 import { use } from 'echarts/core';
 import { LineChart } from 'echarts/charts';
 import { GridComponent, TooltipComponent } from 'echarts/components';
@@ -28,12 +26,14 @@ import type { ComposeOption } from 'echarts/core';
 import type { LineSeriesOption } from 'echarts/charts';
 import type { GridComponentOption, TooltipComponentOption } from 'echarts/components';
 import VChart from 'vue-echarts';
+import type { PredictionSetChanceHistoryResponse } from '~/lib/types/prediction-set';
+import Endpoints from '~/lib/values/endpoints';
 
 const props = defineProps({
   predictionId: { type: Number, default: null, required: true },
-  startTime: { type: String || Date, default: null },
-  endTime: { type: String || Date, default: null },
-  outcomes: { type: Array as PropType<{ id: number; name: string; color: string }[]>, default: [] },
+  startTime: { type: Date, default: null },
+  endTime: { type: Date, default: null },
+  outcomes: { type: Array as PropType<{ id: number; name: string; color: string }[]>, default: () => [] },
 });
 use([CanvasRenderer, LineChart, TooltipComponent, GridComponent]);
 
@@ -103,7 +103,7 @@ onMounted(async () => {
 watchDebounced(
   () => selectedRange.value,
   async () => {
-    getChanceHistory(selectedRange.value);
+    await getChanceHistory(selectedRange.value);
   },
   { debounce: 1000 }
 );

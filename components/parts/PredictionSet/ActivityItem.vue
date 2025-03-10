@@ -29,7 +29,7 @@
             <span class="font-bold">{{ formatTokenAmount(item.userAmount) }} {{ tokenStore.symbol }} </span>
           </span>
           <a
-            :href="`https://sepolia.basescan.org/tx/${item.txHash}`"
+            :href="`${getExplorer()}/tx/${item.txHash}`"
             target="_blank"
             class="underline inline-block align-middle ml-1"
           >
@@ -47,11 +47,11 @@
 </template>
 
 <script lang="ts" setup>
-import { TransactionType, type ActivityInterface } from '~/lib/types/prediction-set';
 import { formatDistanceToNow } from 'date-fns';
+import { TransactionType, type ActivityInterface } from '~/lib/types/prediction-set';
 
 defineProps({
-  item: { type: Object as PropType<ActivityInterface>, default: {}, required: true },
+  item: { type: Object as PropType<ActivityInterface>, default: () => {}, required: true },
 });
 
 const { getTokenStore } = useCollateralToken();

@@ -96,7 +96,7 @@ export default {
       hd: '1920px',
     },
 
-    colors: colors,
+    colors,
 
     fontFamily: {
       heading: ['Inter', 'serif'],

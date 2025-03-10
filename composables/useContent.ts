@@ -1,5 +1,5 @@
-import { decodeHTMLEntities } from '~/lib/misc/strings';
 import type { MessageFunction, VueMessageType } from 'vue-i18n';
+import { decodeHTMLEntities } from '~/lib/misc/strings';
 import IconInfo from '~/components/general/icon/Info.vue';
 
 export type VueMsg = VueMessageType | MessageFunction<VueMessageType>;
@@ -70,5 +70,6 @@ export default function useContent() {
   return {
     labelInfo,
     labelInfoText,
+    generateContent,
   };
 }

@@ -19,7 +19,7 @@
             name: 'markets-id',
             params: { id: banner.prediction_set_id },
           }"
-          btnClass="!bg-white/25 w-fit  hover:!bg-white/30"
+          btn-class="!bg-white/25 w-fit  hover:!bg-white/30"
         >
           {{ banner.button }}
         </BasicButton>
@@ -40,7 +40,6 @@ const props = defineProps({
 });
 
 const getBg = () => {
-  console.log(props.index);
   switch (props.index % 3) {
     case 0:
       return 'bg-gradientBannerGreen';

@@ -1,8 +1,13 @@
 <template>
-  <Dashboard>
+  <Dashboard @load-more="loadMore">
     <BannerListing />
-    <PredictionSetListing :category="'top'" />
+    <PredictionSetListing ref="predictionSetListing" :category="'top'" />
   </Dashboard>
 </template>
 
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+const predictionSetListing = ref(null as any);
+const loadMore = async () => {
+  await predictionSetListing.value?.onInfiniteLoad();
+};
+</script>

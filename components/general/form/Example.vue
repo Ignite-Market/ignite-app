@@ -5,8 +5,8 @@
         v-model:value="formData.name"
         :input-props="{ id: 'name' }"
         placeholder="Value"
-        @keydown.enter.prevent
         clearable
+        @keydown.enter.prevent
       />
     </n-form-item>
 
@@ -51,7 +51,7 @@
 
 <script lang="ts" setup>
 import type { FormInst, FormRules, FormValidationError } from 'naive-ui';
-import Endpoints from '~/lib/values/endpoints';
+// import Endpoints from '~/lib/values/endpoints';
 
 type Form = {
   name: string | null;
@@ -63,7 +63,7 @@ type Form = {
 const { t } = useI18n();
 const message = useMessage();
 
-const emit = defineEmits(['submitActive', 'submitSuccess', 'close']);
+// const emit = defineEmits(['submitActive', 'submitSuccess', 'close']);
 
 /** Form project */
 const loading = ref(false);
@@ -90,7 +90,7 @@ const rules: FormRules = {
 // Submit
 function handleSubmit(e: Event | MouseEvent) {
   e.preventDefault();
-  formRef.value?.validate(async (errors: Array<FormValidationError> | undefined) => {
+  formRef.value?.validate((errors: Array<FormValidationError> | undefined) => {
     if (errors) {
       errors.map(fieldErrors => fieldErrors.map(error => message.warning(error.message || 'Error')));
     } else {
@@ -98,27 +98,27 @@ function handleSubmit(e: Event | MouseEvent) {
     }
   });
 }
-async function createProject() {
-  loading.value = true;
-  emit('submitActive', true);
+// async function createProject() {
+//   loading.value = true;
+//   emit('submitActive', true);
 
-  try {
-    const res = await $api.post<CreateProjectResponse>('', formData.value);
+//   try {
+//     const res = await $api.post<CreateProjectResponse>('', formData.value);
 
-    if (res.data) {
-      /** Clear all stored data 
-      clearAll();*/
+//     if (res.data) {
+//       /** Clear all stored data
+//       clearAll(); */
 
-      /** Set new project as current project 
-      dataStore.setCurrentProject(res.data.project_uuid);*/
+//       /** Set new project as current project
+//       dataStore.setCurrentProject(res.data.project_uuid); */
 
-      emit('submitSuccess');
-      emit('submitActive', false);
-    }
-  } catch (error) {
-    message.error(apiError(error));
-  }
-  loading.value = false;
-  emit('submitActive', false);
-}
+//       emit('submitSuccess');
+//       emit('submitActive', false);
+//     }
+//   } catch (error) {
+//     message.error(apiError(error));
+//   }
+//   loading.value = false;
+//   emit('submitActive', false);
+// }
 </script>
