@@ -10,7 +10,7 @@ export enum AppEnv {
 
 export type TableFilter = {
   options?: SelectOption[];
-  show: boolean;
+  show?: boolean;
   value: string | number | null;
 };
 
