@@ -14,8 +14,8 @@
           <div class="flex flex-col gap-2">
             <div class="text-lg">{{ user?.username }}</div>
             <button
-              @click="copyToClipboard(user?.walletAddress || '')"
               class="flex gap-1 items-center px-2 rounded-lg bg-grey-light"
+              @click="copyToClipboard(user?.walletAddress || '')"
             >
               {{ shortenAddress(user?.walletAddress || '') }}
               <NuxtIcon class="ml-2 text-white cursor-pointer" name="icon/copy" />
@@ -25,11 +25,11 @@
             </div>
           </div>
         </div>
-        <div>
+        <div v-if="isCurrentUser">
           <BasicButton to="/profile/edit">Edit Profile</BasicButton>
         </div>
       </div>
-      <div class="mt-4" v-if="user">
+      <div v-if="user" class="mt-4">
         <ProfileLists :user-id="user.id" />
       </div>
     </div>

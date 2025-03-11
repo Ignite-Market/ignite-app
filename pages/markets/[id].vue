@@ -13,7 +13,7 @@
             </div>
 
             <div class="flex mt-4 items-center">
-              <Status :status="predictionSet.setStatus" :endTime="predictionSet.endTime.toString()"></Status>
+              <Status :status="predictionSet.setStatus" :end-time="new Date(predictionSet.endTime)" />
 
               <div class="mx-4 border-r-1 border-r-white/25 h-[14px]"></div>
 
@@ -40,10 +40,10 @@
               :name="predictionSet.isWatched ? 'icon/star' : 'icon/star-outline'"
               :class="predictionSet.isWatched && 'text-primary'"
               class="text-[20px]"
-            ></NuxtIcon>
+            />
           </Btn>
           <Btn class="bg-grey-light h-8 w-8 rounded flex-cc hover:bg-grey-lighter" type="link" @click="copyLink">
-            <NuxtIcon name="icon/link" class="text-[20px]"></NuxtIcon>
+            <NuxtIcon name="icon/link" class="text-[20px]" />
           </Btn>
         </div>
       </div>
@@ -58,8 +58,8 @@
               v-if="params?.id"
               :prediction-id="+params.id"
               :outcomes="graphOutcomes"
-              :start-time="predictionSet.startTime.toString()"
-              :end-time="predictionSet.endTime.toString()"
+              :start-time="predictionSet.startTime"
+              :end-time="predictionSet.endTime"
             />
           </div>
 
@@ -67,6 +67,7 @@
           <div class="flex flex-col gap-y-[6px] mt-10">
             <div
               v-for="(outcome, i) in predictionSet.outcomes"
+              :key="i"
               class="flex flex-wrap bg-grey rounded-lg pl-3 pr-4 py-[6px] items-center w-full relative gap-x-9 gap-y-4"
               :class="{ 'border-1 border-primary': winningOutcome?.id === outcome.id }"
             >
@@ -96,8 +97,8 @@
                 </div>
 
                 <div
-                  class="font-bold text-[16px] leading-[24px]"
                   v-if="predictionSet.setStatus !== PredictionSetStatus.FINALIZED"
+                  class="font-bold text-[16px] leading-[24px]"
                 >
                   {{ Number(outcome.latestChance.chance * 100).toFixed(0) }} %
                 </div>
@@ -114,10 +115,10 @@
                   class="mr-3 w-full"
                   size="large"
                   type="secondary"
-                  :btnClass="['bg-statusGreen/20 border-statusGreen hover:bg-statusGreen']"
-                  @click="selectOutcome(TransactionType.BUY, outcome)"
+                  :btn-class="['bg-statusGreen/20 border-statusGreen hover:bg-statusGreen']"
                   :selected="selectedOutcome.id === outcome.id && selectedAction === TransactionType.BUY"
-                  :selectedClass="['!bg-statusGreen !border-statusGreen']"
+                  :selected-class="['!bg-statusGreen !border-statusGreen']"
+                  @click="selectOutcome(TransactionType.BUY, outcome)"
                 >
                   Buy
                 </BasicButton>
@@ -125,10 +126,10 @@
                   class="w-full"
                   size="large"
                   type="secondary"
-                  :btnClass="['bg-statusRed/20 border-statusRed hover:bg-statusRed']"
-                  @click="selectOutcome(TransactionType.SELL, outcome)"
+                  :btn-class="['bg-statusRed/20 border-statusRed hover:bg-statusRed']"
                   :selected="selectedOutcome.id === outcome.id && selectedAction === TransactionType.SELL"
-                  :selectedClass="['!bg-statusRed !border-statusRed']"
+                  :selected-class="['!bg-statusRed !border-statusRed']"
+                  @click="selectOutcome(TransactionType.SELL, outcome)"
                 >
                   Sell
                 </BasicButton>
@@ -187,16 +188,13 @@
               }"
             >
               <n-tab-pane name="Comments" tab="Comments">
-                <PredictionSetComments :prediction-set-id="predictionSet.id"></PredictionSetComments>
+                <PredictionSetComments :prediction-set-id="predictionSet.id" />
               </n-tab-pane>
               <n-tab-pane name="Top holders" tab="Top holders">
-                <PredictionSetHolders
-                  :prediction-set-id="predictionSet.id"
-                  :outcomes="predictionSet.outcomes"
-                ></PredictionSetHolders>
+                <PredictionSetHolders :prediction-set-id="predictionSet.id" :outcomes="predictionSet.outcomes" />
               </n-tab-pane>
               <n-tab-pane name="Activity" tab="Activity">
-                <PredictionSetActivity :prediction-set-id="predictionSet.id"></PredictionSetActivity>
+                <PredictionSetActivity :prediction-set-id="predictionSet.id" />
               </n-tab-pane>
             </n-tabs>
           </div>
@@ -205,30 +203,28 @@
         <!-- RIGHT -->
         <div class="md:sticky top-6 self-start md:ml-8 lg:ml-24 w-full min-w-[260px] md:w-[409px] mb-6">
           <PredictionSetAction
-            class="mobile:hidden"
             v-if="actionsEnabled(predictionSet.setStatus, predictionSet.endTime)"
+            class="mobile:hidden"
             :contract-address="predictionSet.chainData.contractAddress"
             :outcome="selectedOutcome"
             :action="selectedAction"
             :status="predictionSet.setStatus"
             :end-time="predictionSet.endTime.toString()"
             :outcomes="predictionSet.outcomes"
-          >
-          </PredictionSetAction>
+            :default-value="defaultActionValue"
+          />
 
           <PredictionSetPhase
             v-if="predictionSet.setStatus !== PredictionSetStatus.FINALIZED"
             :prediction-set="predictionSet"
-          >
-          </PredictionSetPhase>
+          />
 
           <PredictionSetResults
             v-if="predictionSet.setStatus === PredictionSetStatus.FINALIZED"
             :outcome="winningOutcome"
             :contract-address="predictionSet.chainData.contractAddress"
             :condition-id="predictionSet.chainData.conditionId"
-          >
-          </PredictionSetResults>
+          />
         </div>
       </div>
     </div>
@@ -242,8 +238,8 @@
       :status="predictionSet.setStatus"
       :end-time="predictionSet.endTime.toString()"
       :outcomes="predictionSet.outcomes"
-    >
-    </PredictionSetAction>
+      :default-value="defaultActionValue"
+    />
   </n-drawer>
 </template>
 
@@ -264,7 +260,7 @@ const outcomeColors = ['#F95F85', '#4A61C9', '#639266', '#F1B11B'];
 const REFRESH_INTERVAL = 10_000;
 
 const { getTokenStore } = useCollateralToken();
-const { params } = useRoute();
+const { params, query } = useRoute();
 const router = useRouter();
 const config = useRuntimeConfig();
 const { loggedIn } = useUserStore();
@@ -280,17 +276,28 @@ const winningOutcome = ref();
 const graphOutcomes = ref();
 const watchlistLoading = ref(false);
 const actionModal = ref(false);
+const defaultActionValue = ref(0);
 
 onMounted(async () => {
   await sleep(10);
   await getPredictionSet();
+  if (query) {
+    if (query.transaction && query.outcome) {
+      selectedAction.value = +query.transaction;
+      selectedOutcome.value = predictionSet.value?.outcomes.find(x => x.id === +query.outcome!);
+      if (query.value) {
+        defaultActionValue.value = +query.value;
+      }
+      router.replace({ query: undefined });
+    }
+  }
 });
 
 onUnmounted(() => {
   clearInterval(refreshInterval.value);
 });
 
-async function selectOutcome(transaction: TransactionType, outcome: OutcomeInterface) {
+function selectOutcome(transaction: TransactionType, outcome: OutcomeInterface) {
   selectedAction.value = transaction;
   selectedOutcome.value = outcome;
   actionModal.value = true;

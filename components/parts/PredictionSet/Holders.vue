@@ -8,8 +8,8 @@
         label-field="name"
         value-field="outcomeIndex"
         :loading="loading"
-        @update:value="value => getHolders(1, value)"
         :theme-overrides="{ peers: { InternalSelection: { color: '#292929' } } }"
+        @update:value="value => getHolders(1, value)"
       />
     </div>
     <div v-if="!loading && !items.length" class="text-center mt-6">No holders</div>
@@ -19,14 +19,16 @@
           <div>Holder</div>
           <div>Shares</div>
         </div>
-        <n-skeleton v-if="loading" v-for="i in 10" :key="i" height="32px" width="100%" class="rounded-[8px]" />
-        <PredictionSetHolder v-else :item="item" v-for="item of items" />
+        <template v-if="loading">
+          <n-skeleton v-for="i in 10" :key="i" height="32px" width="100%" class="rounded-[8px]" />
+        </template>
+        <PredictionSetHolder v-for="item of items" v-else :key="item.userId" :item="item" />
       </div>
       <div v-if="pagination.itemCount! > pagination.page! * pagination.pageSize" class="mt-4 flex">
         <button
           :disabled="loading"
-          @click="() => getHolders(pagination.page! + 1, lastOutcome!)"
           class="m-auto underline"
+          @click="() => getHolders(pagination.page! + 1, lastOutcome!)"
         >
           Show More
         </button>

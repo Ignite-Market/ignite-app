@@ -1,10 +1,11 @@
-import { useChainId, useChains, useClient, useConnectorClient, useSwitchChain } from '@wagmi/vue';
+import { useChainId, useChains, useConnectorClient, useSwitchChain } from '@wagmi/vue';
 import type { Account, Address, Chain, Client, Transport } from 'viem';
 import { createPublicClient, getContract, http } from 'viem';
 import { ContractType, getContractAbi } from '~/lib/config/contracts';
 
 const contracts = reactive<{ [key: string]: any }>({});
 const readContracts = reactive<{ [key: string]: any }>({});
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const publicClients = reactive<Record<number, Client<Transport, Chain | undefined, Account | undefined>>>({});
 
 export default function useContracts() {
@@ -27,7 +28,7 @@ export default function useContracts() {
    * @param contractAddress
    * @returns
    */
-  async function initReadContract(contractType: ContractType, contractAddress?: Address) {
+  function initReadContract(contractType: ContractType, contractAddress?: Address) {
     if (contractType === ContractType.FPMM && !contractAddress) {
       throw new Error('FPMM contract address must be provided!');
     }

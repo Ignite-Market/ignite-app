@@ -1,7 +1,7 @@
 <template>
-  <Swiper v-if="!loading && banners.length" :slidesPerView="isLg ? 3 : 'auto'" :spaceBetween="10" :class="'mb-6'">
+  <Swiper v-if="!loading && banners.length" :slides-per-view="isLg ? 3 : 'auto'" :space-between="10" :class="'mb-6'">
     <SwiperSlide v-for="(banner, i) in banners" :key="banner.id" class="min-w-[330px] max-w-[500px]">
-      <BannerCard :banner="banner" :index="i"></BannerCard>
+      <BannerCard :banner="banner" :index="i" />
     </SwiperSlide>
   </Swiper>
   <div v-if="loading" class="flex gap-2.5 mb-6">
@@ -12,14 +12,14 @@
 </template>
 
 <script lang="ts" setup>
-import Endpoints from '~/lib/values/endpoints';
 import { Swiper, SwiperSlide } from 'swiper/vue';
+import Endpoints from '~/lib/values/endpoints';
 import 'swiper/css';
 
 const message = useMessage();
 const { isLg } = useScreen();
 
-const banners = ref(<any[]>[]);
+const banners = ref([] as any[]);
 const loading = ref(true);
 
 onMounted(async () => {
@@ -30,7 +30,7 @@ async function getBanners() {
   loading.value = true;
   try {
     const res = await $api.get<any>(Endpoints.banners, {});
-    await sleep(5000);
+
     if (res.data) {
       banners.value = res.data;
     }

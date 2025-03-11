@@ -1,5 +1,3 @@
-import type { PredictionSetActivity } from '#components';
-
 const Endpoints = {
   /** User */
   me: '/users/me',

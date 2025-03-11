@@ -1,12 +1,12 @@
 <template>
   <n-dropdown
     v-if="show"
+    v-model:show="showDropdown"
     trigger="click"
     :options="options"
     :size="'small'"
     placement="bottom-end"
     class="bg-grey-light"
-    v-model:show="showDropdown"
   >
     <NuxtIcon class="text-white text-[12px] cursor-pointer hover:text-primary-bright" name="icon/more" />
   </n-dropdown>
@@ -14,7 +14,7 @@
   <modal v-model:show="showDeleteModal" class="w-[320px] border-none" :mask-closable="!loadingDelete">
     <div class="flex flex-col">
       <div class="flex w-full items-center justify-center mb-3">
-        <NuxtIcon name="icon/warn" class="text-primary text-[40px]"></NuxtIcon>
+        <NuxtIcon name="icon/warn" class="text-primary text-[40px]" />
       </div>
 
       <div class="flex items-center justify-center text-[16px] leading-[20px] font-bold">Delete comment</div>
@@ -44,7 +44,7 @@ import type { CommentInterface } from '~/lib/types/prediction-set';
 import Endpoints from '~/lib/values/endpoints';
 
 const props = defineProps({
-  comment: { type: Object as PropType<CommentInterface>, default: {}, required: true },
+  comment: { type: Object as PropType<CommentInterface>, default: () => {}, required: true },
 });
 
 const emit = defineEmits(['delete']);

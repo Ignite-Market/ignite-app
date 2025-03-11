@@ -17,9 +17,9 @@
 <script lang="ts" setup>
 // const userStore = useUserStore();
 // const { isLg } = useScreen();
-const messageRef = ref<HTMLDivElement>();
-const mainContentRef = ref<HTMLDivElement>();
-const showMobileSidebar = ref<boolean>(false);
+// const messageRef = ref<HTMLDivElement>();
+// const mainContentRef = ref<HTMLDivElement>();
+// const showMobileSidebar = ref<boolean>(false);
 
 /**
  * Show/hide sidebar on mobile
@@ -42,16 +42,16 @@ watch(
   isLg => {
     toggleSidebar(isLg);
   }
-);*/
+); */
 
-function toggleSidebar(show?: boolean) {
-  if (show === undefined) {
-    showMobileSidebar.value = !showMobileSidebar.value;
-  } else {
-    showMobileSidebar.value = show;
-  }
-}
+// function toggleSidebar(show?: boolean) {
+//   if (show === undefined) {
+//     showMobileSidebar.value = !showMobileSidebar.value;
+//   } else {
+//     showMobileSidebar.value = show;
+//   }
+// }
 
 // clear error and redirect to home page
-const handleError = () => clearError({ redirect: false ? '/dashboard' : '/login' });
+const handleError = () => clearError({ redirect: '/' });
 </script>

@@ -33,7 +33,7 @@
       <div class="flex flex-auto w-full flex-col md:flex-row bg-grey-dark">
         <n-layout class="">
           <n-layout-content>
-            <n-scrollbar y-scrollable :style="scrollScreen">
+            <n-infinite-scroll y-scrollable :style="scrollScreen" :distance="10" @load="onLoadMore">
               <div class="flex flex-col gap-4 justify-between pt-4" :style="fullHeight ? heightScreen : {}">
                 <div class="flex flex-col items-center w-full">
                   <div class="xl:max-w-[1520px] w-full px-4">
@@ -44,7 +44,7 @@
                   <slot name="bottom" />
                 </div>
               </div>
-            </n-scrollbar>
+            </n-infinite-scroll>
           </n-layout-content>
         </n-layout>
       </div>
@@ -62,6 +62,12 @@ const props = defineProps({
 
 /** Heading height */
 const headerRef = useTemplateRef('headerRef');
+
+const emit = defineEmits(['loadMore']);
+
+const onLoadMore = () => {
+  emit('loadMore');
+};
 
 const calcHeaderHeight = () => (headerRef.value?.$el?.clientHeight || 86) + 60;
 const headerHeight = ref<number>(calcHeaderHeight());

@@ -1,9 +1,12 @@
 <template>
   <div
-    ref="grid"
-    class="grid xl:grid-cols-4 lg:grid-cols-[repeat(auto-fill,minmax(270px,1fr))] grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-4 justify-items-center"
+    class="grid xl:grid-cols-4 lg:grid-cols-[repeat(auto-fill,minmax(270px,1fr))] grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-4 justify-items-center mb-4"
   >
-    <PredictionSetCard :predictionSet="predictionSet" v-for="predictionSet in predictionSets"></PredictionSetCard>
+    <PredictionSetCard
+      v-for="predictionSet in predictionSets"
+      :key="predictionSet.id"
+      :prediction-set="predictionSet"
+    />
   </div>
   <div
     v-if="loading"
@@ -20,7 +23,6 @@
 </template>
 
 <script lang="ts" setup>
-import { useInfiniteScroll } from '@vueuse/core';
 import Endpoints from '~/lib/values/endpoints';
 
 const props = defineProps({
@@ -30,8 +32,7 @@ const props = defineProps({
 
 const message = useMessage();
 
-const grid = ref();
-const predictionSets = ref(<any[]>[]);
+const predictionSets = ref<any[]>([]);
 const loading = ref(false);
 const page = ref(1);
 const limit = ref(20);
@@ -41,20 +42,16 @@ onMounted(async () => {
   await getPredictionSets();
 });
 
-const {} = useInfiniteScroll(
-  grid,
-  async () => {
-    if (!loading.value) {
-      await getPredictionSets();
-    }
-  },
-  {
-    distance: 10,
-    canLoadMore: () => {
-      return !!total.value && total.value > predictionSets.value.length;
-    },
+function canLoadMore() {
+  console.log(!!total.value && total.value > predictionSets.value.length);
+  return !!total.value && total.value > predictionSets.value.length;
+}
+
+async function onInfiniteLoad() {
+  if (canLoadMore() && !loading.value) {
+    await getPredictionSets();
   }
-);
+}
 
 async function getPredictionSets() {
   loading.value = true;
@@ -67,8 +64,9 @@ async function getPredictionSets() {
       page: page.value,
       watchlist: props.watchlist,
     });
-    await sleep(5000);
     if (res.data) {
+      // const ar = new Array(20).fill(res.data.items[0]);
+      // predictionSets.value.push(...ar);
       predictionSets.value.push(...(res.data.items as any[]));
     }
 
@@ -80,4 +78,6 @@ async function getPredictionSets() {
     loading.value = false;
   }
 }
+
+defineExpose({ onInfiniteLoad });
 </script>

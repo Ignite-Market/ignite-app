@@ -16,28 +16,29 @@
       <div class="flex flex-col border-b border-white/10 pb-3 scroll-container h-[100px] overflow-y-scroll">
         <div class="pb-[20px]">
           <div
-            class="flex flex-row w-full mt-[10px] font-medium cursor-pointer"
             v-for="outcome of predictionSet.outcomes"
+            :key="outcome.id"
+            class="flex flex-row w-full mt-[10px] font-medium cursor-pointer"
           >
             <div>{{ outcome.name }}</div>
             <div class="flex ml-auto justify-center items-center">
               <div class="mr-[6px]">{{ (outcome.chance * 100).toFixed(0) }}%</div>
-              <div class="flex" v-if="tradeEnabled(predictionSet.setStatus, predictionSet.endTime)">
+              <div v-if="tradeEnabled(predictionSet.setStatus, predictionSet.endTime)" class="flex">
                 <div
                   class="mr-[6px] px-1.5 border-1 bg-statusGreen/20 border-statusGreen rounded-[8px] hover:bg-statusGreen"
-                  @click="openDetails(TransactionType.BUY, 5)"
+                  @click="openDetails(outcome.id, TransactionType.BUY, 5)"
                 >
                   Buy 5
                 </div>
                 <div
                   class="mr-[6px] px-1.5 border-1 bg-statusGreen/20 border-statusGreen rounded-[8px] hover:bg-statusGreen"
-                  @click="openDetails(TransactionType.BUY, 5)"
+                  @click="openDetails(outcome.id, TransactionType.BUY, 10)"
                 >
                   Buy 10
                 </div>
                 <div
                   class="px-1.5 border-1 bg-statusRed/20 border-statusRed rounded-[8px] hover:bg-statusRed"
-                  @click="openDetails(TransactionType.SELL)"
+                  @click="openDetails(outcome.id, TransactionType.SELL)"
                 >
                   Sell
                 </div>
@@ -53,13 +54,13 @@
     </div>
 
     <div class="flex flex-row mt-[10px] items-center justify-center text-[12px] leading-[16px]">
-      <Status :status="predictionSet.setStatus" :endTime="predictionSet.endTime"></Status>
+      <Status :status="predictionSet.setStatus" :end-time="new Date(predictionSet.endTime)" />
       <div class="ml-[10px] text-[#888888]">
         {{ getDisplayDate(predictionSet.setStatus, predictionSet.endTime, predictionSet.resolutionTime) }}
       </div>
       <div class="ml-auto flex items-center justify-center">
         <div v-if="predictionSet.setStatus === PredictionSetStatus.FUNDING">
-          <BasicButton :size="'small'" :btnClass="['bg-statusBlue hover:bg-statusBlue-hover']">Fund</BasicButton>
+          <BasicButton :size="'small'" :btn-class="['bg-statusBlue hover:bg-statusBlue-hover']">Fund</BasicButton>
         </div>
         <!-- TODO: Check for potential return. -->
         <div v-else class="flex items-center justify-center">
@@ -72,8 +73,8 @@
 </template>
 
 <script lang="ts" setup>
-import { TransactionType, PredictionSetStatus } from '~/lib/types/prediction-set';
 import Status from './Status.vue';
+import { TransactionType, PredictionSetStatus } from '~/lib/types/prediction-set';
 import BasicButton from '~/components/general/BasicButton.vue';
 
 const props = defineProps({
@@ -82,13 +83,13 @@ const props = defineProps({
 
 const router = useRouter();
 
-function openDetails(transaction?: TransactionType, value?: number) {
+function openDetails(outcome?: number, transaction?: TransactionType, value?: number) {
   let query: any = null;
   if (transaction) {
     query =
       transaction === TransactionType.BUY
-        ? { transaction: TransactionType.BUY, value }
-        : { transaction: TransactionType.SELL };
+        ? { transaction: TransactionType.BUY, value, outcome }
+        : { transaction: TransactionType.SELL, outcome };
   }
 
   router.push({

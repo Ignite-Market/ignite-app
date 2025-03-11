@@ -39,7 +39,7 @@ const loading = ref<boolean>(true);
 const formRef = ref<FormInst | null>(null);
 
 const formData = ref<FormUserProfile>({
-  email: userStore.email,
+  email: userStore.user.email,
 });
 
 const rules: FormRules = {
@@ -57,7 +57,7 @@ onMounted(async () => {
   await Promise.all(Object.values(userStore.promises));
 
   if (!formData.value.email) {
-    formData.value.email = userStore.email;
+    formData.value.email = userStore.user.email;
   }
   loading.value = false;
 });

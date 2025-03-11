@@ -40,6 +40,8 @@ function contractErrorMsg(e: any) {
     return 'Transaction expired.';
   } else if (errorData.includes('Caller is not the owner of the token')) {
     return 'Wallet is not the owner of the chest.';
+  } else if (errorData.includes('amount can be up to 10% of fundingAmountTotal')) {
+    return 'Entered amount exceeds maximum';
   } else {
     return 'Blockchain error. Please retry or contact support if the issue persists.';
   }

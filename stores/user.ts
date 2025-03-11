@@ -77,7 +77,7 @@ export const useUserStore = defineStore('user', {
     /**
      * API calls
      */
-    async initUser() {
+    initUser() {
       if (this.jwt) {
         this.setUserToken(this.jwt);
         this.promises.profile = this.getUserData();

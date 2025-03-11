@@ -1,4 +1,4 @@
-import queryString from 'query-string';
+import { stringify } from 'query-string';
 import { removeLastSlash } from '../misc/strings';
 import { UserError } from '../types/error';
 
@@ -23,7 +23,7 @@ class Api {
   }
 
   async get<T>(path: string, query?: { [k: string]: Parameter | Array<Parameter> }, requestOptions?: RequestInit) {
-    const q = !query ? '' : '?' + queryString.stringify(query, { arrayFormat: 'bracket' });
+    const q = !query ? '' : '?' + stringify(query, { arrayFormat: 'bracket' });
     const requestData = { method: 'GET', query: q };
 
     const response = await fetch(APISettings.basePath + path + q, this.onRequest(requestData, requestOptions));

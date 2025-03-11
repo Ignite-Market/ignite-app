@@ -22,7 +22,7 @@
           <PredictionSetCommentOptions
             :comment="comment"
             @delete="(deletedComment: any) => handleDelete(comment, deletedComment)"
-          ></PredictionSetCommentOptions>
+          />
         </div>
       </div>
 
@@ -42,15 +42,15 @@
 
       <div v-if="showReply" class="my-[10px] w-full">
         <n-input
+          ref="firstReplyRef"
+          v-model:value="firstReply"
           placeholder="Add comment"
           size="medium"
-          v-model:value="firstReply"
           :disabled="!isConnected || replyLoading"
           :loading="replyLoading"
           class="text-[12px]"
-          ref="firstReplyRef"
-          @keyup.enter="addReply(firstReply)"
           :maxlength="600"
+          @keyup.enter="addReply(firstReply)"
         >
           <template #prefix>
             <div class="text-[12px] text-primary-light">{{ replyPrefix }}</div>
@@ -72,7 +72,7 @@
         </n-input>
       </div>
 
-      <div v-for="replyComment of comment.replies" class="mt-[10px] w-full">
+      <div v-for="replyComment of comment.replies" :key="replyComment.id" class="mt-[10px] w-full">
         <div class="flex flex-row w-full">
           <jazzicon
             class="cursor-pointer rounded-[50%] w-[32px] h-[32px] flex-shrink-0"
@@ -96,7 +96,7 @@
                 <PredictionSetCommentOptions
                   :comment="replyComment"
                   @delete="(deletedComment: any) => handleDelete(replyComment, deletedComment)"
-                ></PredictionSetCommentOptions>
+                />
               </div>
             </div>
 
@@ -123,15 +123,15 @@
 
             <div v-if="replyTo === replyComment.id" class="my-[10px] w-full">
               <n-input
+                :ref="el => (secondReplyRefs[replyComment.id] = el as any)"
+                v-model:value="secondReply"
                 placeholder="Add comment"
                 size="medium"
-                v-model:value="secondReply"
                 :disabled="!isConnected || replyLoading"
                 :loading="replyLoading"
                 class="text-[12px]"
-                :ref="el => (secondReplyRefs[replyComment.id] = el as any)"
-                @keyup.enter="addReply(secondReply)"
                 :maxlength="600"
+                @keyup.enter="addReply(secondReply)"
               >
                 <template #prefix>
                   <div class="text-[12px] text-primary-light">{{ replyPrefix }}</div>
@@ -160,15 +160,15 @@
 </template>
 
 <script lang="ts" setup>
-import type { CommentInterface } from '~/lib/types/prediction-set';
-import { SqlModelStatus } from '~/lib/types';
 import { formatDistanceToNow } from 'date-fns';
 import { useAccount } from '@wagmi/vue';
-import Endpoints from '~/lib/values/endpoints';
 import type { InputInst } from 'naive-ui';
+import type { CommentInterface } from '~/lib/types/prediction-set';
+import { SqlModelStatus } from '~/lib/types';
+import Endpoints from '~/lib/values/endpoints';
 
 const props = defineProps({
-  comment: { type: Object as PropType<CommentInterface>, default: {}, required: true },
+  comment: { type: Object as PropType<CommentInterface>, default: () => {}, required: true },
 });
 
 const { isConnected } = useAccount();
@@ -204,6 +204,7 @@ async function addReply(replyContent: string) {
       reply_user_id: taggedUser.value,
     });
 
+    // eslint-disable-next-line vue/no-mutating-props
     props.comment.replies = [...(props.comment.replies || []), res.data];
 
     replyTo.value = null;

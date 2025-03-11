@@ -2,9 +2,9 @@
   <div class="mt-5 pb-[33vh]">
     <div v-if="!loading && !items.length" class="text-center mt-6">No activity</div>
     <div v-else-if="items.length" class="flex flex-col mt-6 gap-y-5">
-      <PredictionSetActivityItem :item="item" v-for="item of items" />
+      <PredictionSetActivityItem v-for="item of items" :key="item.transactionId" :item="item" />
       <div v-if="pagination.itemCount! > pagination.page! * pagination.pageSize" class="flex">
-        <button :disabled="loading" @click="() => getActivity(pagination.page! + 1)" class="m-auto underline">
+        <button :disabled="loading" class="m-auto underline" @click="() => getActivity(pagination.page! + 1)">
           Show More
         </button>
       </div>
@@ -44,12 +44,11 @@ async function getActivity(page: number = 1) {
         orderBy: 'transactionTime',
         desc: true,
       });
-      await sleep(4000);
 
       items.value = [...items.value, ...res.data.items];
       pagination.value.itemCount = res.data.total;
     } catch (error) {
-      console.log(error);
+      console.error(error);
     } finally {
       loading.value = false;
     }

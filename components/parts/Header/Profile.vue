@@ -1,13 +1,13 @@
 <template>
   <n-dropdown
     v-if="userStore.loggedIn"
+    v-model:show="isOpened"
     class="rounded-lg"
     placement="bottom-end"
     size="large"
     :options="options"
     style="min-width: 220px"
     @select="handleSelect"
-    v-model:show="isOpened"
   >
     <div class="flex items-center bg-grey-light py-2 px-[6px] cursor-pointer rounded-lg">
       <jazzicon class="cursor-pointer rounded-[50%] w-[40px] h-[40px]" :address="address" :diameter="40" />
@@ -34,11 +34,11 @@ const userStore = useUserStore();
 
 const isOpened = ref(false);
 
-const renderNuxtIcon = (iconName: string) => {
-  return () => {
-    return h(resolveComponent('NuxtIcon'), { name: iconName, class: 'text' }, '');
-  };
-};
+// const renderNuxtIcon = (iconName: string) => {
+//   return () => {
+//     return h(resolveComponent('NuxtIcon'), { name: iconName, class: 'text' }, '');
+//   };
+// };
 
 const options = computed(() => [
   {

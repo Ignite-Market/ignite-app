@@ -14,16 +14,16 @@
     <div v-if="canClaim" class="flex items-center justify-center mt-5">
       <NuxtIcon name="icon/star2" class="text-primary text-[17px]" />
       <div class="ml-[4px] text-[14px] leading-[20px] font-medium mr-5 text-white/60">0.35$</div>
-      <BasicButton :loading="loading" @click="claimWinnings" size="small" class="py-[6px] px-[10px]">Claim</BasicButton>
+      <BasicButton :loading="loading" size="small" class="py-[6px] px-[10px]" @click="claimWinnings">Claim</BasicButton>
     </div>
 
     <div v-if="canWithdrawFunding" class="flex items-center justify-center mt-5">
       <BasicButton
         :loading="loading"
-        @click="withdrawFunding"
         :class="['bg-statusBlue hover:bg-statusBlue-hover']"
         class="py-[6px] px-[10px]"
         size="small"
+        @click="withdrawFunding"
       >
         Withdraw Funding
       </BasicButton>
@@ -44,7 +44,7 @@ const txWait = useTxWait();
 const props = defineProps({
   contractAddress: { type: String as PropType<Address>, default: null, required: true },
   conditionId: { type: String, default: null, required: true },
-  outcome: { type: Object as PropType<OutcomeInterface>, default: {}, required: true },
+  outcome: { type: Object as PropType<OutcomeInterface>, default: () => {}, required: true },
 });
 
 const canClaim = ref(false);
@@ -82,7 +82,7 @@ async function claimWinnings() {
     await ensureCorrectNetwork();
 
     txWait.hash.value = await claim(props.conditionId, props.outcome.outcomeIndex);
-    const receipt = await txWait.wait();
+    await txWait.wait();
 
     await updateClaimBalance();
   } catch (error) {
