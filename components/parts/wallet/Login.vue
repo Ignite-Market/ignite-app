@@ -1,5 +1,10 @@
 <template>
-  <BasicButton class="py-[17px] px-[16px]" v-bind="$attrs" @click="btnAction()" size="large">
+  <BasicButton
+    class="sm:py-[17px] py-[14px] px-[4px] sm:px-[16px] min-w-[55px]"
+    v-bind="$attrs"
+    size="large"
+    @click="btnAction()"
+  >
     <span v-if="address">
       Disconnect
       <small>({{ truncateWallet(address) }})</small>
@@ -28,7 +33,7 @@ const { resetContracts, ensureCorrectNetwork } = useContracts();
 
 /** Evm wallet - wagmi */
 const { disconnect } = useDisconnect();
-const { address, isConnected } = useAccount();
+const { address } = useAccount();
 
 useAccountEffect({
   onConnect: data => evmWalletLogin(data),

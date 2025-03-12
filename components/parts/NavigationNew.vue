@@ -30,8 +30,6 @@ const menuOptions = [
 const predictionCategories = Object.values(PredictionSetCategory).map(category => ({
   label: category,
   key: category.toLowerCase(),
-  to: 'category-category',
-  params: { category: category.toLowerCase() },
   path: '/category/' + category.toLowerCase(),
 }));
 menuOptions.push(...(predictionCategories as any));

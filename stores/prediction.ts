@@ -1,3 +1,4 @@
+import type { DataTableSortState } from 'naive-ui';
 import { defineStore } from 'pinia';
 import { type PredictionSetInterface, type PredictionSetsResponse } from '~/lib/types/prediction-set';
 import Endpoints from '~/lib/values/endpoints';
@@ -9,9 +10,15 @@ export const usePredictionStore = defineStore('prediction', {
     category: null as string | null,
     loading: false,
     pagination: createPagination(),
-    sorter: null,
+    sorter: null as DataTableSortState | null,
     filters: {
       search: {
+        value: null as string | null,
+      },
+      status: {
+        value: null as string | null,
+      },
+      sort: {
         value: null as string | null,
       },
     },
@@ -28,6 +35,9 @@ export const usePredictionStore = defineStore('prediction', {
 
     async fetch(args: FetchParams = {}, force = true): Promise<PredictionSetInterface[]> {
       syncFilters(this.filters, args);
+      if (args.category === 'all') {
+        args.category = null;
+      }
       if (args.category) {
         this.category = args.category;
       }

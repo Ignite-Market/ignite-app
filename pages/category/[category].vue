@@ -1,5 +1,6 @@
 <template>
   <Dashboard>
+    <PredictionSetFilter class="mb-6" />
     <PredictionSetListing :category="category" />
   </Dashboard>
 </template>

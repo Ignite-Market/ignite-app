@@ -1,6 +1,6 @@
 <!-- TODO: this is somehow too big? -->
 <template>
-  <n-input v-model:value="search" placeholder="Search markets" size="large" class="md:min-w-[30vw]">
+  <n-input v-model:value="search" placeholder="Search" size="large">
     <template #prefix>
       <NuxtIcon name="icon/search" />
     </template>
@@ -9,6 +9,13 @@
 
 <script lang="ts" setup>
 const search = ref('');
+
+onMounted(() => {
+  predictionStore.filters.search.value = null;
+});
+onUnmounted(() => {
+  predictionStore.filters.search.value = null;
+});
 
 watchDebounced(
   () => search.value,

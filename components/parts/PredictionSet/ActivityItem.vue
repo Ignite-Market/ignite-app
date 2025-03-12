@@ -17,9 +17,9 @@
         </span>
         <span v-if="item.type < TransactionType.FUND">
           {{ item.type === TransactionType.BUY ? ' bought ' : ' sold ' }}
-          <span class="text-primary"
-            >{{ formatTokenAmount(item.outcomeTokens) }} <span class="font-bold">{{ item.outcomeName }}</span></span
-          >
+          <span class="text-primary">
+            {{ formatTokenAmount(item.outcomeTokens) }} <span class="font-bold">{{ item.outcomeName }}</span>
+          </span>
           for <span class="font-bold">{{ formatTokenAmount(item.userAmount) }} {{ tokenStore.symbol }}</span>
         </span>
         <span v-else>

@@ -35,6 +35,7 @@ export enum TransactionType {
  * Prediction set categories.
  */
 export enum PredictionSetCategory {
+  ALL = 'All',
   SPORTS = 'Sports',
   BUSINESS = 'Business',
 }

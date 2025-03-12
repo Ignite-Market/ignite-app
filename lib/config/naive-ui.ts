@@ -43,6 +43,9 @@ export const themeOverrides: GlobalThemeOverrides = {
     colorActiveWarning: colors.bg.DEFAULT,
     colorDisabled: colors.primary.dark,
   },
+  AutoComplete: {
+    peers: { InternalSelectMenu: { color: colors.grey.light } },
+  },
   Input: {
     border: `1px solid ${colors.grey.light}`,
     borderDisabled: `1px solid ${colors.primary.dark}`,
