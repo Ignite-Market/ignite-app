@@ -5,6 +5,7 @@
     :theme-overrides="{ peers: { InternalSelection: { color: '#292929' } } }"
     placeholder="Status"
     :options="options"
+    clearable
   >
     <template #arrow>
       <NuxtIcon name="icon/arrow-down" class="icon-auto !inline-flex flex-cc" />
@@ -13,29 +14,30 @@
 </template>
 
 <script lang="ts" setup>
+import { PredictionSetStatus } from '~/lib/types/prediction-set';
+
+const predictionStore = usePredictionStore();
+
 const status = ref(null);
 
 const options = [
-  { label: 'All', value: 1 },
-  { label: 'Active', value: 2 },
-  { label: 'Resolved', value: 3 },
+  { label: 'Active', value: PredictionSetStatus.ACTIVE },
+  { label: 'Resolved', value: PredictionSetStatus.PENDING },
+  { label: 'Funding', value: PredictionSetStatus.FUNDING },
 ];
 
 onMounted(() => {
-  predictionStore.filters.search.value = null;
+  predictionStore.filters.status.value = null;
 });
 onUnmounted(() => {
-  predictionStore.filters.search.value = null;
+  predictionStore.filters.status.value = null;
 });
 
-watchDebounced(
+watch(
   () => status.value,
   async status => {
     predictionStore.filters.status.value = status;
     await predictionStore.fetch();
-  },
-  { debounce: 1000 }
+  }
 );
-
-const predictionStore = usePredictionStore();
 </script>

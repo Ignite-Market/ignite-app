@@ -41,6 +41,10 @@ export const usePredictionStore = defineStore('prediction', {
       if (args.category) {
         this.category = args.category;
       }
+      if (this.sorter && !args?.sorter) {
+        args.sorter = this.sorter;
+      }
+      console.log(args.sorter);
       if (this.data?.length && !force) {
         return this.data;
       }

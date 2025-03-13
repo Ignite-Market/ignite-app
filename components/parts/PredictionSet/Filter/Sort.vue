@@ -5,6 +5,7 @@
     :theme-overrides="{ peers: { InternalSelection: { color: '#292929' } } }"
     placeholder="Sort by"
     :options="options"
+    clearable
   >
     <template #arrow>
       <NuxtIcon name="icon/arrow-down" class="icon-auto !inline-flex flex-cc" />
@@ -15,6 +16,8 @@
 <script lang="ts" setup>
 import type { DataTableSortState } from 'naive-ui';
 
+const predictionStore = usePredictionStore();
+
 const sort = ref(null);
 
 const options = [
@@ -24,24 +27,21 @@ const options = [
 ];
 
 onMounted(() => {
-  predictionStore.filters.search.value = null;
+  predictionStore.sorter = null;
 });
 onUnmounted(() => {
-  predictionStore.filters.search.value = null;
+  predictionStore.sorter = null;
 });
 
-watchDebounced(
+watch(
   () => sort.value,
   async sort => {
-    console.log(sort);
-    if (sort) {
-      predictionStore.sorter = getSorter(sort!);
-      await predictionStore.fetch();
-    }
-  },
-  { debounce: 500 }
+    predictionStore.sorter = getSorter(sort!);
+    await predictionStore.fetch();
+  }
 );
-function getSorter(sort: number): DataTableSortState {
+
+function getSorter(sort: number): DataTableSortState | null {
   switch (sort) {
     case 1:
       return {
@@ -63,12 +63,7 @@ function getSorter(sort: number): DataTableSortState {
       };
 
     default:
-      return {
-        columnKey: 'id',
-        order: 'descend',
-        sorter: 'default',
-      };
+      return null;
   }
 }
-const predictionStore = usePredictionStore();
 </script>
