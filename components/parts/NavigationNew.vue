@@ -15,6 +15,8 @@
 
 <script lang="ts" setup>
 import type { MenuOption } from 'naive-ui';
+import type { RouteLocationNormalizedLoadedGeneric } from 'vue-router';
+import { PredictionSetCategory } from '~/lib/types/prediction-set';
 
 const menuOptions = [
   {
@@ -23,35 +25,35 @@ const menuOptions = [
     to: 'index',
     iconName: 'icon/fire',
   },
-  {
-    label: 'Sports',
-    key: 'sports',
-    to: 'sports',
-  },
-  {
-    label: 'Business',
-    key: 'business',
-    to: 'business',
-  },
 ];
+
+const predictionCategories = Object.values(PredictionSetCategory).map(category => ({
+  label: category,
+  key: category.toLowerCase(),
+  path: '/category/' + category.toLowerCase(),
+}));
+menuOptions.push(...(predictionCategories as any));
 
 const props = defineProps({
   sliceName: { type: Boolean, default: false },
 });
 const route = useRoute();
-const selectedMenu = ref<string>(routeNameToKey(route.name?.toString() || ''));
-
-/** Watch route name and refresh selected menu item */
-const routeName = computed(() => {
-  return route.name?.toString() || '';
-});
+const selectedMenu = ref<string>(routeToKey(route));
 
 watch(
-  () => routeName.value,
-  routeName => {
-    selectedMenu.value = routeNameToKey(routeName?.toString() || '');
+  () => route,
+  route => {
+    selectedMenu.value = routeToKey(route);
   }
 );
+
+function routeToKey(route: RouteLocationNormalizedLoadedGeneric) {
+  console.log(route);
+  if (route.params && Object.keys(route.params).length !== 0) {
+    const ar = route.path.split('/');
+    return ar[ar.length - 1];
+  } else return routeNameToKey(route.name?.toString() || '');
+}
 
 function routeNameToKey(name: string) {
   return props.sliceName ? removeIdOrSlug(name) : name;
@@ -74,7 +76,7 @@ function renderMenuLabel(option: MenuOption) {
   } else if ('to' in option) {
     return h(
       resolveComponent('NuxtLink'),
-      { to: { name: option.to, query: option.query }, class: 'font-medium' },
+      { to: { name: option.to, query: option.query, params: option.params }, class: 'font-medium' },
       () => option.label as string
     );
   }

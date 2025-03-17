@@ -5,11 +5,7 @@
     </div>
 
     <div>
-      <n-input placeholder="Search markets" size="large" class="md:min-w-[30vw]">
-        <template #prefix>
-          <NuxtIcon name="icon/search" />
-        </template>
-      </n-input>
+      <PredictionSetSearch />
     </div>
 
     <div>

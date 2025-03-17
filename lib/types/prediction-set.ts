@@ -31,6 +31,15 @@ export enum TransactionType {
   REMOVE_FUND = 4,
 }
 
+/**
+ * Prediction set categories.
+ */
+export enum PredictionSetCategory {
+  ALL = 'All',
+  SPORTS = 'Sports',
+  BUSINESS = 'Business',
+}
+
 export interface OutcomeChance extends GeneralInterface {
   chance: number;
   supply: number;

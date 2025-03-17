@@ -1,7 +1,7 @@
 <template>
   <Dashboard @load-more="loadMore">
     <BannerListing />
-    <PredictionSetListing ref="predictionSetListing" :category="'top'" />
+    <PredictionSetListing ref="predictionSetListing" />
   </Dashboard>
 </template>
 
