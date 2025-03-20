@@ -376,7 +376,6 @@ const buyValidator = (x: number) => {
 };
 
 const onBuyBlur = () => {
-  console.log('blur');
   if (buyError.value) {
     amount.value = buyFundLimit.value;
     buyError.value = '';
