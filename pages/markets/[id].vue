@@ -32,7 +32,7 @@
         <div class="flex gap-1.5 mt-2">
           <Btn
             v-if="loggedIn"
-            class="bg-grey-light h-8 w-8 rounded flex-cc hover:bg-grey-lighter"
+            btn-class="bg-grey-light h-8 w-8 rounded flex-cc hover:bg-grey-lighter"
             type="link"
             @click="toggleWatchlist"
           >
@@ -42,7 +42,7 @@
               class="text-[20px]"
             />
           </Btn>
-          <Btn class="bg-grey-light h-8 w-8 rounded flex-cc hover:bg-grey-lighter" type="link" @click="copyLink">
+          <Btn btn-class="bg-grey-light h-8 w-8 rounded flex-cc hover:bg-grey-lighter" type="link" @click="copyLink">
             <NuxtIcon name="icon/link" class="text-[20px]" />
           </Btn>
         </div>
@@ -58,8 +58,8 @@
               v-if="params?.id"
               :prediction-id="+params.id"
               :outcomes="graphOutcomes"
-              :start-time="predictionSet.startTime"
-              :end-time="predictionSet.endTime"
+              :start-time="new Date(predictionSet.startTime)"
+              :end-time="new Date(predictionSet.endTime)"
             />
           </div>
 
@@ -112,10 +112,9 @@
                 class="flex items-center flex-grow-[1]"
               >
                 <BasicButton
-                  class="mr-3 w-full"
                   size="large"
                   type="secondary"
-                  :btn-class="['bg-statusGreen/20 border-statusGreen hover:bg-statusGreen']"
+                  :btn-class="['bg-statusGreen/20 border-statusGreen hover:bg-statusGreen mr-3 w-full']"
                   :selected="selectedOutcome.id === outcome.id && selectedAction === TransactionType.BUY"
                   :selected-class="['!bg-statusGreen !border-statusGreen']"
                   @click="selectOutcome(TransactionType.BUY, outcome)"
@@ -123,10 +122,9 @@
                   Buy
                 </BasicButton>
                 <BasicButton
-                  class="w-full"
                   size="large"
                   type="secondary"
-                  :btn-class="['bg-statusRed/20 border-statusRed hover:bg-statusRed']"
+                  :btn-class="['bg-statusRed/20 border-statusRed hover:bg-statusRed w-full']"
                   :selected="selectedOutcome.id === outcome.id && selectedAction === TransactionType.SELL"
                   :selected-class="['!bg-statusRed !border-statusRed']"
                   @click="selectOutcome(TransactionType.SELL, outcome)"
@@ -202,17 +200,18 @@
 
         <!-- RIGHT -->
         <div class="md:sticky top-6 self-start md:ml-8 lg:ml-24 w-full min-w-[260px] md:w-[409px] mb-6">
-          <PredictionSetAction
-            v-if="actionsEnabled(predictionSet.setStatus, predictionSet.endTime)"
-            class="mobile:hidden"
-            :contract-address="predictionSet.chainData.contractAddress"
-            :outcome="selectedOutcome"
-            :action="selectedAction"
-            :status="predictionSet.setStatus"
-            :end-time="predictionSet.endTime.toString()"
-            :outcomes="predictionSet.outcomes"
-            :default-value="defaultActionValue"
-          />
+          <div class="mobile:hidden">
+            <PredictionSetAction
+              v-if="actionsEnabled(predictionSet.setStatus, predictionSet.endTime)"
+              :contract-address="predictionSet.chainData.contractAddress"
+              :outcome="selectedOutcome"
+              :action="selectedAction"
+              :status="predictionSet.setStatus"
+              :end-time="predictionSet.endTime.toString()"
+              :outcomes="predictionSet.outcomes"
+              :default-value="defaultActionValue"
+            />
+          </div>
 
           <PredictionSetPhase
             v-if="predictionSet.setStatus !== PredictionSetStatus.FINALIZED"

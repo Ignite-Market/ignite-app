@@ -111,7 +111,7 @@
               class="min-w-full text-center"
               type="number"
               :show-button="true"
-              :max="tokenStore.parsedBalance"
+              :max="maxBuy"
               button-placement="both"
               :disabled="loading"
             >
@@ -335,7 +335,7 @@ const props = defineProps({
   defaultValue: { type: Number, default: 0 },
 });
 
-const { getMinTokensToBuy, addFunding, buy, sell, calcSellAmountInCollateral, getPricePerShare } =
+const { getMinTokensToBuy, addFunding, buy, sell, calcSellAmountInCollateral, getPricePerShare, getTotalFunding } =
   useFixedMarketMaker();
 const { refreshCollateralBalance, getTokenStore } = useCollateralToken();
 const { getConditionalBalance, parseConditionalBalance } = useConditionalToken();
@@ -354,6 +354,7 @@ const returnAmount = ref<string>('0.0');
 const potentialReturn = ref<string>('0.0');
 const conditionalBalance = ref(BigInt(0));
 const pricePerShare = ref(0.0);
+const totalFundAmount = ref(BigInt(0));
 
 const showSuccessModal = ref(false);
 const transactionHash = ref('');
@@ -375,14 +376,16 @@ const enoughCollateralBalance = computed(() => {
   return tokenStore.balance >= scaledAmount;
 });
 
-onMounted(async () => {
-  if (props.status === PredictionSetStatus.FUNDING) {
-    selectedTab.value = TransactionType.FUND;
-  } else if (props.action) {
-    selectedTab.value = props.action;
+const maxBuy = computed(() => {
+  let max = (BigInt(totalFundAmount.value) * 10n) / 100n;
+  if (tokenStore.balance < max) {
+    max = tokenStore.balance;
   }
+  return bigIntToNum(max, 6);
+});
 
-  await refreshCollateralBalance();
+onMounted(async () => {
+  totalFundAmount.value = await getTotalFunding(props.contractAddress);
 });
 
 watchEffect(async () => {
@@ -516,8 +519,9 @@ async function fund() {
       message.error(contractError(receipt.error));
     }
 
-    amount.value = '' as any;
+    amount.value = 0 as any;
     await refreshCollateralBalance();
+    await refreshBalances();
   } catch (error) {
     console.error(error);
     message.error(contractError(error));
@@ -559,7 +563,7 @@ async function sellOutcome() {
 
     console.log(collateralAmount);
 
-    amount.value = '' as any;
+    amount.value = 0 as any;
     await refreshBalances();
   } catch (error) {
     console.error(error);
@@ -594,7 +598,7 @@ async function buyOutcome() {
       message.error(contractError(receipt.error));
     }
 
-    amount.value = '' as any;
+    amount.value = 0 as any;
     await refreshBalances();
   } catch (error) {
     console.error(error);
@@ -614,6 +618,7 @@ async function refreshBalances() {
     await refreshCollateralBalance();
     conditionalBalance.value = await getConditionalBalance(props.outcome.positionId);
     pricePerShare.value = await getPricePerShare(props.contractAddress, props.outcome.outcomeIndex);
+    totalFundAmount.value = await getTotalFunding(props.contractAddress);
   } catch (error) {}
 }
 </script>
