@@ -48,7 +48,6 @@ watch(
 );
 
 function routeToKey(route: RouteLocationNormalizedLoadedGeneric) {
-  console.log(route);
   if (route.params && Object.keys(route.params).length !== 0) {
     const ar = route.path.split('/');
     return ar[ar.length - 1];

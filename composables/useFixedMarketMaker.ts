@@ -1,5 +1,6 @@
 import { newtonRaphson } from '@fvictorio/newton-raphson-method';
 import { useAccount } from '@wagmi/vue';
+// eslint-disable-next-line import/no-named-as-default
 import Big from 'big.js';
 import { type Address } from 'viem';
 import { ContractType } from '~/lib/config/contracts';
@@ -192,6 +193,17 @@ export default function useFixedMarketMaker() {
   }
 
   /**
+   * Returns total funding for selected market.
+   * @param fpmmContractAddress FPMM contract address.
+   * @param shareAmount Amount of shares to return.
+   */
+  async function getTotalFunding(fpmmContractAddress: Address) {
+    const contract = await initContract(ContractType.FPMM, fpmmContractAddress);
+    const res = await contract.read.fundingAmountTotal();
+    return res;
+  }
+
+  /**
    *
    * @param sharesAmount
    * @param outcomeIndex
@@ -296,6 +308,7 @@ export default function useFixedMarketMaker() {
     getPricePerShare,
     getFundingBalance,
     removeFunding,
+    getTotalFunding,
     calcSellAmountInCollateral,
     removeFraction,
     addFraction,

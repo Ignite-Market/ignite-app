@@ -106,7 +106,6 @@
             <n-input-number
               v-model:value="amount"
               placeholder="0"
-              min="0"
               size="large"
               class="min-w-full text-center"
               type="number"
@@ -114,6 +113,8 @@
               :max="tokenStore.parsedBalance"
               button-placement="both"
               :disabled="loading"
+              :validator="buyValidator"
+              @blur="onBuyBlur"
             >
               <template #minus-icon>
                 <div
@@ -131,6 +132,9 @@
                 </div>
               </template>
             </n-input-number>
+            <div v-if="buyError" class="text-statusRed mt-1">
+              {{ buyError }}
+            </div>
           </div>
 
           <BasicButton
@@ -335,7 +339,7 @@ const props = defineProps({
   defaultValue: { type: Number, default: 0 },
 });
 
-const { getMinTokensToBuy, addFunding, buy, sell, calcSellAmountInCollateral, getPricePerShare } =
+const { getMinTokensToBuy, addFunding, buy, sell, calcSellAmountInCollateral, getPricePerShare, getTotalFunding } =
   useFixedMarketMaker();
 const { refreshCollateralBalance, getTokenStore } = useCollateralToken();
 const { getConditionalBalance, parseConditionalBalance } = useConditionalToken();
@@ -354,9 +358,29 @@ const returnAmount = ref<string>('0.0');
 const potentialReturn = ref<string>('0.0');
 const conditionalBalance = ref(BigInt(0));
 const pricePerShare = ref(0.0);
+const totalFundAmount = ref(BigInt(0));
 
 const showSuccessModal = ref(false);
 const transactionHash = ref('');
+
+const buyError = ref('');
+
+const buyValidator = (x: number) => {
+  if (x > buyFundLimit.value) {
+    // Because input is calling -1 +1 for buttons
+    if (amount.value !== x - 1) {
+      buyError.value = `Value can not exceed 10% of funding`;
+    }
+  } else buyError.value = '';
+  return x >= 0 && x <= buyFundLimit.value;
+};
+
+const onBuyBlur = () => {
+  if (buyError.value) {
+    amount.value = buyFundLimit.value;
+    buyError.value = '';
+  }
+};
 
 watch(
   () => props.defaultValue,
@@ -375,14 +399,16 @@ const enoughCollateralBalance = computed(() => {
   return tokenStore.balance >= scaledAmount;
 });
 
-onMounted(async () => {
-  if (props.status === PredictionSetStatus.FUNDING) {
-    selectedTab.value = TransactionType.FUND;
-  } else if (props.action) {
-    selectedTab.value = props.action;
+const buyFundLimit = computed(() => {
+  let max = (BigInt(totalFundAmount.value) * 10n) / 100n;
+  if (tokenStore.balance < max) {
+    max = tokenStore.balance;
   }
+  return bigIntToNum(max, 6);
+});
 
-  await refreshCollateralBalance();
+onMounted(async () => {
+  totalFundAmount.value = await getTotalFunding(props.contractAddress);
 });
 
 watchEffect(async () => {
@@ -516,8 +542,9 @@ async function fund() {
       message.error(contractError(receipt.error));
     }
 
-    amount.value = '' as any;
+    amount.value = 0 as any;
     await refreshCollateralBalance();
+    await refreshBalances();
   } catch (error) {
     console.error(error);
     message.error(contractError(error));
@@ -559,7 +586,7 @@ async function sellOutcome() {
 
     console.log(collateralAmount);
 
-    amount.value = '' as any;
+    amount.value = 0 as any;
     await refreshBalances();
   } catch (error) {
     console.error(error);
@@ -577,7 +604,7 @@ async function buyOutcome() {
   loading.value = true;
   try {
     await refreshCollateralBalance();
-    if (!enoughCollateralBalance.value) {
+    if (buyFundLimit.value < amount.value || !enoughCollateralBalance.value) {
       return;
     }
 
@@ -594,7 +621,7 @@ async function buyOutcome() {
       message.error(contractError(receipt.error));
     }
 
-    amount.value = '' as any;
+    amount.value = 0 as any;
     await refreshBalances();
   } catch (error) {
     console.error(error);
@@ -614,6 +641,7 @@ async function refreshBalances() {
     await refreshCollateralBalance();
     conditionalBalance.value = await getConditionalBalance(props.outcome.positionId);
     pricePerShare.value = await getPricePerShare(props.contractAddress, props.outcome.outcomeIndex);
+    totalFundAmount.value = await getTotalFunding(props.contractAddress);
   } catch (error) {}
 }
 </script>
