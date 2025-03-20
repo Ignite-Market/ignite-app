@@ -106,14 +106,15 @@
             <n-input-number
               v-model:value="amount"
               placeholder="0"
-              min="0"
               size="large"
               class="min-w-full text-center"
               type="number"
               :show-button="true"
-              :max="maxBuy"
+              :max="tokenStore.parsedBalance"
               button-placement="both"
               :disabled="loading"
+              :validator="buyValidator"
+              @blur="onBuyBlur"
             >
               <template #minus-icon>
                 <div
@@ -131,6 +132,9 @@
                 </div>
               </template>
             </n-input-number>
+            <div v-if="buyError" class="text-statusRed mt-1">
+              {{ buyError }}
+            </div>
           </div>
 
           <BasicButton
@@ -359,6 +363,26 @@ const totalFundAmount = ref(BigInt(0));
 const showSuccessModal = ref(false);
 const transactionHash = ref('');
 
+const buyError = ref('');
+
+const buyValidator = (x: number) => {
+  if (x > buyFundLimit.value) {
+    // Because input is calling -1 +1 for buttons
+    if (amount.value !== x - 1) {
+      buyError.value = `Value can not exceed 10% of funding`;
+    }
+  } else buyError.value = '';
+  return x >= 0 && x <= buyFundLimit.value;
+};
+
+const onBuyBlur = () => {
+  console.log('blur');
+  if (buyError.value) {
+    amount.value = buyFundLimit.value;
+    buyError.value = '';
+  }
+};
+
 watch(
   () => props.defaultValue,
   defaultValue => {
@@ -376,7 +400,7 @@ const enoughCollateralBalance = computed(() => {
   return tokenStore.balance >= scaledAmount;
 });
 
-const maxBuy = computed(() => {
+const buyFundLimit = computed(() => {
   let max = (BigInt(totalFundAmount.value) * 10n) / 100n;
   if (tokenStore.balance < max) {
     max = tokenStore.balance;
@@ -581,7 +605,7 @@ async function buyOutcome() {
   loading.value = true;
   try {
     await refreshCollateralBalance();
-    if (!enoughCollateralBalance.value) {
+    if (buyFundLimit.value < amount.value || !enoughCollateralBalance.value) {
       return;
     }
 
