@@ -408,6 +408,13 @@ const buyFundLimit = computed(() => {
 });
 
 onMounted(async () => {
+  if (props.status === PredictionSetStatus.FUNDING) {
+    selectedTab.value = TransactionType.FUND;
+  } else if (props.action) {
+    selectedTab.value = props.action;
+  }
+
+  await refreshCollateralBalance();
   totalFundAmount.value = await getTotalFunding(props.contractAddress);
 });
 
