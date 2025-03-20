@@ -347,7 +347,7 @@ async function toggleWatchlist() {
   }
   watchlistLoading.value = true;
   if (predictionSet.value.isWatched) {
-    // Delete if already watched
+    // Delete if already watched.
     try {
       await $api.delete(Endpoints.predictionSetUserWatchlist(predictionSet.value.id));
       predictionSet.value.isWatched = false;
@@ -355,7 +355,7 @@ async function toggleWatchlist() {
       console.error(error);
     }
   } else {
-    // Add to watchlist
+    // Add to watchlist.
     try {
       await $api.post(Endpoints.predictionSetUserWatchlist(predictionSet.value.id));
       predictionSet.value.isWatched = true;
