@@ -80,6 +80,7 @@ export interface PredictionSetInterface extends GeneralInterface {
   chainData: ChainDataInterface;
   isWatched?: boolean;
   volume?: number;
+  positions: any[];
 }
 export interface PredictionSetResponse extends GeneralResponse<PredictionSetInterface> {}
 export interface PredictionSetsResponse extends GeneralItemsResponse<any> {}

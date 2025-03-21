@@ -63,17 +63,25 @@
             />
           </div>
 
+          <!-- OPEN POSITIONS -->
+          <div v-if="predictionSet.positions.length">
+            <PredictionSetPositions :positions="predictionSet.positions" />
+          </div>
+
           <!-- OUTCOMES -->
           <div class="flex flex-col gap-y-[6px] mt-10">
             <div
               v-for="(outcome, i) in predictionSet.outcomes"
               :key="i"
-              class="flex flex-wrap bg-grey rounded-lg pl-3 pr-4 py-[6px] items-center w-full relative gap-x-9 gap-y-4"
-              :class="{ 'border-1 border-primary': winningOutcome?.id === outcome.id }"
+              class="flex flex-wrap bg-grey rounded-lg pl-3 pr-4 py-[6px] items-center w-full relative gap-x-9 gap-y-4 overflow-hidden cursor-pointer"
+              :class="{
+                'border-1 border-primary': winningOutcome?.id === outcome.id,
+              }"
             >
               <div
-                class="absolute w-0.5 h-6 left-0 top-1/2 bottom-1/2 -translate-y-1/2"
+                class="absolute w-0.5 h-6 left-0 top-1/2 bottom-1/2 -translate-y-1/2 z-1 transition-all duration-500"
                 :style="{ backgroundColor: outcomeColors[i] }"
+                :class="{ 'h-full': selectedOutcome.id === outcome.id }"
               ></div>
 
               <div class="flex justify-between items-center flex-grow-[10] gap-8 min-w-[220px]">
@@ -256,7 +264,20 @@ import {
 import Endpoints from '~/lib/values/endpoints';
 
 // Chart colors
-const outcomeColors = ['#F95F85', '#4A61C9', '#639266', '#F1B11B'];
+const outcomeColors = [
+  '#F95F85',
+  '#4A61C9',
+  '#639266',
+  '#F1B11B',
+  '#FF6B3B',
+  '#B620E0',
+  '#00B7C2',
+  '#8438FF',
+  '#E03E52',
+  '#FF8F00',
+  '#6C00A2',
+  '#00A86B',
+];
 
 const REFRESH_INTERVAL = 10_000;
 
