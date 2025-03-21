@@ -210,6 +210,7 @@
               :end-time="predictionSet.endTime.toString()"
               :outcomes="predictionSet.outcomes"
               :default-value="defaultActionValue"
+              @action-changed="(action: TransactionType) => (selectedAction = action)"
             />
           </div>
 
@@ -238,6 +239,7 @@
       :end-time="predictionSet.endTime.toString()"
       :outcomes="predictionSet.outcomes"
       :default-value="defaultActionValue"
+      @action-changed="(action: TransactionType) => (selectedAction = action)"
     />
   </n-drawer>
 </template>

@@ -339,6 +339,8 @@ const props = defineProps({
   defaultValue: { type: Number, default: 0 },
 });
 
+const emit = defineEmits(['actionChanged']);
+
 const { getMinTokensToBuy, addFunding, buy, sell, calcSellAmountInCollateral, getPricePerShare, getTotalFunding } =
   useFixedMarketMaker();
 const { refreshCollateralBalance, getTokenStore } = useCollateralToken();
@@ -429,6 +431,14 @@ watch(
   () => props.action,
   () => {
     selectedTab.value = props.action;
+  }
+);
+
+watch(
+  () => selectedTab.value,
+  () => {
+    console.log(selectedTab.value);
+    emit('actionChanged', selectedTab.value);
   }
 );
 
