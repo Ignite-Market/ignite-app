@@ -13,8 +13,17 @@
   </BasicButton>
 
   <!-- Modal - Wallet select -->
-  <modal v-model:show="modalWalletSelectVisible" class="w-auto" :title="$t('wallet.info')">
-    <WalletEvm :loading="loadingWallet" />
+  <modal v-model:show="modalWalletSelectVisible" class="w-[270px] border-none">
+    <div class="flex flex-col">
+      <div class="flex w-full items-center justify-center mb-2">
+        <NuxtIcon name="wallet/injected" class="text-primary text-[40px]" />
+      </div>
+      <div class="flex items-center justify-center text-[14px] leading-[20px] font-bold">Connect wallet</div>
+
+      <div class="flex flex-col items-center justify-center mt-5 mb-3">
+        <WalletEvm :loading="loadingWallet" />
+      </div>
+    </div>
   </modal>
 </template>
 

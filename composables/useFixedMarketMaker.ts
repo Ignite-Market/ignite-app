@@ -9,7 +9,7 @@ import { ContractType } from '~/lib/config/contracts';
  * Use Fixed Market Maker (FMM) Contract.
  */
 export default function useFixedMarketMaker() {
-  const { checkCollateralAllowance, getTokenStore, loadToken } = useCollateralToken();
+  const { getTokenStore, loadToken } = useCollateralToken();
   const { checkConditionalApprove } = useConditionalToken();
   const { initContract, initReadContract } = useContracts();
   const { address, isConnected } = useAccount();
@@ -102,13 +102,11 @@ export default function useFixedMarketMaker() {
     }
     const contract = await initContract(ContractType.FPMM, fpmmContractAddress);
 
-    const allowance = await checkCollateralAllowance(fpmmContractAddress);
-    if (allowance) {
-      const { minTokensToBuy } = await getMinTokensToBuy(fpmmContractAddress, amount, outcomeIndex, slippage);
-      const scaledAmount = BigInt(Math.round(amount * 10 ** tokenStore.decimals));
+    // Make sure that you check for collateral allowance separately.
+    const { minTokensToBuy } = await getMinTokensToBuy(fpmmContractAddress, amount, outcomeIndex, slippage);
+    const scaledAmount = BigInt(Math.round(amount * 10 ** tokenStore.decimals));
 
-      return await contract.write.buy([scaledAmount, outcomeIndex, minTokensToBuy]);
-    }
+    return await contract.write.buy([scaledAmount, outcomeIndex, minTokensToBuy]);
   }
 
   /**
@@ -171,11 +169,9 @@ export default function useFixedMarketMaker() {
     }
     const contract = await initContract(ContractType.FPMM, fpmmContractAddress);
 
-    const allowance = await checkCollateralAllowance(fpmmContractAddress);
-    if (allowance) {
-      const scaledAmount = BigInt(Math.round(amount * 10 ** tokenStore.decimals));
-      return await contract.write.addFunding([scaledAmount, []]);
-    }
+    // Make sure that you check for collateral allowance separately.
+    const scaledAmount = BigInt(Math.round(amount * 10 ** tokenStore.decimals));
+    return await contract.write.addFunding([scaledAmount, []]);
   }
 
   /**

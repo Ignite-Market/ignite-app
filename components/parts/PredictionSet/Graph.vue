@@ -6,6 +6,7 @@
         size="small"
         class="!bg-grey-light w-[46px] h-[26px] hover:!bg-grey-lighter"
         :class="selectedRange === range ? 'border-primary border-2' : ''"
+        :disabled="loading"
         @click="() => (selectedRange = range)"
       >
         {{ range }}
@@ -40,6 +41,7 @@ use([CanvasRenderer, LineChart, TooltipComponent, GridComponent]);
 type Options = ComposeOption<GridComponentOption | TooltipComponentOption>;
 
 const ranges = ['ALL', '1D', '1W', '1M'] as const;
+const loading = ref(false);
 const selectedRange = ref<(typeof ranges)[number]>('ALL');
 
 const options = ref({
@@ -121,18 +123,25 @@ function isRangeDisabled(range: (typeof ranges)[number]) {
 }
 
 async function getChanceHistory(range: (typeof ranges)[number] = 'ALL') {
-  const res = await $api.get<PredictionSetChanceHistoryResponse>(
-    Endpoints.predictionSetChanceHistory(Number(props.predictionId)),
-    { range }
-  );
+  loading.value = true;
+  try {
+    const res = await $api.get<PredictionSetChanceHistoryResponse>(
+      Endpoints.predictionSetChanceHistory(Number(props.predictionId)),
+      { range }
+    );
 
-  const data = Object.keys(res.data).map(key => ({
-    name: props.outcomes.find(o => o.id === Number(key))?.name,
-    color: props.outcomes.find(o => o.id === Number(key))?.color,
-    type: 'line' as const,
-    showSymbol: false,
-    data: res.data[key].map(x => [x.date, x.chance]),
-  }));
-  options.value.series = data;
+    const data = Object.keys(res.data).map(key => ({
+      name: props.outcomes.find(o => o.id === Number(key))?.name,
+      color: props.outcomes.find(o => o.id === Number(key))?.color,
+      type: 'line' as const,
+      showSymbol: false,
+      data: res.data[key].map(x => [x.date, x.chance]),
+    }));
+    options.value.series = data;
+  } catch (error) {
+    console.log(error);
+  } finally {
+    loading.value = false;
+  }
 }
 </script>

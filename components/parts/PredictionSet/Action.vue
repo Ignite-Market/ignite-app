@@ -330,6 +330,15 @@
       </BasicButton>
     </div>
   </Modal>
+
+  <!-- <Modal v-model:show="modalWalletSelectVisible" class="w-[270px] border-none">
+    <div class="flex flex-col">
+      <div class="flex w-full items-center justify-center mb-2">
+        <NuxtIcon name="wallet/injected" class="text-primary text-[40px]" />
+      </div>
+      <div class="flex items-center justify-center text-[14px] leading-[20px] font-bold">Connect wallet</div>
+    </div>
+  </Modal> -->
 </template>
 
 <script setup lang="ts">
@@ -353,7 +362,7 @@ const emit = defineEmits(['actionChanged']);
 
 const { getMinTokensToBuy, addFunding, buy, sell, calcSellAmountInCollateral, getPricePerShare, getTotalFunding } =
   useFixedMarketMaker();
-const { refreshCollateralBalance, getTokenStore } = useCollateralToken();
+const { refreshCollateralBalance, getTokenStore, checkCollateralAllowance } = useCollateralToken();
 const { getConditionalBalance, parseConditionalBalance } = useConditionalToken();
 const { ensureCorrectNetwork } = useContracts();
 const { isConnected } = useAccount();
@@ -377,6 +386,7 @@ const transactionHash = ref('');
 
 const buyError = ref('');
 const sellError = ref('');
+const transactionStep = ref(1);
 
 const buyValidator = (x: number) => {
   if (x > buyFundLimit.value) {
@@ -587,15 +597,23 @@ async function fund() {
     return;
   }
 
+  transactionStep.value = 1;
   loading.value = true;
   try {
     await refreshCollateralBalance();
 
     if (!enoughCollateralBalance.value) {
+      loading.value = false;
       return;
     }
-
     await ensureCorrectNetwork();
+
+    const allowance = await checkCollateralAllowance(props.contractAddress);
+    if (!allowance) {
+      loading.value = false;
+      return;
+    }
+    transactionStep.value = 2;
 
     txWait.hash.value = await addFunding(props.contractAddress, amount.value);
     const receipt = await txWait.wait();
@@ -615,6 +633,7 @@ async function fund() {
     message.error(contractError(error));
   } finally {
     loading.value = false;
+    transactionStep.value = 1;
   }
 }
 
@@ -664,14 +683,22 @@ async function buyOutcome() {
     return;
   }
 
+  transactionStep.value = 1;
   loading.value = true;
   try {
     await refreshCollateralBalance();
     if (buyFundLimit.value < amount.value || !enoughCollateralBalance.value) {
+      loading.value = false;
       return;
     }
-
     await ensureCorrectNetwork();
+
+    const allowance = await checkCollateralAllowance(props.contractAddress);
+    if (!allowance) {
+      loading.value = false;
+      return;
+    }
+    transactionStep.value = 2;
 
     txWait.hash.value = await buy(props.contractAddress, amount.value, props.outcome.outcomeIndex, slippage.value);
     const receipt = await txWait.wait();
@@ -689,6 +716,7 @@ async function buyOutcome() {
     console.error(error);
   } finally {
     loading.value = false;
+    transactionStep.value = 1;
   }
 }
 
