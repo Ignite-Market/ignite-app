@@ -192,7 +192,9 @@
               :show-button="true"
               button-placement="both"
               :max="parseConditionalBalance(conditionalBalance)"
+              :validator="sellValidator"
               :disabled="loading"
+              @blur="onSellBlur"
             >
               <template #minus-icon>
                 <div
@@ -210,6 +212,9 @@
                 </div>
               </template>
             </n-input-number>
+            <div v-if="sellError" class="text-statusRed mt-1">
+              {{ sellError }}
+            </div>
           </div>
 
           <BasicButton
@@ -366,14 +371,31 @@ const showSuccessModal = ref(false);
 const transactionHash = ref('');
 
 const buyError = ref('');
+const sellError = ref('');
 
 const buyValidator = (x: number) => {
   if (x > buyFundLimit.value) {
     // Because input is calling -1 +1 for buttons
     if (amount.value !== x - 1) {
-      buyError.value = `Value can not exceed 10% of funding`;
+      buyError.value = `Amount can not exceed 10% of total funding.`;
     }
-  } else buyError.value = '';
+  } else {
+    buyError.value = '';
+  }
+
+  return x >= 0 && x <= buyFundLimit.value;
+};
+
+const sellValidator = (x: number) => {
+  if (x > sellFundLimit.value) {
+    // Because input is calling -1 +1 for buttons
+    if (amount.value !== x - 1) {
+      sellError.value = `Sell amount can not exceed 10% of total funding.`;
+    }
+  } else {
+    buyError.value = '';
+  }
+
   return x >= 0 && x <= buyFundLimit.value;
 };
 
@@ -384,10 +406,24 @@ const onBuyBlur = () => {
   }
 };
 
+const onSellBlur = () => {
+  if (sellError.value) {
+    amount.value = sellFundLimit.value;
+    sellError.value = '';
+  }
+};
+
 watch(
   () => props.defaultValue,
   defaultValue => {
     amount.value = defaultValue;
+  }
+);
+
+watch(
+  () => isConnected.value,
+  async () => {
+    await refreshBalances();
   }
 );
 
@@ -405,6 +441,14 @@ const buyFundLimit = computed(() => {
   let max = (BigInt(totalFundAmount.value) * 10n) / 100n;
   if (tokenStore.balance < max) {
     max = tokenStore.balance;
+  }
+  return bigIntToNum(max, 6);
+});
+
+const sellFundLimit = computed(() => {
+  let max = (BigInt(totalFundAmount.value) * 10n) / 100n;
+  if (conditionalBalance.value < max) {
+    max = conditionalBalance.value;
   }
   return bigIntToNum(max, 6);
 });
@@ -437,7 +481,6 @@ watch(
 watch(
   () => selectedTab.value,
   () => {
-    console.log(selectedTab.value);
     emit('actionChanged', selectedTab.value);
   }
 );

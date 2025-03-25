@@ -18,7 +18,7 @@ export const themeOverrides: GlobalThemeOverrides = {
     textColorBase: colors.white,
   },
   DataTable: {
-    tdColor: colors.grey.DEFAULT,
+    tdColor: colors.grey.dark,
     thColor: colors.grey.dark,
     borderColor: colors.transparent,
     borderRadius: '8px',

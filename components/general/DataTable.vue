@@ -1,7 +1,7 @@
 <template>
   <div class="card !px-6 !pt-8">
     <div class="flex-bc mb-4 gap-2 flex-wrap">
-      <h2>{{ title }}</h2>
+      <h4>{{ title }}</h4>
       <div class="flex gap-4 flex-wrap">
         <FormInputSearch
           v-if="filters?.search"

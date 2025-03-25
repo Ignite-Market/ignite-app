@@ -65,7 +65,12 @@
 
           <!-- OPEN POSITIONS -->
           <div v-if="predictionSet.positions.length">
-            <PredictionSetPositions :positions="predictionSet.positions" />
+            <PredictionSetPositions
+              :positions="predictionSet.positions"
+              :contract-address="predictionSet.chainData.contractAddress"
+              :prediction-set="predictionSet"
+              @sell="(id: number, amount: number) => sellPosition(id, amount)"
+            />
           </div>
 
           <!-- OUTCOMES -->
@@ -73,7 +78,7 @@
             <div
               v-for="(outcome, i) in predictionSet.outcomes"
               :key="i"
-              class="flex flex-wrap bg-grey rounded-lg pl-3 pr-4 py-[6px] items-center w-full relative gap-x-9 gap-y-4 overflow-hidden cursor-pointer"
+              class="flex flex-wrap bg-grey rounded-lg pl-3 pr-4 py-[6px] items-center w-full relative gap-x-9 gap-y-4 overflow-hidden"
               :class="{
                 'border-1 border-primary': winningOutcome?.id === outcome.id,
               }"
@@ -84,7 +89,10 @@
                 :class="{ 'h-full': selectedOutcome.id === outcome.id }"
               ></div>
 
-              <div class="flex justify-between items-center flex-grow-[10] gap-8 min-w-[220px]">
+              <div
+                class="flex justify-between items-center flex-grow-[10] gap-8 min-w-[220px] cursor-pointer"
+                @click="selectOutcome(TransactionType.BUY, outcome)"
+              >
                 <div class="flex">
                   <div class="w-[56px] h-[56px] flex-shrink-0">
                     <img
@@ -286,6 +294,7 @@ const { params, query } = useRoute();
 const router = useRouter();
 const config = useRuntimeConfig();
 const { loggedIn } = useUserStore();
+const userStore = useUserStore();
 const { isMd } = useScreen();
 const tokenStore = getTokenStore();
 
@@ -319,6 +328,20 @@ onUnmounted(() => {
   clearInterval(refreshInterval.value);
 });
 
+watch(
+  () => userStore.loggedIn,
+  async () => {
+    await getPredictionSet(true);
+  }
+);
+
+function sellPosition(outcomeId: number, sharesAmount: number) {
+  selectedAction.value = TransactionType.SELL;
+  selectedOutcome.value = predictionSet.value?.outcomes.find(x => x.id === outcomeId);
+  defaultActionValue.value = sharesAmount;
+  actionModal.value = true;
+}
+
 function selectOutcome(transaction: TransactionType, outcome: OutcomeInterface) {
   selectedAction.value = transaction;
   selectedOutcome.value = outcome;
@@ -345,7 +368,6 @@ async function getPredictionSet(silent: boolean = false) {
 
       clearInterval(refreshInterval.value);
     } else {
-      // TODO: look at url if another outcome is selected.
       if (!selectedOutcome.value || !selectedAction.value) {
         selectedOutcome.value = predictionSet.value.outcomes[0];
         selectedAction.value = TransactionType.BUY;
