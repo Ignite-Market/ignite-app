@@ -10,7 +10,6 @@ import { ContractType } from '~/lib/config/contracts';
  */
 export default function useFixedMarketMaker() {
   const { getTokenStore, loadToken } = useCollateralToken();
-  const { checkConditionalApprove } = useConditionalToken();
   const { initContract, initReadContract } = useContracts();
   const { address, isConnected } = useAccount();
   const tokenStore = getTokenStore();
@@ -127,17 +126,9 @@ export default function useFixedMarketMaker() {
     }
     const contract = await initContract(ContractType.FPMM, fpmmContractAddress);
 
-    const approved = await checkConditionalApprove(fpmmContractAddress);
-    if (approved) {
-      const { maxTokensToSell } = await getMaxTokensToSell(
-        fpmmContractAddress,
-        collateralAmount,
-        outcomeIndex,
-        slippage
-      );
-
-      return await contract.write.sell([collateralAmount, outcomeIndex, maxTokensToSell]);
-    }
+    // Make sure that you check for conditional allowance separately.
+    const { maxTokensToSell } = await getMaxTokensToSell(fpmmContractAddress, collateralAmount, outcomeIndex, slippage);
+    return await contract.write.sell([collateralAmount, outcomeIndex, maxTokensToSell]);
   }
 
   /**

@@ -13,7 +13,7 @@
       <NuxtIcon v-if="Phase.FUNDING < activePhase" class="text-primary text-[17px] ml-auto" name="icon/complete" />
 
       <div v-if="Phase.FUNDING === activePhase" class="w-[17px] h-[17px] flex justify-center items-center ml-auto">
-        <div class="w-[7px] h-[7px] bg-statusGreen rounded-full"></div>
+        <div class="w-[7px] h-[7px] bg-statusGreen rounded-full animate-pulse"></div>
       </div>
     </div>
 
@@ -30,7 +30,7 @@
       <NuxtIcon v-if="Phase.STARTED < activePhase" class="text-primary text-[17px] ml-auto" name="icon/complete" />
 
       <div v-if="Phase.STARTED === activePhase" class="w-[17px] h-[17px] flex justify-center items-center ml-auto">
-        <div class="w-[7px] h-[7px] bg-statusGreen rounded-full"></div>
+        <div class="w-[7px] h-[7px] bg-statusGreen rounded-full animate-pulse"></div>
       </div>
     </div>
 
@@ -52,7 +52,7 @@
       <div>Results on {{ toMonthAndYear(predictionSet.resolutionTime) }}</div>
 
       <div v-if="Phase.RESULTS === activePhase" class="w-[17px] h-[17px] flex justify-center items-center ml-auto">
-        <div class="w-[7px] h-[7px] bg-statusGreen rounded-full"></div>
+        <div class="w-[7px] h-[7px] bg-statusGreen rounded-full animate-pulse"></div>
       </div>
     </div>
   </div>

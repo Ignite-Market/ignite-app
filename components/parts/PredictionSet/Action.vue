@@ -331,14 +331,68 @@
     </div>
   </Modal>
 
-  <!-- <Modal v-model:show="modalWalletSelectVisible" class="w-[270px] border-none">
-    <div class="flex flex-col">
+  <n-modal
+    v-model:show="showTransactionModal"
+    preset="card"
+    class="w-[400px] border-none"
+    :mask-closable="false"
+    :close-on-esc="false"
+    :closable="false"
+  >
+    <div v-if="selectedTab === TransactionType.FUND" class="flex flex-col mt-4">
       <div class="flex w-full items-center justify-center mb-2">
-        <NuxtIcon name="wallet/injected" class="text-primary text-[40px]" />
+        <NuxtIcon name="icon/coins" class="text-primary text-[56px]" />
       </div>
-      <div class="flex items-center justify-center text-[14px] leading-[20px] font-bold">Connect wallet</div>
+      <div class="flex items-center justify-center text-[14px] leading-[20px] font-bold">Fund market</div>
     </div>
-  </Modal> -->
+
+    <div v-else class="flex flex-col mt-4">
+      <div class="flex w-full items-center justify-center mb-4">
+        <div class="w-[56px] h-[56px] flex-shrink-0">
+          <img class="rounded-[78px] w-full h-full object-cover" src="https://app-dev.ignitemarket.xyz/favicon.png" />
+        </div>
+      </div>
+      <div
+        v-if="selectedTab === TransactionType.BUY"
+        class="flex items-center justify-center text-[14px] leading-[20px]"
+      >
+        Buy&nbsp;
+        <span class="font-extrabold">{{ outcome.name }}</span>
+        &nbsp;shares for {{ amount }} {{ tokenStore.symbol }}.
+      </div>
+
+      <div
+        v-if="selectedTab === TransactionType.SELL"
+        class="flex items-center justify-center text-[14px] leading-[20px]"
+      >
+        Sell&nbsp;
+        <span class="font-extrabold">{{ amount }}</span>
+        &nbsp;of&nbsp;<span class="font-extrabold">{{ outcome.name }}</span>
+        &nbsp;shares.
+      </div>
+    </div>
+
+    <div class="flex items-center py-4 border-b-1 border-b-grey-lighter mt-4 font-semibold px-1">
+      1. Increase allowance
+
+      <div class="ml-auto">
+        <div v-if="transactionStep === 1" class="w-[17px] h-[17px] flex justify-center items-center ml-auto">
+          <div class="w-[7px] h-[7px] bg-statusGreen rounded-full animate-pulse"></div>
+        </div>
+        <NuxtIcon v-else class="text-primary text-[17px]" name="icon/complete" />
+      </div>
+    </div>
+
+    <div class="flex items-center pt-4 font-semibold px-1">
+      2. Confirm transaction
+
+      <div v-if="transactionStep === 2" class="ml-auto">
+        <div class="w-[17px] h-[17px] flex justify-center items-center ml-auto">
+          <div class="w-[7px] h-[7px] bg-statusGreen rounded-full animate-pulse"></div>
+        </div>
+      </div>
+    </div>
+  </n-modal>
 </template>
 
 <script setup lang="ts">
@@ -363,7 +417,7 @@ const emit = defineEmits(['actionChanged']);
 const { getMinTokensToBuy, addFunding, buy, sell, calcSellAmountInCollateral, getPricePerShare, getTotalFunding } =
   useFixedMarketMaker();
 const { refreshCollateralBalance, getTokenStore, checkCollateralAllowance } = useCollateralToken();
-const { getConditionalBalance, parseConditionalBalance } = useConditionalToken();
+const { getConditionalBalance, parseConditionalBalance, checkConditionalApprove } = useConditionalToken();
 const { ensureCorrectNetwork } = useContracts();
 const { isConnected } = useAccount();
 const message = useMessage();
@@ -382,6 +436,7 @@ const pricePerShare = ref(0.0);
 const totalFundAmount = ref(BigInt(0));
 
 const showSuccessModal = ref(false);
+const showTransactionModal = ref(false);
 const transactionHash = ref('');
 
 const buyError = ref('');
@@ -597,6 +652,7 @@ async function fund() {
     return;
   }
 
+  showTransactionModal.value = true;
   transactionStep.value = 1;
   loading.value = true;
   try {
@@ -634,6 +690,7 @@ async function fund() {
   } finally {
     loading.value = false;
     transactionStep.value = 1;
+    showTransactionModal.value = false;
   }
 }
 
@@ -642,14 +699,24 @@ async function sellOutcome() {
     return;
   }
 
+  showTransactionModal.value = true;
+  transactionStep.value = 1;
   loading.value = true;
   try {
     conditionalBalance.value = await getConditionalBalance(props.outcome.positionId);
     if (!enoughConditionalBalance.value) {
+      loading.value = false;
       return;
     }
 
     await ensureCorrectNetwork();
+
+    const approved = await checkConditionalApprove(props.contractAddress);
+    if (!approved) {
+      loading.value = false;
+      return;
+    }
+    transactionStep.value = 2;
 
     const collateralAmount = await calcSellAmountInCollateral(
       amount.value,
@@ -675,6 +742,8 @@ async function sellOutcome() {
     message.error(contractError(error));
   } finally {
     loading.value = false;
+    transactionStep.value = 1;
+    showTransactionModal.value = false;
   }
 }
 
@@ -683,6 +752,7 @@ async function buyOutcome() {
     return;
   }
 
+  showTransactionModal.value = true;
   transactionStep.value = 1;
   loading.value = true;
   try {
@@ -717,6 +787,7 @@ async function buyOutcome() {
   } finally {
     loading.value = false;
     transactionStep.value = 1;
+    showTransactionModal.value = false;
   }
 }
 
