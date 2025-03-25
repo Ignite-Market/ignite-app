@@ -7,6 +7,11 @@
     <template #header>
       <div v-if="selectedTab === TransactionType.FUND" class="flex items-center justify-center">
         <div class="text-[12px] leading-[16px] pt-[19px] pb-[19px]">Fund this market</div>
+        <!-- TODO: ADD LINK TO DOCS. -->
+        <IconInfo
+          size="sm"
+          tooltip="Provide liquidity to earn trading fees and profit from market movement. </br> Learn more about <a href='' target='_blank' class='underline'>funding the markets.</a>"
+        />
       </div>
       <div v-else class="bg-grey-light rounded-[8px] p-3 flex flex-row items-center justify-center">
         <div class="w-[30px] h-[30px] flex-shrink-0">
@@ -644,8 +649,6 @@ async function sellOutcome() {
       message.error(contractError(receipt.error));
     }
 
-    console.log(collateralAmount);
-
     amount.value = 0 as any;
     await refreshBalances();
   } catch (error) {
@@ -672,7 +675,6 @@ async function buyOutcome() {
 
     txWait.hash.value = await buy(props.contractAddress, amount.value, props.outcome.outcomeIndex, slippage.value);
     const receipt = await txWait.wait();
-    console.log(receipt);
 
     if (receipt.status === 'success') {
       showSuccessModal.value = true;

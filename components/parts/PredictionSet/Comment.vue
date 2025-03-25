@@ -244,8 +244,6 @@ function handleSecondLvlReply(replyComment: CommentInterface) {
   replyPrefix.value = `@${replyComment.username}`;
   taggedUser.value = replyComment.user_id;
 
-  console.log(replyComment);
-
   if (replyTo.value) {
     nextTick(() => {
       secondReplyRefs.value[replyComment.id]?.focus();
@@ -266,15 +264,8 @@ function openUserProfile(userId: number) {
 }
 
 function handleDelete(comment: CommentInterface, deletedComment: any) {
-  console.log('holalaaaa');
-  console.log(comment);
-  console.log(deletedComment);
-
   comment.content = deletedComment.content;
   comment.status = deletedComment.status;
-
-  console.log(comment.content);
-  console.log(deletedComment);
 }
 </script>
 

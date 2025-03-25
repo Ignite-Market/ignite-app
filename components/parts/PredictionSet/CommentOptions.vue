@@ -163,8 +163,6 @@ async function deleteComment() {
     const deletedComment = await $api.delete<GeneralResponse<any>>(Endpoints.commentById(props.comment.id));
 
     showDeleteModal.value = false;
-
-    console.log(deletedComment.data);
     emit('delete', deletedComment.data);
   } catch (error) {
     message.success('Error while deleting comment. Please try again.');

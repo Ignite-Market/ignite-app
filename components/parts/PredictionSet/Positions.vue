@@ -61,8 +61,6 @@ watchEffect(async () => {
   );
 
   processedPositions.value = enriched;
-
-  console.log(tradeEnabled(props.predictionSet.setStatus, props.predictionSet.endTime));
 });
 
 onMounted(() => {

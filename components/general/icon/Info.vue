@@ -1,5 +1,14 @@
 <template>
-  <n-tooltip v-if="tooltip" v-bind="$attrs" trigger="hover">
+  <n-tooltip
+    v-if="tooltip"
+    v-bind="$attrs"
+    trigger="hover"
+    placement="top"
+    :theme-overrides="{
+      borderRadius: '8px',
+      color: colors.grey.light,
+    }"
+  >
     <template #trigger>
       <n-button
         class="align-sub"
@@ -10,13 +19,10 @@
         quaternary
         round
       >
-        <NuxtIcon
-          :class="size === 'sm' ? 'text-base' : size === 'md' ? 'text-2xl' : 'text-3xl'"
-          name="icon/info"
-        ></NuxtIcon>
+        <NuxtIcon :class="size === 'sm' ? 'text-base' : size === 'md' ? 'text-2xl' : 'text-3xl'" name="icon/info" />
       </n-button>
     </template>
-    {{ tooltip }}
+    <span v-html="tooltip"></span>
   </n-tooltip>
   <n-button
     v-else
@@ -34,6 +40,8 @@
 </template>
 
 <script lang="ts" setup>
+import { colors } from '~/tailwind.config';
+
 defineProps({
   size: {
     type: String,
