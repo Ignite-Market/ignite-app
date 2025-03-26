@@ -153,10 +153,6 @@
             Buy
           </BasicButton>
 
-          <BasicButton class="w-full" :btn-class="[' !font-bold']" :size="'large'" @click="showSuccessModal = true">
-            test
-          </BasicButton>
-
           <div class="text-[16px] leading-[24px] text-grey-lightest font-normal mt-6">
             <div class="flex items-center justify-center">
               <div>Avg price</div>
@@ -340,9 +336,12 @@
             You have successfully bought <span class="font-bold">{{ obtainedAmount }}</span> shares of outcome:
           </div>
           <div v-else>
-            You have successfully sold
-            <span class="font-bold">{{ givenAmount }}</span> ({{ obtainedAmount }} {{ tokenStore.symbol }}) shares of
-            outcome:
+            You have sold
+            <span class="font-bold">
+              {{ givenAmount }}
+            </span>
+            <span class="font-normal text-statusGreen"> ({{ obtainedAmount }} {{ tokenStore.symbol }})</span>
+            shares of outcome:
           </div>
 
           <div class="flex w-full items-center justify-center mt-6">
