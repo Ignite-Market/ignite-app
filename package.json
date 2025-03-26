@@ -29,6 +29,7 @@
     "swiper": "^11.2.5",
     "v-lazy-image": "^2.1.1",
     "viem": "^2.21.52",
+    "vue-confetti-explosion": "^1.0.2",
     "vue-cookie-accept-decline": "^6.1.0",
     "vue-echarts": "^7.0.3",
     "vue3-jazzicon": "^0.1.4"

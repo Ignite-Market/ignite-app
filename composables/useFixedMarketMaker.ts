@@ -133,6 +133,7 @@ export default function useFixedMarketMaker() {
 
   /**
    * Returns user's funding balance - LP tokens.
+   *
    * @param fpmmContractAddress FPMM contract address.
    * @returns Funding balance.
    */
@@ -147,6 +148,7 @@ export default function useFixedMarketMaker() {
 
   /**
    * Adds funding to selected market.
+   *
    * @param fpmmContractAddress FPMM contract address.
    * @param amount Funding amount in collateral token.
    */
@@ -167,6 +169,7 @@ export default function useFixedMarketMaker() {
 
   /**
    * Removes funding from the selected market.
+   *
    * @param fpmmContractAddress FPMM contract address.
    * @param shareAmount Amount of shares to return.
    */
@@ -181,6 +184,7 @@ export default function useFixedMarketMaker() {
 
   /**
    * Returns total funding for selected market.
+   *
    * @param fpmmContractAddress FPMM contract address.
    * @param shareAmount Amount of shares to return.
    */
@@ -254,7 +258,7 @@ export default function useFixedMarketMaker() {
     /* Newton-Raphson method is used to find the root of a function.
      * Root of a function is the point where the function touches the x-axis on a graph.
      * In this case y-axis is the number of outcome tokens / shares.
-     * The x-axis is the number of colleral tokens to be received.
+     * The x-axis is the number of collateral tokens to be received.
      * This meaning we want to know how much collateral we need to receive to have 0 outcome tokens / shares.
      */
     const r = newtonRaphson(f, 0, { maxIterations: 100 });

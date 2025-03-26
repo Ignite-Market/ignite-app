@@ -125,7 +125,9 @@ onMounted(() => {
             onClick: () =>
               emit('sell', row.outcomeId, Number(formatTokenAmount(row.sharesAmount, tokenStore.decimals))),
           },
-          'Sell'
+          {
+            default: () => 'Sell',
+          }
         );
       },
     });

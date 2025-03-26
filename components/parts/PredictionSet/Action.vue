@@ -153,6 +153,10 @@
             Buy
           </BasicButton>
 
+          <BasicButton class="w-full" :btn-class="[' !font-bold']" :size="'large'" @click="showSuccessModal = true">
+            test
+          </BasicButton>
+
           <div class="text-[16px] leading-[24px] text-grey-lightest font-normal mt-6">
             <div class="flex items-center justify-center">
               <div>Avg price</div>
@@ -303,27 +307,65 @@
     </div>
   </n-card>
 
+  <!-- TRANSACTION SUCCESS MODAL -->
   <Modal v-model:show="showSuccessModal" class="w-[320px] border-none">
-    <div class="flex flex-col">
+    <div class="flex flex-col items-center">
+      <ConfettiExplosion
+        :stage-width="1000"
+        :stage-height="1500"
+        :duration="3000"
+        :force="0.3"
+        :particle-count="100"
+        :colors="[
+          colors.primary.DEFAULT,
+          colors.primary.bright,
+          colors.primary.dark,
+          colors.primary.light,
+          colors.primary.hover,
+        ]"
+      />
+
       <div class="flex w-full items-center justify-center mb-2">
         <NuxtIcon name="icon/check" class="text-primary text-[40px]" />
       </div>
-      <div class="flex items-center justify-center text-[14px] leading-[20px] font-bold">Success!</div>
+      <div class="flex items-center justify-center text-[14px] leading-[20px] font-bold">Congratulations!</div>
 
       <div class="flex flex-col items-center justify-center mt-5">
-        <div v-if="selectedTab === TransactionType.FUND" class="text-center">
-          You have successfully funded this market.
+        <div v-if="selectedTab === TransactionType.FUND" class="text-center mb-2">
+          You have successfully funded this market for
+          <span class="font-bold"> {{ givenAmount }} {{ tokenStore.symbol }} </span>.
         </div>
         <div v-else class="flex flex-col items-center justify-center text-center">
-          <div>You have successfully {{ selectedTab === TransactionType.BUY ? 'bought' : 'sold' }} outcome:</div>
+          <div v-if="selectedTab === TransactionType.BUY">
+            You have successfully bought <span class="font-bold">{{ obtainedAmount }}</span> shares of outcome:
+          </div>
+          <div v-else>
+            You have successfully sold
+            <span class="font-bold">{{ givenAmount }}</span> ({{ obtainedAmount }} {{ tokenStore.symbol }}) shares of
+            outcome:
+          </div>
+
+          <div class="flex w-full items-center justify-center mt-6">
+            <div class="w-[56px] h-[56px] flex-shrink-0">
+              <img
+                class="rounded-[78px] w-full h-full object-cover"
+                src="https://app-dev.ignitemarket.xyz/favicon.png"
+              />
+            </div>
+          </div>
           <div class="my-4 uppercase font-extrabold text-[18px]">{{ outcome.name }}</div>
         </div>
       </div>
 
+      <BasicButton class="w-full font-bold mt-5" type="primary" :size="'large'" @click="showSuccessModal = false">
+        Close
+      </BasicButton>
+
       <BasicButton
         v-if="transactionHash"
-        class="w-full font-bold mt-5"
-        :size="'large'"
+        class="w-full font-bold mt-3"
+        type="secondary"
+        :size="'medium'"
         @click="openExplorer(transactionHash)"
       >
         Transaction
@@ -331,6 +373,7 @@
     </div>
   </Modal>
 
+  <!-- TRANSACTION TWO STEP MODAL -->
   <n-modal
     v-model:show="showTransactionModal"
     preset="card"
@@ -399,8 +442,10 @@
 import { watchDebounced } from '@vueuse/core';
 import type { Address } from 'viem';
 import { useAccount } from '@wagmi/vue';
+import ConfettiExplosion from 'vue-confetti-explosion';
 import type { OutcomeInterface } from '~/lib/types/prediction-set';
 import { PredictionSetStatus, TransactionType } from '~/lib/types/prediction-set';
+import { colors } from '~/tailwind.config';
 
 const props = defineProps({
   contractAddress: { type: String as PropType<Address>, default: null, required: true },
@@ -419,7 +464,7 @@ const { getMinTokensToBuy, addFunding, buy, sell, calcSellAmountInCollateral, ge
 const { refreshCollateralBalance, getTokenStore, checkCollateralAllowance } = useCollateralToken();
 const { getConditionalBalance, parseConditionalBalance, checkConditionalApprove } = useConditionalToken();
 const { ensureCorrectNetwork } = useContracts();
-const { isConnected } = useAccount();
+const { isConnected, address } = useAccount();
 const message = useMessage();
 const txWait = useTxWait();
 const tokenStore = getTokenStore();
@@ -434,6 +479,9 @@ const potentialReturn = ref<string>('0.0');
 const conditionalBalance = ref(BigInt(0));
 const pricePerShare = ref(0.0);
 const totalFundAmount = ref(BigInt(0));
+
+const givenAmount = ref();
+const obtainedAmount = ref();
 
 const showSuccessModal = ref(false);
 const showTransactionModal = ref(false);
@@ -616,6 +664,23 @@ watch(
   }
 );
 
+function openExplorer(txHash: string) {
+  const explorer = getExplorer();
+
+  window.open(`${explorer}/tx/${txHash}`, '_blank');
+}
+
+async function refreshBalances() {
+  try {
+    await refreshCollateralBalance();
+    conditionalBalance.value = await getConditionalBalance(props.outcome.positionId);
+    pricePerShare.value = await getPricePerShare(props.contractAddress, props.outcome.outcomeIndex);
+    totalFundAmount.value = await getTotalFunding(props.contractAddress);
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 async function updateBuyAmount() {
   if (!amount.value) {
     return;
@@ -647,6 +712,9 @@ async function updateSellAmount() {
   potentialReturn.value = (Number(result) / Math.pow(10, tokenStore.decimals)).toString();
 }
 
+/**
+ * Fund market.
+ */
 async function fund() {
   if (!amount.value) {
     return;
@@ -675,6 +743,7 @@ async function fund() {
     const receipt = await txWait.wait();
 
     if (receipt.status === 'success') {
+      givenAmount.value = amount.value;
       showSuccessModal.value = true;
       transactionHash.value = receipt?.data?.transactionHash || '';
     } else if (receipt.status === 'error') {
@@ -694,6 +763,9 @@ async function fund() {
   }
 }
 
+/**
+ * Sell outcome shares.
+ */
 async function sellOutcome() {
   if (!amount.value) {
     return;
@@ -729,6 +801,19 @@ async function sellOutcome() {
     const receipt = await txWait.wait();
 
     if (receipt.status === 'success') {
+      const parsedGiven = parseSingleTransfersERC1155(receipt);
+      if (parsedGiven.length) {
+        const event = parsedGiven.find((e: any) => e.from === address.value);
+        givenAmount.value = formatCollateralAmount(event.amount, tokenStore.decimals);
+      }
+
+      const parsedObtained = parseTransfersERC20(receipt);
+      if (parsedObtained.length) {
+        const event = parsedObtained.find((e: any) => e.to === address.value);
+        obtainedAmount.value = formatCollateralAmount(event.amount, tokenStore.decimals);
+      }
+
+      givenAmount.value = amount.value;
       showSuccessModal.value = true;
       transactionHash.value = receipt?.data?.transactionHash || '';
     } else if (receipt.status === 'error') {
@@ -747,6 +832,9 @@ async function sellOutcome() {
   }
 }
 
+/**
+ * Buy outcome shares.
+ */
 async function buyOutcome() {
   if (!amount.value) {
     return;
@@ -774,6 +862,12 @@ async function buyOutcome() {
     const receipt = await txWait.wait();
 
     if (receipt.status === 'success') {
+      const parsed = parseSingleTransfersERC1155(receipt);
+      if (parsed.length) {
+        const event = parsed.find((e: any) => e.to === address.value);
+        obtainedAmount.value = formatCollateralAmount(event.amount, tokenStore.decimals);
+      }
+
       showSuccessModal.value = true;
       transactionHash.value = receipt?.data?.transactionHash || '';
     } else if (receipt.status === 'error') {
@@ -789,21 +883,6 @@ async function buyOutcome() {
     transactionStep.value = 1;
     showTransactionModal.value = false;
   }
-}
-
-function openExplorer(txHash: string) {
-  const explorer = getExplorer();
-
-  window.open(`${explorer}/tx/${txHash}`, '_blank');
-}
-
-async function refreshBalances() {
-  try {
-    await refreshCollateralBalance();
-    conditionalBalance.value = await getConditionalBalance(props.outcome.positionId);
-    pricePerShare.value = await getPricePerShare(props.contractAddress, props.outcome.outcomeIndex);
-    totalFundAmount.value = await getTotalFunding(props.contractAddress);
-  } catch (error) {}
 }
 </script>
 
