@@ -77,6 +77,45 @@ export function parseTransfersERC20(txReceipt: any) {
 }
 
 /**
+ *  Parses ERC1155 TransferBatch events from transaction receipt.
+ *
+ * @param txReceipt Transaction receipt.
+ * @returns TransferBatch events.
+ */
+export function parseBatchTransfer1155(txReceipt: any) {
+  const batchTransferEventSignature = 'TransferBatch(address,address,address,uint256[],uint256[])';
+  const batchTransferEventAbi =
+    'event TransferBatch(address indexed operator, address indexed from, address indexed to, uint256[] ids, uint256[] values)';
+
+  try {
+    const topicHash = keccak256(toHex(batchTransferEventSignature));
+
+    return txReceipt.data.logs
+      .filter((log: any) => log.topics[0] === topicHash)
+      .map((log: any) => {
+        const parsed = decodeEventLog({
+          abi: [parseAbiItem(batchTransferEventAbi)],
+          data: log.data,
+          topics: log.topics,
+        });
+
+        return {
+          contractAddress: log.address,
+          operator: parsed.args.operator,
+          from: parsed.args.from,
+          to: parsed.args.to,
+          ids: parsed.args.ids.map(id => id.toString()),
+          values: parsed.args.values,
+          logIndex: log.logIndex,
+        };
+      });
+  } catch (error) {
+    console.log(error);
+    return [];
+  }
+}
+
+/**
  * Gets explorer URL base on the selected network.
  *
  * @returns Explorer URL.

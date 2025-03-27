@@ -34,11 +34,12 @@ import Endpoints from '~/lib/values/endpoints';
 import { truncateWallet } from '~/lib/misc/strings';
 import BasicButton from '~/components/general/BasicButton.vue';
 
-const { t } = useI18n();
-const { $wagmiConfig } = useNuxtApp();
-const { error, success } = useMessage();
-const userStore = useUserStore();
 const { resetContracts, ensureCorrectNetwork } = useContracts();
+const { $wagmiConfig } = useNuxtApp();
+const { loadToken } = useCollateralToken();
+
+const messageProvider = useMessage();
+const userStore = useUserStore();
 
 /** Evm wallet - wagmi */
 const { disconnect } = useDisconnect();
@@ -53,17 +54,15 @@ const modalWalletSelectVisible = ref<boolean>(false);
 
 onBeforeMount(() => {
   // if (!isConnected.value) {
-  //   try {
-  //     assetStore.$reset();
-  //   } catch (e) {
-  //     console.error(e);
-  //   }
+  //   userStore.logout();
   // }
 
   if (!userStore.loggedIn) {
     disconnect();
     resetContracts();
   }
+
+  loadToken(false);
 });
 
 watch(
@@ -91,14 +90,13 @@ async function evmWalletLogin(data: Record<string, any>) {
   await sleep(200);
 
   if (!address) {
-    error(t('wallet.login.walletAccountNotConnected'));
+    messageProvider.error('A wallet account must be connected.');
     return;
   } else if (loadingWallet.value) {
     return;
   }
 
   loadingWallet.value = true;
-
   try {
     await ensureCorrectNetwork();
   } catch (error) {
@@ -120,14 +118,14 @@ async function evmWalletLogin(data: Record<string, any>) {
 
     userStore.saveUser(res.data);
 
-    /** Show success message */
-    success(t('wallet.login.success'));
-  } catch (e) {
-    // TODO: handle canceled signature.
+    messageProvider.success('Wallet has been successfully connected.');
+  } catch (error) {
     // TODO: handle wallet switch - user needs to sign the message again!
 
-    console.error(e);
-    error(apiError(e));
+    console.error(error);
+
+    messageProvider.error(contractError(error));
+    userStore.logout();
     disconnect();
   }
   loadingWallet.value = false;

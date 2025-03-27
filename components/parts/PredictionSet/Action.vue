@@ -10,7 +10,7 @@
         <!-- TODO: ADD LINK TO DOCS. -->
         <IconInfo
           size="sm"
-          tooltip="Provide liquidity to earn trading fees and profit from market movement. </br> Learn more about <a href='' target='_blank' class='underline'>funding the markets.</a>"
+          tooltip="Provide liquidity to earn trading fees and profit from market movement. </br> You can withdraw funding and claim rewards when the market closes.</br> Learn more about <a href='' target='_blank' class='underline'>funding the markets.</a>"
         />
       </div>
       <div v-else class="bg-grey-light rounded-[8px] p-3 flex flex-row items-center justify-center">
@@ -669,6 +669,9 @@ function openExplorer(txHash: string) {
   window.open(`${explorer}/tx/${txHash}`, '_blank');
 }
 
+/**
+ * TODO: Debounce!
+ */
 async function refreshBalances() {
   try {
     await refreshCollateralBalance();
@@ -719,8 +722,8 @@ async function fund() {
     return;
   }
 
-  showTransactionModal.value = true;
   transactionStep.value = 1;
+  showTransactionModal.value = true;
   loading.value = true;
   try {
     await refreshCollateralBalance();
@@ -750,7 +753,6 @@ async function fund() {
     }
 
     amount.value = 0 as any;
-    await refreshCollateralBalance();
     await refreshBalances();
   } catch (error) {
     console.error(error);
@@ -770,8 +772,8 @@ async function sellOutcome() {
     return;
   }
 
-  showTransactionModal.value = true;
   transactionStep.value = 1;
+  showTransactionModal.value = true;
   loading.value = true;
   try {
     conditionalBalance.value = await getConditionalBalance(props.outcome.positionId);
@@ -839,8 +841,8 @@ async function buyOutcome() {
     return;
   }
 
-  showTransactionModal.value = true;
   transactionStep.value = 1;
+  showTransactionModal.value = true;
   loading.value = true;
   try {
     await refreshCollateralBalance();

@@ -97,7 +97,7 @@ onMounted(() => {
       title: 'Return',
       key: 'calculatedReturn',
       render(row: any) {
-        const collateralReturn = (row.returnAmount - row.collateralAmount) / Math.pow(10, tokenStore.decimals);
+        const collateralReturn = (row.returnAmount - row.collateralAmount) / Math.pow(10, tokenStore.decimals || 6);
         const returnPercentage = ((row.returnAmount - row.collateralAmount) / row.collateralAmount) * 100;
 
         const displayCollateral = `${collateralReturn > 0 ? '+' : ''}` + collateralReturn.toFixed(2);

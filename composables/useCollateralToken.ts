@@ -91,16 +91,21 @@ export default function useCollateralToken() {
   /**
    * Loads collateral token.
    */
-  async function loadToken() {
+  async function loadToken(refreshBalance: boolean = true) {
     const tokenStore = getTokenStore();
+
     try {
       await ensureCorrectNetwork();
 
       tokenStore.loading = true;
-      tokenStore.balance = await getCollateralBalance();
       tokenStore.decimals = await getDecimals();
       tokenStore.symbol = await getSymbol();
-      tokenStore.parsedBalance = parseBalance();
+
+      if (refreshBalance) {
+        tokenStore.balance = await getCollateralBalance();
+        tokenStore.parsedBalance = parseBalance();
+      }
+
       tokenStore.loaded = true;
     } catch (e) {
       console.error(e);

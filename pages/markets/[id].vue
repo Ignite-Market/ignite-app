@@ -90,8 +90,9 @@
               ></div>
 
               <div
-                class="flex justify-between items-center flex-grow-[10] gap-8 min-w-[220px] cursor-pointer"
-                @click="selectOutcome(TransactionType.BUY, outcome)"
+                class="flex justify-between items-center flex-grow-[10] gap-8 min-w-[220px]"
+                :class="{ 'cursor-pointer': !winningOutcome?.id }"
+                @click="winningOutcome?.id ? null : selectOutcome(TransactionType.BUY, outcome)"
               >
                 <div class="flex">
                   <div class="w-[56px] h-[56px] flex-shrink-0">
