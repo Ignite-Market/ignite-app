@@ -86,7 +86,7 @@
               <div
                 class="absolute w-0.5 h-6 left-0 top-1/2 bottom-1/2 -translate-y-1/2 z-1 transition-all duration-500"
                 :style="{ backgroundColor: outcomeColors[i] }"
-                :class="{ 'h-full': selectedOutcome.id === outcome.id }"
+                :class="{ 'h-full': selectedOutcome?.id === outcome.id }"
               ></div>
 
               <div
