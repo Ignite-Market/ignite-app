@@ -105,7 +105,7 @@ onMounted(() => {
         const percentageClass = `${returnPercentage >= 0 ? 'text-statusGreen font-semibold' : 'text-statusRed font-semibold'}`;
 
         return h('div', { class: 'flex whitespace-nowrap' }, [
-          h('div', { class: 'mr-1 w-[50px]' }, displayCollateral),
+          h('div', { class: 'mr-1 w-[60px]' }, displayCollateral),
           h('span', { class: percentageClass }, displayPercentage),
         ]);
       },

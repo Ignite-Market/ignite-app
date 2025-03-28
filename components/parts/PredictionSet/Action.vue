@@ -75,7 +75,14 @@
                 3%
               </BasicButton>
 
-              <n-input-number v-model:value="slippage" :show-button="false" :max="100" :min="0" class="w-[70px]">
+              <n-input-number
+                v-model:value="slippage"
+                :show-button="false"
+                :max="100"
+                :min="0"
+                :precision="2"
+                class="w-[70px]"
+              >
                 <template #suffix>%</template>
               </n-input-number>
             </div>
@@ -418,7 +425,10 @@
       1. Increase allowance
 
       <div class="ml-auto">
-        <div v-if="transactionStep === 1" class="w-[17px] h-[17px] flex justify-center items-center ml-auto">
+        <div
+          v-if="transactionStep === TransactionStep.ALLOWANCE"
+          class="w-[17px] h-[17px] flex justify-center items-center ml-auto"
+        >
           <div class="w-[7px] h-[7px] bg-statusGreen rounded-full animate-pulse"></div>
         </div>
         <NuxtIcon v-else class="text-primary text-[17px]" name="icon/complete" />
@@ -428,7 +438,7 @@
     <div class="flex items-center pt-4 font-semibold px-1">
       2. Confirm transaction
 
-      <div v-if="transactionStep === 2" class="ml-auto">
+      <div v-if="transactionStep === TransactionStep.CONFIRM" class="ml-auto">
         <div class="w-[17px] h-[17px] flex justify-center items-center ml-auto">
           <div class="w-[7px] h-[7px] bg-statusGreen rounded-full animate-pulse"></div>
         </div>
@@ -445,6 +455,11 @@ import ConfettiExplosion from 'vue-confetti-explosion';
 import type { OutcomeInterface } from '~/lib/types/prediction-set';
 import { PredictionSetStatus, TransactionType } from '~/lib/types/prediction-set';
 import { colors } from '~/tailwind.config';
+
+enum TransactionStep {
+  ALLOWANCE = 1,
+  CONFIRM = 2,
+}
 
 const props = defineProps({
   contractAddress: { type: String as PropType<Address>, default: null, required: true },
@@ -488,7 +503,7 @@ const transactionHash = ref('');
 
 const buyError = ref('');
 const sellError = ref('');
-const transactionStep = ref(1);
+const transactionStep = ref(TransactionStep.ALLOWANCE);
 
 const buyValidator = (x: number) => {
   if (x > buyFundLimit.value) {
@@ -722,7 +737,7 @@ async function fund() {
     return;
   }
 
-  transactionStep.value = 1;
+  transactionStep.value = TransactionStep.ALLOWANCE;
   showTransactionModal.value = true;
   loading.value = true;
   try {
@@ -739,7 +754,7 @@ async function fund() {
       loading.value = false;
       return;
     }
-    transactionStep.value = 2;
+    transactionStep.value = TransactionStep.CONFIRM;
 
     txWait.hash.value = await addFunding(props.contractAddress, amount.value);
     const receipt = await txWait.wait();
@@ -759,7 +774,7 @@ async function fund() {
     message.error(contractError(error));
   } finally {
     loading.value = false;
-    transactionStep.value = 1;
+    transactionStep.value = TransactionStep.ALLOWANCE;
     showTransactionModal.value = false;
   }
 }
@@ -772,7 +787,7 @@ async function sellOutcome() {
     return;
   }
 
-  transactionStep.value = 1;
+  transactionStep.value = TransactionStep.ALLOWANCE;
   showTransactionModal.value = true;
   loading.value = true;
   try {
@@ -789,7 +804,7 @@ async function sellOutcome() {
       loading.value = false;
       return;
     }
-    transactionStep.value = 2;
+    transactionStep.value = TransactionStep.CONFIRM;
 
     const collateralAmount = await calcSellAmountInCollateral(
       amount.value,
@@ -828,7 +843,7 @@ async function sellOutcome() {
     message.error(contractError(error));
   } finally {
     loading.value = false;
-    transactionStep.value = 1;
+    transactionStep.value = TransactionStep.ALLOWANCE;
     showTransactionModal.value = false;
   }
 }
@@ -841,7 +856,7 @@ async function buyOutcome() {
     return;
   }
 
-  transactionStep.value = 1;
+  transactionStep.value = TransactionStep.ALLOWANCE;
   showTransactionModal.value = true;
   loading.value = true;
   try {
@@ -857,7 +872,7 @@ async function buyOutcome() {
       loading.value = false;
       return;
     }
-    transactionStep.value = 2;
+    transactionStep.value = TransactionStep.CONFIRM;
 
     txWait.hash.value = await buy(props.contractAddress, amount.value, props.outcome.outcomeIndex, slippage.value);
     const receipt = await txWait.wait();
@@ -881,7 +896,7 @@ async function buyOutcome() {
     console.error(error);
   } finally {
     loading.value = false;
-    transactionStep.value = 1;
+    transactionStep.value = TransactionStep.ALLOWANCE;
     showTransactionModal.value = false;
   }
 }

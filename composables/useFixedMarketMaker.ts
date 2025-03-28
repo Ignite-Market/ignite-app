@@ -1,9 +1,14 @@
+/* eslint-disable import/no-named-as-default */
 import { newtonRaphson } from '@fvictorio/newton-raphson-method';
 import { useAccount } from '@wagmi/vue';
-// eslint-disable-next-line import/no-named-as-default
 import Big from 'big.js';
-import { type Address } from 'viem';
+import { parseEther, type Address } from 'viem';
 import { ContractType } from '~/lib/config/contracts';
+
+/**
+ * Slippage scale for fraction calculation support.
+ */
+const SLIPPAGE_SCALE = 100;
 
 /**
  * Use Fixed Market Maker (FMM) Contract.
@@ -16,6 +21,7 @@ export default function useFixedMarketMaker() {
 
   /**
    * Gets current share price.
+   *
    * @param fpmmContractAddress FPMM contract address.
    * @param outcomeIndex Outcome index.
    * @returns Price per share.
@@ -34,6 +40,7 @@ export default function useFixedMarketMaker() {
 
   /**
    * Returns max tokens to sell based on slippage.
+   *
    * @param fpmmContractAddress FPMM contract address.
    * @param amount Amount of collateral token to return.
    * @param outcomeIndex Outcome index.
@@ -49,18 +56,21 @@ export default function useFixedMarketMaker() {
     const contract = await initContract(ContractType.FPMM, fpmmContractAddress);
 
     const maxTokensToSellNoSlippage = await contract.read.calcSellAmount([collateralAmount, outcomeIndex]);
-    const maxTokensToSell = (maxTokensToSellNoSlippage * BigInt(100 + slippage)) / BigInt(100);
+    const maxTokensToSell =
+      (maxTokensToSellNoSlippage * BigInt(100 * SLIPPAGE_SCALE + slippage * SLIPPAGE_SCALE)) /
+      BigInt(100 * SLIPPAGE_SCALE);
 
     return { maxTokensToSell, maxTokensToSellNoSlippage };
   }
 
   /**
+   * Return min tokens to buy based on slippage.
    *
-   * @param fpmmContractAddress
-   * @param amount
-   * @param outcomeIndex
-   * @param slippage
-   * @returns
+   * @param fpmmContractAddress FPMM contract address.
+   * @param amount Amount of collateral to spend.
+   * @param outcomeIndex Outcome index.
+   * @param slippage Slippage.
+   * @returns Min tokens to buy.
    */
   async function getMinTokensToBuy(
     fpmmContractAddress: Address,
@@ -76,15 +86,16 @@ export default function useFixedMarketMaker() {
 
     const scaledAmount = BigInt(Math.round(amount * 10 ** tokenStore.decimals));
     const minTokensToBuyNoSlippage = await contract.read.calcBuyAmount([scaledAmount, outcomeIndex]);
-    const minTokensToBuy = (minTokensToBuyNoSlippage * BigInt(100 - slippage)) / BigInt(100);
+    const minTokensToBuy =
+      (minTokensToBuyNoSlippage * BigInt(100 * SLIPPAGE_SCALE - slippage * SLIPPAGE_SCALE)) /
+      BigInt(100 * SLIPPAGE_SCALE);
 
-    // TODO: FIX FRACTIONS:
-    // new Big(amount.toString()).mul(keepFraction).toFixed(0);
     return { minTokensToBuy, minTokensToBuyNoSlippage };
   }
 
   /**
    * Buys outcome tokens for the given market.
+   *
    * @param fpmmContractAddress FPMM contract address.
    * @param amount Buy amount in collateral token.
    * @param outcomeIndex Outcome index to buy.
@@ -109,12 +120,13 @@ export default function useFixedMarketMaker() {
   }
 
   /**
+   * Sells outcome shares.
    *
-   * @param fpmmContractAddress
-   * @param amount
-   * @param outcomeIndex
-   * @param slippage
-   * @returns
+   * @param fpmmContractAddress FPMM contract address.
+   * @param amount Amount of outcome shares to sell.
+   * @param outcomeIndex Outcome index.
+   * @param slippage Slippage value.
+   * @returns Sell TX.
    */
   async function sell(fpmmContractAddress: Address, collateralAmount: bigint, outcomeIndex: number, slippage: number) {
     if (!isConnected.value) {
@@ -189,18 +201,19 @@ export default function useFixedMarketMaker() {
    * @param shareAmount Amount of shares to return.
    */
   async function getTotalFunding(fpmmContractAddress: Address) {
-    const contract = await initContract(ContractType.FPMM, fpmmContractAddress);
-    const res = await contract.read.fundingAmountTotal();
-    return res;
+    const contract = await initReadContract(ContractType.FPMM, fpmmContractAddress);
+
+    return await contract.read.fundingAmountTotal();
   }
 
   /**
+   * Calculate shares amount approximation in collateral amount.
    *
-   * @param sharesAmount
-   * @param outcomeIndex
-   * @param fpmmContractAddress
-   * @param positionIds
-   * @returns
+   * @param sharesAmount Shares amount.
+   * @param outcomeIndex Outcome index.
+   * @param fpmmContractAddress FPMM contract address.
+   * @param positionIds Array of position IDs.
+   * @returns Shares amount in collateral.
    */
   async function calcSellAmountInCollateral(
     sharesAmount: number,
@@ -216,20 +229,18 @@ export default function useFixedMarketMaker() {
     const marketSharesAmounts = await ctContract.read.balanceOfBatch([owners, ids]);
 
     const fpmmContract = await initContract(ContractType.FPMM, fpmmContractAddress);
-    const actualFee = await fpmmContract.read.fee();
+    const fee = await fpmmContract.read.fee();
 
-    // TODO: HANDLE FEE IN CALCULATION
-
-    const marketFee = new Big(actualFee.toString()).div(10 ** 18);
-    console.log('marketFee: ', marketFee.toFixed(18));
+    const feeBN = new Big(fee.toString());
+    const userFeeDecimal = feeBN.div(parseEther('1').toString());
 
     const marketSellingSharesAmounts = new Big(marketSharesAmounts[outcomeIndex]);
     const marketNonSellingSharesAmounts = marketSharesAmounts
-      .filter((_, index) => index !== outcomeIndex)
-      .map(marketShares => new Big(marketShares));
+      .filter((_: any, index: any) => index !== outcomeIndex)
+      .map((marketShares: any) => new Big(marketShares));
     const sharesToSell = new Big(Math.round(sharesAmount * 10 ** tokenStore.decimals));
 
-    const f = r => {
+    const f = (r: any) => {
       /* For three outcomes, where the `x` is the one being sold, the formula is:
        * f(r) = ((y - R) * (z - R)) * (x  + a - R) - (x * y * z)
        * where:
@@ -239,7 +250,8 @@ export default function useFixedMarketMaker() {
        *   `r` (the unknown) is the amount of collateral that will be returned in exchange of `a` tokens
        */
 
-      const R = r.div(1);
+      const R = r.div(new Big(1).minus(userFeeDecimal)); // Adjust for fee
+      // const R = r.div(1);
       // const R = r.div(1 - marketFee);
 
       // ((y - R) * (z - R))
@@ -270,26 +282,6 @@ export default function useFixedMarketMaker() {
     return BigInt(r.toFixed(0)) as any;
   }
 
-  // Removes the given fraction from the given integer-bounded amount and returns the value as an original type.
-  function removeFraction(amount: bigint, fraction: number): bigint {
-    if (fraction >= 1 || fraction <= 0)
-      throw new Error(`The given basisPoints ${fraction} is not in the range [0, 1].`);
-
-    const keepFraction = 1 - fraction;
-
-    return BigInt(new Big(amount.toString()).mul(keepFraction).toFixed(0));
-  }
-
-  // Adds the given fraction from the given integer-bounded amount and returns the value as an original type.
-  function addFraction(amount: bigint, fraction: number): bigint {
-    if (fraction >= 1 || fraction <= 0)
-      throw new Error(`The given basisPoints ${fraction} is not in the range [0, 1].`);
-
-    const keepFraction = 1 + fraction;
-
-    return BigInt(new Big(amount.toString()).mul(keepFraction).toFixed(0));
-  }
-
   return {
     getMaxTokensToSell,
     getMinTokensToBuy,
@@ -301,7 +293,5 @@ export default function useFixedMarketMaker() {
     removeFunding,
     getTotalFunding,
     calcSellAmountInCollateral,
-    removeFraction,
-    addFraction,
   };
 }
