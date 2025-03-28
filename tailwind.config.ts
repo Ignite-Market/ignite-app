@@ -30,13 +30,6 @@ export const colors = {
 
   secondary: '#E7EDFF',
 
-  chain: {
-    // TODO: remove
-    ethereum: '#6481E7',
-    moonbeam: '#958FDC',
-    bnb: '#F0B90B',
-  },
-
   body: {
     light: '#A3AED0',
     DEFAULT: '#F5F5F5',

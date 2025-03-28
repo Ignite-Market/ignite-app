@@ -1,4 +1,3 @@
-<!-- TODO: this is somehow too big? -->
 <template>
   <n-select
     v-model:value="sort"

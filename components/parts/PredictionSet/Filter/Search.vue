@@ -1,4 +1,3 @@
-<!-- TODO: this is somehow too big? -->
 <template>
   <n-input v-model:value="search" placeholder="Search" size="large">
     <template #prefix>

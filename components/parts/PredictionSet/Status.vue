@@ -1,4 +1,3 @@
-<!-- TODO: this is somehow too big? -->
 <template>
   <div class="flex items-center justify-center p-0 m-0">
     <div
