@@ -2,7 +2,7 @@
   <div class="border-1 border-grey-lighter bg-grey-light rounded-lg p-8 flex flex-col justify-center items-center">
     <div class="font-normal text-[16px] leading-[24px] text-white/80">Outcome winner</div>
     <div class="w-[64px] h-[64px] flex-shrink-0 mt-5">
-      <Image src="https://app-dev.ignitemarket.xyz/favicon.png" class="rounded-[48px] w-full h-full object-cover" />
+      <Image :src="outcome.imgUrl" class="rounded-[48px] w-full h-full object-cover" />
     </div>
 
     <div class="font-bold text-[16px] leading-[24px] mt-2">{{ outcome.name }}</div>
@@ -53,7 +53,7 @@
     <div v-else class="flex flex-col mt-4">
       <div class="flex w-full items-center justify-center mb-4">
         <div class="w-[56px] h-[56px] flex-shrink-0">
-          <Image src="https://app-dev.ignitemarket.xyz/favicon.png" class="rounded-[78px] w-full h-full object-cover" />
+          <Image :src="outcome.imgUrl" class="rounded-[78px] w-full h-full object-cover" />
         </div>
       </div>
       <div class="flex items-center justify-center text-[14px] leading-[20px]">

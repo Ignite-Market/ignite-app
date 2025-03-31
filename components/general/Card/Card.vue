@@ -8,7 +8,7 @@
     </div>
     <div class="flex flex-col justify-between">
       <div v-if="title || content">
-        <component v-if="title" :is="size === 'sm' ? 'h3' : size === 'md' ? 'h2' : 'h1'" class="whitespace-pre-line">
+        <component :is="size === 'sm' ? 'h3' : size === 'md' ? 'h2' : 'h1'" v-if="title" class="whitespace-pre-line">
           {{ title }}
         </component>
         <p v-if="content" class="mt-2 mb-6 whitespace-pre-line">

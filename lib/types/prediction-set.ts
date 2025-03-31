@@ -52,6 +52,7 @@ export interface OutcomeInterface extends GeneralInterface {
   name: string;
   latestChance: OutcomeChance;
   volume: number;
+  imgUrl: string;
 }
 
 export interface ChainDataInterface extends GeneralInterface {
@@ -76,6 +77,7 @@ export interface PredictionSetInterface extends GeneralInterface {
   resolutionType: ResolutionType;
   consensusThreshold: number;
   setStatus: PredictionSetStatus;
+  imgUrl: string;
   outcomes: OutcomeInterface[];
   chainData: ChainDataInterface;
   isWatched?: boolean;

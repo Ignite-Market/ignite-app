@@ -5,7 +5,7 @@
   >
     <div class="flex border-b border-white/10 pb-3 cursor-pointer" @click="openDetails()">
       <div class="w-[38px] h-[38px] flex-shrink-0">
-        <img class="rounded-[8px] w-full h-full object-cover" src="https://app-dev.ignitemarket.xyz/favicon.png" />
+        <Image :src="predictionSet.imgUrl" class="rounded-[8px] w-full h-full object-cover" />
       </div>
       <div class="ml-4 text-[14px] leading-[20px] font-medium">
         {{ predictionSet.question }}

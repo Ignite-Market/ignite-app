@@ -15,7 +15,7 @@
       </div>
       <div v-else class="bg-grey-light rounded-[8px] p-3 flex flex-row items-center justify-center">
         <div class="w-[30px] h-[30px] flex-shrink-0">
-          <img class="rounded-[48px] w-full h-full object-cover" src="https://app-dev.ignitemarket.xyz/favicon.png" />
+          <Image :src="outcome.imgUrl" class="rounded-[48px] w-full h-full object-cover" />
         </div>
         <div class="ml-2 text-[12px] leading-[16px] font-bold">{{ outcome.name }}</div>
         <div class="text-[12px] leading-[16px] font-bold ml-auto">
@@ -353,10 +353,7 @@
 
           <div class="flex w-full items-center justify-center mt-6">
             <div class="w-[56px] h-[56px] flex-shrink-0">
-              <img
-                class="rounded-[78px] w-full h-full object-cover"
-                src="https://app-dev.ignitemarket.xyz/favicon.png"
-              />
+              <Image :src="outcome.imgUrl" class="rounded-[78px] w-full h-full object-cover" />
             </div>
           </div>
           <div class="my-4 uppercase font-extrabold text-[18px]">{{ outcome.name }}</div>
@@ -398,7 +395,7 @@
     <div v-else class="flex flex-col mt-4">
       <div class="flex w-full items-center justify-center mb-4">
         <div class="w-[56px] h-[56px] flex-shrink-0">
-          <img class="rounded-[78px] w-full h-full object-cover" src="https://app-dev.ignitemarket.xyz/favicon.png" />
+          <Image :src="outcome.imgUrl" class="rounded-[78px] w-full h-full object-cover" />
         </div>
       </div>
       <div

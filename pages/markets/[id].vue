@@ -5,7 +5,7 @@
       <div class="flex mb-10 justify-between flex-wrap gap-4">
         <div class="flex flex-wrap gap-x-8 gap-y-4">
           <div class="w-[80px] h-[80px] flex-shrink-0">
-            <img class="rounded-[8px] w-full h-full object-cover" src="https://app-dev.ignitemarket.xyz/favicon.png" />
+            <Image :src="predictionSet.imgUrl" class="rounded-[8px] w-full h-full object-cover" />
           </div>
           <div class="flex flex-col">
             <div class="text-[24px] leading-[34px] font-bold text-white mt-[5px]">
@@ -96,10 +96,7 @@
               >
                 <div class="flex">
                   <div class="w-[56px] h-[56px] flex-shrink-0">
-                    <img
-                      class="rounded-[78px] w-full h-full object-cover"
-                      src="https://app-dev.ignitemarket.xyz/favicon.png"
-                    />
+                    <Image :src="outcome.imgUrl" class="rounded-[78px] w-full h-full object-cover" />
                   </div>
 
                   <div class="flex flex-col ml-4">
