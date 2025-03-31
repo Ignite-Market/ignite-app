@@ -86,13 +86,22 @@
               <div
                 class="absolute w-0.5 h-6 left-0 top-1/2 bottom-1/2 -translate-y-1/2 z-1 transition-all duration-500"
                 :style="{ backgroundColor: outcomeColors[i] }"
-                :class="{ 'h-full': selectedOutcome?.id === outcome.id }"
+                :class="{
+                  'h-full':
+                    selectedOutcome?.id === outcome.id && predictionSet.setStatus === PredictionSetStatus.ACTIVE,
+                }"
               ></div>
 
               <div
                 class="flex justify-between items-center flex-grow-[10] gap-8 min-w-[220px]"
-                :class="{ 'cursor-pointer': !winningOutcome?.id }"
-                @click="winningOutcome?.id ? null : selectOutcome(TransactionType.BUY, outcome)"
+                :class="{
+                  'cursor-pointer': !winningOutcome?.id && predictionSet.setStatus === PredictionSetStatus.ACTIVE,
+                }"
+                @click="
+                  winningOutcome?.id || predictionSet.setStatus !== PredictionSetStatus.ACTIVE
+                    ? null
+                    : selectOutcome(TransactionType.BUY, outcome)
+                "
               >
                 <div class="flex">
                   <div class="w-[56px] h-[56px] flex-shrink-0">
