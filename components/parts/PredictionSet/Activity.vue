@@ -1,6 +1,6 @@
 <template>
   <div class="mt-5 pb-[33vh]">
-    <div v-if="!loading && !items.length" class="text-center mt-6">No activity</div>
+    <div v-if="!loading && !items.length" class="text-center mt-6 text-[14px] text-grey-lightest">No activity</div>
     <div v-else-if="items.length" class="flex flex-col mt-6 gap-y-5">
       <PredictionSetActivityItem v-for="item of items" :key="item.transactionId" :item="item" />
       <div v-if="pagination.itemCount! > pagination.page! * pagination.pageSize" class="flex">

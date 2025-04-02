@@ -12,7 +12,7 @@
         @update:value="value => getHolders(1, value)"
       />
     </div>
-    <div v-if="!loading && !items.length" class="text-center mt-6">No holders</div>
+    <div v-if="!loading && !items.length" class="text-center mt-6 text-[14px] text-grey-lightest">No holders</div>
     <div v-else>
       <div class="flex flex-col mt-6 gap-y-5">
         <div class="flex justify-between text-xs max-w-[99%]">
@@ -62,6 +62,7 @@ async function getHolders(page: number = 1, outcomeIndex: number = 0) {
   if (outcomeIndex === lastOutcome.value && page === pagination.value.page) {
     return;
   }
+
   if (!loading.value) {
     loading.value = true;
     try {

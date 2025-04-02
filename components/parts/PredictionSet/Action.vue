@@ -151,7 +151,7 @@
 
           <BasicButton
             class="w-full"
-            :btn-class="[' !font-bold']"
+            :btn-class="['!font-bold']"
             :size="'large'"
             :disabled="!isConnected || !enoughCollateralBalance"
             :loading="loading"
@@ -232,7 +232,7 @@
           <BasicButton
             :disabled="!isConnected || !enoughConditionalBalance"
             class="w-full"
-            :btn-class="[' !font-bold']"
+            :btn-class="['!font-bold']"
             :size="'large'"
             :loading="loading"
             @click="sellOutcome"
@@ -522,10 +522,10 @@ const sellValidator = (x: number) => {
       sellError.value = `Sell amount can not exceed 10% of total funding.`;
     }
   } else {
-    buyError.value = '';
+    sellError.value = '';
   }
 
-  return x >= 0 && x <= buyFundLimit.value;
+  return x >= 0 && x <= sellFundLimit.value;
 };
 
 const onBuyBlur = () => {
@@ -571,7 +571,7 @@ const buyFundLimit = computed(() => {
   if (tokenStore.balance < max) {
     max = tokenStore.balance;
   }
-  return bigIntToNum(max, 6);
+  return bigIntToNum(max, tokenStore.decimals || 6);
 });
 
 const sellFundLimit = computed(() => {
@@ -579,7 +579,7 @@ const sellFundLimit = computed(() => {
   if (conditionalBalance.value < max) {
     max = conditionalBalance.value;
   }
-  return bigIntToNum(max, 6);
+  return bigIntToNum(max, tokenStore.decimals || 6);
 });
 
 onMounted(async () => {

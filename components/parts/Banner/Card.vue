@@ -2,7 +2,7 @@
   <n-card class="max-w-[500px] !border-none" :content-class="'!px-3 !py-4 !rounded-[8px] ' + getBg()">
     <div class="flex gap-3 relative">
       <div class="w-[106px] h-[126px] flex-shrink-0 rounded-[8px] border border-white bg-white/10">
-        <img class="w-full h-full object-cover" :src="banner.imageUrl" />
+        <Image class="w-full h-full object-cover rounded-[7px]" :src="banner.imageUrl" />
       </div>
 
       <div class="flex flex-col">

@@ -173,11 +173,14 @@
             <div class="flex border-r-grey-lighter sm:pr-2 items-center flex-grow flex-wrap justify-between gap-2">
               <div class="text-white/80">Contract</div>
               <div class="flex items-center">
-                <div class="ml-auto font-bold hover:text-primary cursor-pointer">
+                <div
+                  class="ml-auto font-bold hover:text-primary-bright cursor-pointer"
+                  @click="openExplorer(predictionSet.chainData.contractAddress)"
+                >
                   {{ shortenAddress(predictionSet.chainData.contractAddress) }}
                 </div>
                 <NuxtIcon
-                  class="ml-2 text-white cursor-pointer"
+                  class="ml-2 text-white cursor-pointer hover:text-primary-bright"
                   name="icon/copy"
                   @click="copyToClipboard(predictionSet.chainData.contractAddress)"
                 />
@@ -188,11 +191,14 @@
             <div class="flex border-l-grey-lighter sm:pl-2 items-center flex-grow flex-wrap justify-between gap-2">
               <div class="text-white/80">Resolver</div>
               <div class="flex items-center">
-                <div class="ml-auto font-bol hover:text-primary cursor-pointer">
+                <div
+                  class="ml-auto font-bol hover:text-primary-bright cursor-pointer"
+                  @click="openExplorer(config.public.ORACLE_CONTRACT)"
+                >
                   {{ shortenAddress(config.public.ORACLE_CONTRACT) }}
                 </div>
                 <NuxtIcon
-                  class="ml-2 text-white cursor-pointer"
+                  class="ml-2 text-white cursor-pointer hover:text-primary-bright"
                   name="icon/copy"
                   @click="copyToClipboard(config.public.ORACLE_CONTRACT)"
                 />
@@ -420,5 +426,11 @@ async function toggleWatchlist() {
 
 function copyLink() {
   copyToClipboard(window.location.href);
+}
+
+function openExplorer(address: string) {
+  const explorer = getExplorer();
+
+  window.open(`${explorer}/address/${address}`, '_blank');
 }
 </script>

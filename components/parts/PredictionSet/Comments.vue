@@ -19,7 +19,7 @@
         />
       </template>
     </n-input>
-    <div v-if="!loading && !comments.length" class="text-center mt-6">No comments</div>
+    <div v-if="!loading && !comments.length" class="text-center mt-6 text-[14px] text-grey-lightest">No comments</div>
 
     <div v-else class="flex flex-col mt-6 gap-y-5">
       <template v-if="loading">
