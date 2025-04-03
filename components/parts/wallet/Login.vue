@@ -52,6 +52,9 @@ useAccountEffect({
 const loadingWallet = ref<boolean>(false);
 const modalWalletSelectVisible = ref<boolean>(false);
 
+// TODO: Disconnect user if he doesn't sign the message!
+// TODO: handle wallet switch - user needs to sign the message again!
+
 onBeforeMount(() => {
   // if (!isConnected.value) {
   //   userStore.logout();
@@ -120,8 +123,6 @@ async function evmWalletLogin(data: Record<string, any>) {
 
     messageProvider.success('Wallet has been successfully connected.');
   } catch (error) {
-    // TODO: handle wallet switch - user needs to sign the message again!
-
     console.error(error);
 
     messageProvider.error(contractError(error));

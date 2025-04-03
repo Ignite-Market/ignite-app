@@ -168,47 +168,104 @@
         <!-- RIGHT -->
         <div class="md:sticky top-6 self-start md:ml-8 lg:ml-24 w-full min-w-[260px] md:w-[409px] mb-6">
           <!-- Sidebar content -->
-          <div class="border-1 border-grey-lighter rounded-lg p-6">
-            <div class="flex mb-4 justify-center">
-              <div class="font-bold text-[16px] leading-[24px] text-white">Round #12</div>
-              <div class="flex justify-center items-center ml-auto">
-                <div class="w-[7px] h-[7px] bg-statusGreen rounded-full animate-pulse"></div>
-              </div>
+          <div v-if="currentRound" class="border-1 border-grey-lighter rounded-lg p-6">
+            <div class="rounded-lg border-1 border-grey-lighter mb-4">
+              <n-select
+                v-model:value="selectedRound"
+                :show-checkmark="false"
+                :clearable="false"
+                size="large"
+                :theme-overrides="{
+                  peers: {
+                    InternalSelection: {
+                      color: 'transparent',
+                      textColor: 'white',
+                    },
+                    InternalSelectMenu: {
+                      color: '#292929',
+                    },
+                  },
+                }"
+                :render-label="
+                  (option: any) => {
+                    return h('div', { class: 'flex items-center w-full' }, [
+                      h('div', { class: 'font-bold text-white text-[16px] leading-[24px] p-2' }, option.label),
+                      h(
+                        'div',
+                        {
+                          class: `w-[7px] h-[7px]  rounded-full ml-auto absolute right-5 ${option.status === ProposalRoundStatus.ACTIVE ? 'bg-statusGreen animate-pulse' : 'bg-statusRed'} `,
+                        },
+                        ''
+                      ),
+                    ]);
+                  }
+                "
+                :render-tag="
+                  ({ option }) => {
+                    return h('div', { class: 'flex items-center' }, [
+                      h('span', { class: 'font-bold text-white text-[16px] leading-[24px]' }, `Round #${option.value}`),
+                    ]);
+                  }
+                "
+                :options="
+                  proposalRounds.map(p => {
+                    return {
+                      label: `Round #${p.id}`,
+                      status: p.roundStatus,
+                      value: p.id,
+                    };
+                  })
+                "
+                class="font-bold"
+              >
+                <template #arrow>
+                  <div class="flex items-center mr-4">
+                    <div
+                      v-if="currentRound?.roundStatus === ProposalRoundStatus.ACTIVE"
+                      class="w-[7px] h-[7px] bg-statusGreen rounded-full animate-pulse mr-2"
+                    ></div>
+                    <div v-else class="w-[7px] h-[7px] bg-statusRed rounded-full mr-2"></div>
+
+                    <NuxtIcon name="icon/arrow-down" class="icon-auto !inline-flex flex-cc text-primary" />
+                  </div>
+                </template>
+              </n-select>
             </div>
 
             <div class="font-medium text-[14px] leading-[20px] text-grey-lightest">
               <div
                 class="flex items-center py-4 border-b-1 border-b-grey-lighter"
-                :title="dateTimeToDateAndTime(new Date())"
+                :title="dateTimeToDateAndTime(currentRound.startTime)"
               >
                 <NuxtIcon class="text-grey-lightest text-[17px] mr-[17px]" name="icon/calendar" />
                 <div>Started on:</div>
-                <div class="ml-auto text-white/80 font-bold">{{ toMonthAndYear(new Date()) }}</div>
+                <div class="ml-auto text-white/80 font-bold">{{ toMonthAndYear(currentRound.startTime) }}</div>
               </div>
 
               <div
                 class="flex items-center py-4 border-b-1 border-b-grey-lighter"
-                :title="dateTimeToDateAndTime(new Date())"
+                :title="dateTimeToDateAndTime(currentRound.endTime)"
               >
                 <NuxtIcon class="text-grey-lightest text-[17px] mr-[17px]" name="icon/flag" />
                 <div>Ends on:</div>
-                <div class="ml-auto text-white/80 font-bold">{{ toMonthAndYear(new Date()) }}</div>
+                <div class="ml-auto text-white/80 font-bold">{{ toMonthAndYear(currentRound.endTime) }}</div>
               </div>
 
               <div class="flex items-center py-4" :title="dateTimeToDateAndTime(new Date())">
                 <NuxtIcon class="text-grey-lightest text-[17px] mr-[17px]" name="icon/trophy" />
                 <div>Reward:</div>
                 <div class="flex items-center justify-center text-white/80 ml-auto font-bold">
-                  <div class="mr-1">100</div>
+                  <div class="mr-1">{{ currentRound.rewardPoints }}</div>
                   <NuxtIcon name="icon/star2" class="text-primary" />
                 </div>
               </div>
 
               <BasicButton
+                v-if="currentRound.roundStatus === ProposalRoundStatus.ACTIVE"
                 class="w-full mt-4"
                 :btn-class="['!font-bold']"
                 :size="'large'"
-                :disabled="!isConnected"
+                :disabled="!isConnected || !userStore.loggedIn"
                 :loading="loading"
               >
                 Add proposal
@@ -223,6 +280,9 @@
 
 <script lang="ts" setup>
 import { useAccount } from '@wagmi/vue';
+import { h } from 'vue';
+import { ProposalRoundStatus, type ProposalRound, type ProposalRoundsResponse } from '~/lib/types/proposal';
+import Endpoints from '~/lib/values/endpoints';
 
 enum Sort {
   TOP = 1,
@@ -232,11 +292,78 @@ enum Sort {
 const { isConnected } = useAccount();
 const router = useRouter();
 const userStore = useUserStore();
+const message = useMessage();
 
 const search = ref('');
 const sortFilter = ref(Sort.TOP);
 
+const selectedRound = ref<string | number>();
+const currentRound = ref<ProposalRound>();
+const proposalRounds = ref<ProposalRound[]>([]);
+
 const loading = ref(false);
+const loadingProposals = ref(false);
+
+onMounted(() => {
+  getProposalRounds();
+});
+
+watch(selectedRound, newValue => {
+  if (newValue) {
+    const round = proposalRounds.value.find(p => p.id === newValue);
+    if (round) {
+      currentRound.value = round;
+    }
+  }
+});
+
+watchDebounced(
+  () => currentRound.value,
+  async () => {
+    if (currentRound.value) {
+      await getProposals();
+    }
+  },
+  { debounce: 500, maxWait: 1000 }
+);
+
+async function getProposals() {
+  loadingProposals.value = true;
+
+  try {
+    const res = await $api.get<ProposalRoundsResponse>(Endpoints.proposalRounds, {
+      orderBy: ['id'],
+      desc: [true],
+    });
+
+    proposalRounds.value = res.data.items;
+  } catch (error) {
+    message.error(apiError(error));
+  } finally {
+    loading.value = false;
+  }
+}
+
+async function getProposalRounds() {
+  loading.value = true;
+
+  try {
+    const res = await $api.get<ProposalRoundsResponse>(Endpoints.proposalRounds, {
+      orderBy: ['id'],
+      desc: [true],
+    });
+
+    proposalRounds.value = res.data.items;
+    if (proposalRounds.value.length) {
+      selectedRound.value = proposalRounds.value[0].id;
+      currentRound.value = proposalRounds.value[0];
+    }
+  } catch (error) {
+    message.error(apiError(error));
+  } finally {
+    loading.value = false;
+  }
+}
 
 function openUserProfile(userId: number) {
   if (userId === userStore.user.id) {

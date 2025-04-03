@@ -150,7 +150,7 @@ export const themeOverrides: GlobalThemeOverrides = {
         clearColor: colors.grey.DEFAULT,
         clearColorHover: colors.grey.DEFAULT,
         clearColorPressed: colors.grey.DEFAULT,
-        color: colors.bg.DEFAULT,
+        color: colors.grey.light,
         colorActive: colors.bg.DEFAULT,
         colorActiveError: colors.bg.DEFAULT,
         colorActiveWarning: colors.bg.DEFAULT,

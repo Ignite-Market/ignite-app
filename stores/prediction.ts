@@ -35,16 +35,19 @@ export const usePredictionStore = defineStore('prediction', {
 
     async fetch(args: FetchParams = {}, force = true): Promise<PredictionSetInterface[]> {
       syncFilters(this.filters, args);
+
       if (args.category === 'all') {
         args.category = null;
       }
+
       if (args.category) {
         this.category = args.category;
       }
+
       if (this.sorter && !args?.sorter) {
         args.sorter = this.sorter;
       }
-      console.log(args.sorter);
+
       if (this.data?.length && !force) {
         return this.data;
       }
@@ -57,10 +60,13 @@ export const usePredictionStore = defineStore('prediction', {
         !args?.page || args.page === 1
           ? (this.items[this.category ?? 'all'] = res.data.items)
           : this.items[this.category ?? 'all'].push(...(res.data.items as any[]));
+
         this.pagination.itemCount = res.data.total;
+
         if (args.page) {
           this.pagination.page = args.page;
         }
+
         if (args.limit) {
           this.pagination.pageSize = args.limit;
         }

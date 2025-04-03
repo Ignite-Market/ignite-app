@@ -31,6 +31,10 @@ const Endpoints = {
 
   /** Banners */
   banners: '/prediction-sets/banners',
+
+  /** Proposals */
+  proposals: '/proposals',
+  proposalRounds: '/proposals/rounds',
 };
 
 export default Endpoints;
