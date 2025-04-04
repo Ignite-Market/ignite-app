@@ -8,9 +8,38 @@ export enum ProposalRoundStatus {
 }
 
 /**
+ * Proposal vote type.
+ */
+export enum ProposalVoteType {
+  UPVOTE = 1,
+  DOWNVOTE = -1,
+}
+
+/**
+ * Proposal vote interface.
+ */
+export interface ProposalVote extends GeneralInterface {
+  user_id: number;
+  proposal_id: string;
+  voteType: ProposalVoteType;
+}
+export interface ProposalVoteResponse extends GeneralResponse<ProposalVoteResponse> {}
+
+/**
  * Proposal rounds interface.
  */
-export interface Proposal extends GeneralInterface {}
+export interface Proposal extends GeneralInterface {
+  round_id: number;
+  user_id: number;
+  question: string;
+  generalResolutionDef: string;
+  outcomeResolutionDef: string;
+  totalVotes: number;
+  username: string;
+  userWallet: string;
+  votes: ProposalVote[];
+}
+export interface ProposalResponse extends GeneralResponse<Proposal> {}
 export interface ProposalsResponse extends GeneralItemsResponse<Proposal> {}
 
 /**
@@ -22,4 +51,5 @@ export interface ProposalRound extends GeneralInterface {
   endTime: Date;
   roundStatus: ProposalRoundStatus;
 }
+export interface ProposalRoundResponse extends GeneralResponse<ProposalRound> {}
 export interface ProposalRoundsResponse extends GeneralItemsResponse<ProposalRound> {}

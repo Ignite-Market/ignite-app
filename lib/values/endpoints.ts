@@ -34,7 +34,10 @@ const Endpoints = {
 
   /** Proposals */
   proposals: '/proposals',
+  proposalById: (id: number) => `/proposals/${id}`,
   proposalRounds: '/proposals/rounds',
+  proposalRoundById: (id: number) => `/proposals/rounds/${id}`,
+  voteOnProposal: (id: number) => `/proposals/${id}/vote`,
 };
 
 export default Endpoints;

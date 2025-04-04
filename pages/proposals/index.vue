@@ -55,7 +55,7 @@
             <div class="border-1 border-grey-lighter rounded-lg mt-6 p-6">
               <!-- Reddit-style filter tabs -->
               <div class="flex items-center mb-5 border-b-1 border-grey-lighter pb-2">
-                <div class="font-bold text-[18px] leading-[24px] text-white mr-2">Posts</div>
+                <div class="font-bold text-[18px] leading-[24px] text-white mr-2">Proposals</div>
 
                 <button
                   class="flex items-center px-2 py-1 hover:bg-grey-lighter/20 rounded-full text-white/60 text-xs font-medium border-1 border-grey-lighter mr-1.5 cursor-pointer"
@@ -79,88 +79,117 @@
                 </button>
               </div>
 
-              <n-input v-model:value="search" placeholder="Search proposals" size="large" class="mb-6">
+              <n-input v-model:value="search" placeholder="Search proposals" size="large">
                 <template #prefix>
                   <NuxtIcon name="icon/search" />
                 </template>
               </n-input>
 
-              <!-- Post -->
-              <div class="border-1 border-grey-lighter rounded-lg overflow-hidden">
-                <!-- Voting sidebar -->
-                <div class="flex">
-                  <div class="bg-grey-dark p-2 pr-0 flex flex-col items-center w-12">
-                    <Btn
-                      btn-class="bg-grey-light h-6 w-6 rounded flex-cc hover:bg-grey-lighter rotate-180 mt-1"
-                      type="link"
-                    >
-                      <NuxtIcon name="icon/arrow-down" class="text-[20px]" />
-                    </Btn>
+              <div v-for="(proposal, idx) in proposals" :key="proposal.id">
+                <div class="border-1 border-grey-lighter rounded-lg overflow-hidden mt-6 hover:border-primary">
+                  <!-- Voting sidebar -->
+                  <div class="flex">
+                    <div class="bg-grey-dark p-2 pr-0 flex flex-col items-center w-12">
+                      <Btn
+                        btn-class="bg-grey-light h-6 w-6 rounded flex-cc hover:bg-grey-lighter rotate-180 mt-1"
+                        :class="{
+                          '!bg-grey-lighter !text-primary': proposal.votes.find(
+                            v => v.user_id === userStore?.user?.id && v.voteType === ProposalVoteType.UPVOTE
+                          ),
+                        }"
+                        type="link"
+                        :disabled="!isConnected || !userStore.loggedIn || loadingVote"
+                        @click="vote(proposal.id, ProposalVoteType.UPVOTE, idx)"
+                      >
+                        <NuxtIcon name="icon/arrow-down" class="text-[20px]" />
+                      </Btn>
 
-                    <div class="text-white font-bold py-2">23</div>
+                      <div class="text-white font-bold py-2">
+                        {{ proposal.totalVotes }}
+                      </div>
 
-                    <Btn btn-class="bg-grey-light h-6 w-6 rounded flex-cc hover:bg-grey-lighter" type="link">
-                      <NuxtIcon name="icon/arrow-down" class="text-[20px]" />
-                    </Btn>
-                  </div>
+                      <Btn
+                        btn-class="bg-grey-light h-6 w-6 rounded flex-cc hover:bg-grey-lighter"
+                        :class="{
+                          '!bg-grey-lighter !text-primary': proposal.votes.find(
+                            v => v.user_id === userStore?.user?.id && v.voteType === ProposalVoteType.DOWNVOTE
+                          ),
+                        }"
+                        type="link"
+                        :disabled="!isConnected || !userStore.loggedIn || loadingVote"
+                        @click="vote(proposal.id, ProposalVoteType.DOWNVOTE, idx)"
+                      >
+                        <NuxtIcon name="icon/arrow-down" class="text-[20px]" />
+                      </Btn>
+                    </div>
 
-                  <div class="flex-1">
-                    <!-- Post header -->
-                    <div class="p-3 bg-grey-light/10">
-                      <div class="flex items-center text-xs text-white/60">
-                        <div class="flex items-center">
-                          <div class="w-4 h-4 rounded-full overflow-hidden mr-1">
-                            <jazzicon
-                              class="cursor-pointer rounded-[50%] w-[16px] h-[16px] flex-shrink-0"
-                              :address="'0xB3810C07f5073402738f15eb627d45a174AbD8b6'"
-                              :diameter="16"
-                              @click="openUserProfile(1)"
-                            />
+                    <div class="flex-1">
+                      <!-- Post header -->
+                      <div class="p-3 bg-grey-light/10">
+                        <div class="flex items-center text-xs text-white/60">
+                          <div class="flex items-center">
+                            <div class="w-4 h-4 rounded-full overflow-hidden mr-1">
+                              <jazzicon
+                                class="cursor-pointer rounded-[50%] w-[16px] h-[16px] flex-shrink-0"
+                                :address="proposal.userWallet"
+                                :diameter="16"
+                                @click="openUserProfile(1)"
+                              />
+                            </div>
+                            <span
+                              class="cursor-pointer hover:text-primary-bright"
+                              @click="openUserProfile(proposal.user_id)"
+                            >
+                              {{ proposal.username }}
+                            </span>
                           </div>
-                          <span class="cursor-pointer hover:text-primary-bright" @click="openUserProfile(1)">
-                            0x8fa...3e21
-                          </span>
+                          <div class="mx-2 border-r-1 border-r-white/25 h-[12px]"></div>
+                          <div class="mr-2" :title="dateTimeToDateAndTime(proposal.createTime)">
+                            {{ formatDistanceToNow(new Date(proposal.createTime), { addSuffix: true }) }}
+                          </div>
+                          <div class="bg-grey-lighter px-2 py-0.5 rounded-full text-xs ml-1">Crypto</div>
                         </div>
-                        <div class="mx-2 border-r-1 border-r-white/25 h-[12px]"></div>
-                        <div class="mr-2">2 days ago</div>
-                        <div class="bg-grey-lighter px-2 py-0.5 rounded-full text-xs ml-1">Crypto</div>
                       </div>
-                    </div>
 
-                    <!-- Post content -->
-                    <div class="p-3">
-                      <div class="text-white font-medium text-[16px] mb-2 line-clamp-3">
-                        Will Solana reach 1 million TPS by the end of 2024?
-                      </div>
-                      <div class="text-white/80 text-[14px] line-clamp-4">
-                        Solana has been working on improving its transaction throughput, and they claim they can handle
-                        high TPS. This market would predict whether Solana will actually reach the milestone of
-                        processing 1 million transactions per second in a verifiable test by December 31, 2024. Solana
-                        has been working on improving its transaction throughput, and they claim they can handle high
-                        TPS. This market would predict whether Solana will actually reach the milestone of processing 1
-                        million transactions per second in a verifiable test by December 31, 2024.
-                      </div>
-                    </div>
-
-                    <!-- Post footer/actions -->
-                    <div class="p-3 flex items-center text-white/60 text-xs">
+                      <!-- Post content -->
                       <div
-                        class="flex items-center justify-center mr-2 bg-grey-light hover:bg-grey-lighter p-1.5 rounded cursor-pointer group"
+                        class="p-3 cursor-pointer"
+                        @click="
+                          router.push({
+                            name: 'proposals-id',
+                            params: { id: proposal.id },
+                          })
+                        "
                       >
-                        <NuxtIcon name="icon/comment" class="mr-1 text-[16px] group-hover:text-primary" />
-                        <span>8 Comments</span>
+                        <div class="text-white font-medium text-[16px] mb-2 line-clamp-3">
+                          {{ proposal.question }}
+                        </div>
+                        <div class="text-white/80 text-[14px] line-clamp-4">
+                          {{ proposal.generalResolutionDef }}
+                        </div>
                       </div>
 
-                      <div
-                        class="flex items-center justify-center bg-grey-light hover:bg-grey-lighter p-1.5 rounded cursor-pointer group"
-                      >
-                        <NuxtIcon name="icon/share" class="mr-1 text-[16px] group-hover:text-primary" />
-                        <span>Share</span>
+                      <!-- Post footer/actions -->
+                      <div class="p-3 flex items-center text-white/60 text-xs">
+                        <div
+                          class="flex items-center justify-center mr-2 bg-grey-light hover:bg-grey-lighter p-1.5 rounded cursor-pointer group"
+                        >
+                          <NuxtIcon name="icon/comment" class="mr-1 text-[16px] group-hover:text-primary" />
+                          <span>8 Comments</span>
+                        </div>
+
+                        <div
+                          class="flex items-center justify-center bg-grey-light hover:bg-grey-lighter p-1.5 rounded cursor-pointer group"
+                        >
+                          <NuxtIcon name="icon/share" class="mr-1 text-[16px] group-hover:text-primary" />
+                          <span>Share</span>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
+              <!-- Post -->
             </div>
           </div>
         </div>
@@ -280,8 +309,17 @@
 
 <script lang="ts" setup>
 import { useAccount } from '@wagmi/vue';
+import { formatDistanceToNow } from 'date-fns';
 import { h } from 'vue';
-import { ProposalRoundStatus, type ProposalRound, type ProposalRoundsResponse } from '~/lib/types/proposal';
+import {
+  ProposalRoundStatus,
+  ProposalVoteType,
+  type Proposal,
+  type ProposalRound,
+  type ProposalRoundsResponse,
+  type ProposalsResponse,
+  type ProposalVoteResponse,
+} from '~/lib/types/proposal';
 import Endpoints from '~/lib/values/endpoints';
 
 enum Sort {
@@ -300,9 +338,11 @@ const sortFilter = ref(Sort.TOP);
 const selectedRound = ref<string | number>();
 const currentRound = ref<ProposalRound>();
 const proposalRounds = ref<ProposalRound[]>([]);
+const proposals = ref<Proposal[]>([]);
 
 const loading = ref(false);
 const loadingProposals = ref(false);
+const loadingVote = ref(false);
 
 onMounted(() => {
   getProposalRounds();
@@ -328,19 +368,57 @@ watchDebounced(
 );
 
 async function getProposals() {
-  loadingProposals.value = true;
+  if (!currentRound?.value?.id) {
+    return;
+  }
 
+  loadingProposals.value = true;
   try {
-    const res = await $api.get<ProposalRoundsResponse>(Endpoints.proposalRounds, {
-      orderBy: ['id'],
-      desc: [true],
+    const res = await $api.get<ProposalsResponse>(Endpoints.proposals, {
+      roundId: currentRound.value.id,
     });
 
-    proposalRounds.value = res.data.items;
+    proposals.value = res.data.items;
   } catch (error) {
     message.error(apiError(error));
   } finally {
-    loading.value = false;
+    loadingProposals.value = false;
+  }
+}
+
+async function vote(proposalId: number, voteType: ProposalVoteType, idx: number) {
+  if (!currentRound?.value?.id) {
+    return;
+  }
+
+  const totalVotes = proposals.value[idx].totalVotes;
+  const existingVote = proposals.value[idx].votes.find(v => v.user_id === userStore.user.id);
+  if (existingVote) {
+    if (existingVote.voteType === voteType) {
+      proposals.value[idx].totalVotes += voteType === ProposalVoteType.UPVOTE ? -1 : 1;
+    }
+  } else {
+    proposals.value[idx].totalVotes += voteType === ProposalVoteType.UPVOTE ? 1 : -1;
+  }
+
+  loadingVote.value = true;
+  try {
+    await $api.post<ProposalVoteResponse>(Endpoints.voteOnProposal(proposalId), {
+      voteType,
+    });
+
+    const res = await $api.get<ProposalsResponse>(Endpoints.proposals, {
+      roundId: currentRound.value.id,
+      proposalId,
+    });
+
+    proposals.value[idx] = res.data.items[0];
+  } catch (error) {
+    message.error(apiError(error));
+
+    proposals.value[idx].totalVotes = totalVotes;
+  } finally {
+    loadingVote.value = false;
   }
 }
 
