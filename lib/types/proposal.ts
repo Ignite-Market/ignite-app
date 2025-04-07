@@ -50,6 +50,15 @@ export interface ProposalRound extends GeneralInterface {
   startTime: Date;
   endTime: Date;
   roundStatus: ProposalRoundStatus;
+  winner_id?: number;
+  winner?: {
+    id: number;
+    createTime: Date;
+    user_id: number;
+    question: string;
+    username: string;
+    userWallet: string;
+  };
 }
 export interface ProposalRoundResponse extends GeneralResponse<ProposalRound> {}
 export interface ProposalRoundsResponse extends GeneralItemsResponse<ProposalRound> {}

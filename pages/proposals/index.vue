@@ -1,5 +1,5 @@
 <template>
-  <Dashboard :loading="loading">
+  <Dashboard :loading="loading" @load-more="loadMore">
     <div class="px-4 max-w-[1241px] m-auto">
       <!-- HEADER -->
       <div class="flex mb-10 justify-between flex-wrap gap-4">
@@ -84,8 +84,12 @@
                   <NuxtIcon name="icon/search" />
                 </template>
               </n-input>
-
-              <div v-for="(proposal, idx) in proposals" :key="proposal.id">
+              <div v-if="loadingProposals">
+                <div v-for="i in 3" :key="i" class="flex">
+                  <n-skeleton height="248px" width="100%" class="rounded-[8px] mt-6" />
+                </div>
+              </div>
+              <div v-for="(proposal, idx) in proposals" v-else :key="proposal.id">
                 <div class="border-1 border-grey-lighter rounded-lg overflow-hidden mt-6 hover:border-primary">
                   <!-- Voting sidebar -->
                   <div class="flex">
@@ -98,7 +102,12 @@
                           ),
                         }"
                         type="link"
-                        :disabled="!isConnected || !userStore.loggedIn || loadingVote"
+                        :disabled="
+                          !isConnected ||
+                          !userStore.loggedIn ||
+                          loadingVote ||
+                          currentRound?.roundStatus !== ProposalRoundStatus.ACTIVE
+                        "
                         @click="vote(proposal.id, ProposalVoteType.UPVOTE, idx)"
                       >
                         <NuxtIcon name="icon/arrow-down" class="text-[20px]" />
@@ -116,11 +125,23 @@
                           ),
                         }"
                         type="link"
-                        :disabled="!isConnected || !userStore.loggedIn || loadingVote"
+                        :disabled="
+                          !isConnected ||
+                          !userStore.loggedIn ||
+                          loadingVote ||
+                          currentRound?.roundStatus !== ProposalRoundStatus.ACTIVE
+                        "
                         @click="vote(proposal.id, ProposalVoteType.DOWNVOTE, idx)"
                       >
                         <NuxtIcon name="icon/arrow-down" class="text-[20px]" />
                       </Btn>
+
+                      <div
+                        v-if="proposal.id === currentRound?.winner?.id"
+                        class="w-[30px] h-[30px] bg-primary/20 rounded-full flex items-center justify-center mt-4"
+                      >
+                        <NuxtIcon name="icon/trophy" class="text-[17px] text-primary" />
+                      </div>
                     </div>
 
                     <div class="flex-1">
@@ -299,6 +320,42 @@
               >
                 Add proposal
               </BasicButton>
+
+              <div v-else-if="currentRound.winner_id && currentRound.winner" class="mt-4">
+                <div class="text-white/80 text-[14px] mb-2">This round has finished:</div>
+                <div
+                  class="border-1 border-grey-lighter rounded-lg p-4 hover:border-primary cursor-pointer"
+                  @click="
+                    router.push({
+                      name: 'proposals-id',
+                      params: { id: currentRound.winner.id },
+                    })
+                  "
+                >
+                  <div class="flex items-center mb-2">
+                    <NuxtIcon name="icon/trophy" class="text-primary text-[20px] mr-2" />
+                    <div class="font-bold text-white">Winner</div>
+                  </div>
+                  <div class="text-white/80 text-[14px] mb-2">{{ currentRound.winner.question }}</div>
+                  <div class="flex items-center text-white/60 text-[12px]">
+                    <div class="w-4 h-4 rounded-full overflow-hidden mr-1">
+                      <jazzicon
+                        class="rounded-[50%] w-[16px] h-[16px] flex-shrink-0"
+                        :address="currentRound.winner.userWallet"
+                        :diameter="16"
+                      />
+                    </div>
+                    <span
+                      class="hover:text-primary-bright cursor-pointer"
+                      @click="openUserProfile(currentRound.winner.user_id)"
+                    >
+                      {{ currentRound.winner.username }}
+                    </span>
+                    <div class="mx-2 border-r-1 border-r-white/25 h-[12px]"></div>
+                    <div>{{ formatDistanceToNow(new Date(currentRound.winner.createTime), { addSuffix: true }) }}</div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -323,8 +380,8 @@ import {
 import Endpoints from '~/lib/values/endpoints';
 
 enum Sort {
-  TOP = 1,
-  NEW = 2,
+  TOP = 'totalVotes',
+  NEW = 'id',
 }
 
 const { isConnected } = useAccount();
@@ -344,6 +401,10 @@ const loading = ref(false);
 const loadingProposals = ref(false);
 const loadingVote = ref(false);
 
+const page = ref(1);
+const limit = ref(20);
+const total = ref(0);
+
 onMounted(() => {
   getProposalRounds();
 });
@@ -361,8 +422,32 @@ watchDebounced(
   () => currentRound.value,
   async () => {
     if (currentRound.value) {
+      page.value = 1;
+      proposals.value = [];
+
       await getProposals();
     }
+  },
+  { debounce: 500, maxWait: 1000 }
+);
+
+function canLoadMore() {
+  return !!total.value && total.value > proposals.value.length;
+}
+
+async function loadMore() {
+  if (canLoadMore() && !loadingProposals.value) {
+    await getProposals();
+  }
+}
+
+watchDebounced(
+  () => [sortFilter.value, search.value],
+  async () => {
+    page.value = 1;
+    proposals.value = [];
+
+    await getProposals();
   },
   { debounce: 500, maxWait: 1000 }
 );
@@ -376,9 +461,19 @@ async function getProposals() {
   try {
     const res = await $api.get<ProposalsResponse>(Endpoints.proposals, {
       roundId: currentRound.value.id,
+      search: search.value,
+      orderBy: [sortFilter.value],
+      desc: [true],
+      page: page.value,
+      limit: limit.value,
     });
 
-    proposals.value = res.data.items;
+    if (res.data) {
+      proposals.value.push(...(res.data.items as any[]));
+    }
+
+    page.value += 1;
+    total.value = res?.data?.total || 0;
   } catch (error) {
     message.error(apiError(error));
   } finally {

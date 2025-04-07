@@ -18,7 +18,12 @@
                     ),
                   }"
                   type="link"
-                  :disabled="!isConnected || !userStore.loggedIn || loadingVote"
+                  :disabled="
+                    !isConnected ||
+                    !userStore.loggedIn ||
+                    loadingVote ||
+                    round?.roundStatus !== ProposalRoundStatus.ACTIVE
+                  "
                   @click="vote(ProposalVoteType.UPVOTE)"
                 >
                   <NuxtIcon name="icon/arrow-down" class="text-[30px]" />
@@ -36,11 +41,23 @@
                     ),
                   }"
                   type="link"
-                  :disabled="!isConnected || !userStore.loggedIn || loadingVote"
+                  :disabled="
+                    !isConnected ||
+                    !userStore.loggedIn ||
+                    loadingVote ||
+                    round?.roundStatus !== ProposalRoundStatus.ACTIVE
+                  "
                   @click="vote(ProposalVoteType.DOWNVOTE)"
                 >
                   <NuxtIcon name="icon/arrow-down" class="text-[30px]" />
                 </Btn>
+
+                <div
+                  v-if="proposal.id === round?.winner?.id"
+                  class="w-[40px] h-[40px] bg-primary/20 rounded-full flex items-center justify-center mt-4"
+                >
+                  <NuxtIcon name="icon/trophy" class="text-[22px] text-primary" />
+                </div>
               </div>
 
               <div class="flex-1">
@@ -81,14 +98,8 @@
                 <!-- Post footer/actions -->
                 <div class="p-3 pb-5 flex items-center text-white/60 text-xs">
                   <div
-                    class="flex items-center justify-center mr-2 bg-grey-light hover:bg-grey-lighter p-1.5 rounded cursor-pointer group"
-                  >
-                    <NuxtIcon name="icon/comment" class="mr-1 text-[16px] group-hover:text-primary" />
-                    <span>8 Comments</span>
-                  </div>
-
-                  <div
                     class="flex items-center justify-center bg-grey-light hover:bg-grey-lighter p-1.5 rounded cursor-pointer group"
+                    @click="copyLink"
                   >
                     <NuxtIcon name="icon/share" class="mr-1 text-[16px] group-hover:text-primary" />
                     <span>Share</span>
@@ -154,6 +165,42 @@
               >
                 Add proposal
               </BasicButton>
+
+              <div v-else-if="round.winner_id && round.winner" class="mt-4">
+                <div class="text-white/80 text-[14px] mb-2">This round has finished:</div>
+                <div
+                  class="border-1 border-grey-lighter rounded-lg p-4 hover:border-primary cursor-pointer"
+                  @click="
+                    router.push({
+                      name: 'proposals-id',
+                      params: { id: round.winner.id },
+                    })
+                  "
+                >
+                  <div class="flex items-center mb-2">
+                    <NuxtIcon name="icon/trophy" class="text-primary text-[20px] mr-2" />
+                    <div class="font-bold text-white">Winner</div>
+                  </div>
+                  <div class="text-white/80 text-[14px] mb-2">{{ round.winner.question }}</div>
+                  <div class="flex items-center text-white/60 text-[12px]">
+                    <div class="w-4 h-4 rounded-full overflow-hidden mr-1">
+                      <jazzicon
+                        class="rounded-[50%] w-[16px] h-[16px] flex-shrink-0"
+                        :address="round.winner.userWallet"
+                        :diameter="16"
+                      />
+                    </div>
+                    <span
+                      class="hover:text-primary-bright cursor-pointer"
+                      @click="openUserProfile(round.winner.user_id)"
+                    >
+                      {{ round.winner.username }}
+                    </span>
+                    <div class="mx-2 border-r-1 border-r-white/25 h-[12px]"></div>
+                    <div>{{ formatDistanceToNow(new Date(round.winner.createTime), { addSuffix: true }) }}</div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -165,17 +212,17 @@
 <script lang="ts" setup>
 import { useAccount } from '@wagmi/vue';
 import { formatDistanceToNow } from 'date-fns';
+import { CommentEntityTypes } from '~/lib/types/comment';
 import {
   ProposalRoundStatus,
   ProposalVoteType,
   type Proposal,
   type ProposalRound,
-  type ProposalRoundResponse,
+  type ProposalRoundsResponse,
   type ProposalsResponse,
   type ProposalVoteResponse,
 } from '~/lib/types/proposal';
 import Endpoints from '~/lib/values/endpoints';
-import { CommentEntityTypes } from '~/lib/types/comment';
 
 const { isConnected } = useAccount();
 const router = useRouter();
@@ -208,8 +255,13 @@ async function getProposal(silent: boolean = false) {
       proposal.value = res.data.items[0];
 
       if (!round.value) {
-        const resRound = await $api.get<ProposalRoundResponse>(Endpoints.proposalRoundById(proposal.value.round_id));
-        round.value = resRound.data;
+        const resRound = await $api.get<ProposalRoundsResponse>(Endpoints.proposalRounds, {
+          roundId: proposal.value.round_id,
+        });
+
+        if (resRound.data.items.length) {
+          round.value = resRound.data.items[0];
+        }
       }
     }
   } catch (error) {
@@ -262,5 +314,9 @@ function openUserProfile(userId: number) {
     name: 'profile-id',
     params: { id: userId },
   });
+}
+
+function copyLink() {
+  copyToClipboard(window.location.href);
 }
 </script>

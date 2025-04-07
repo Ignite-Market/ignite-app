@@ -12,7 +12,7 @@ export enum CommentEntityTypes {
 export interface CommentInterface extends GeneralInterface {
   user_id: number;
   entity_id: number;
-  entityType: number;
+  entityType: CommentEntityTypes;
   parent_comment_id: number;
   content: string;
   username: string;
