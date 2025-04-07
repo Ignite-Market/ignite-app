@@ -40,7 +40,7 @@
 
 <script lang="ts" setup>
 import { SqlModelStatus } from '~/lib/types';
-import type { CommentInterface } from '~/lib/types/prediction-set';
+import type { CommentInterface } from '~/lib/types/comment';
 import Endpoints from '~/lib/values/endpoints';
 
 const props = defineProps({

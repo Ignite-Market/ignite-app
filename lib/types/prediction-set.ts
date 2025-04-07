@@ -87,18 +87,6 @@ export interface PredictionSetInterface extends GeneralInterface {
 export interface PredictionSetResponse extends GeneralResponse<PredictionSetInterface> {}
 export interface PredictionSetsResponse extends GeneralItemsResponse<any> {}
 
-export interface CommentInterface extends GeneralInterface {
-  user_id: number;
-  prediction_set_id: number;
-  parent_comment_id: number;
-  content: string;
-  username: string;
-  walletAddress: string;
-  reply_user_id: number;
-  taggedUserUsername: string;
-  replies: CommentInterface[];
-}
-
 export interface PredictionSetOutcomeChanceInterface {
   [outcomeId: number]: {
     outcomeId: number;

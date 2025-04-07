@@ -24,7 +24,6 @@ const Endpoints = {
   /** Prediction set comments */
   comments: '/comments',
   commentById: (id: number) => `/comments/${id}`,
-  predictionSetComments: (id: number) => `/comments/prediction-set/${id}`,
 
   /** User prediction watchlist */
   predictionSetUserWatchlist: (id: number) => `/prediction-sets/${id}/watchlist`,

@@ -28,7 +28,7 @@
           <n-skeleton height="68px" width="100%" class="rounded-[8px] ml-4" />
         </div>
       </template>
-      <PredictionSetComment v-for="commentItem of comments" v-else :key="commentItem.id" :comment="commentItem" />
+      <CommentCard v-for="commentItem of comments" v-else :key="commentItem.id" :comment="commentItem" />
     </div>
     <div v-if="!!comments.length && pagination.itemCount! > pagination.page! * pagination.pageSize" class="mt-4 flex">
       <button :disabled="loading" class="m-auto underline" @click="() => getComments(pagination.page! + 1)">
@@ -40,10 +40,12 @@
 
 <script lang="ts" setup>
 import { useAccount } from '@wagmi/vue';
+import { CommentEntityTypes } from '~/lib/types/comment';
 import Endpoints from '~/lib/values/endpoints';
 
 const props = defineProps({
-  predictionSetId: { type: Number, required: true },
+  entityId: { type: Number, required: true },
+  entityType: { type: Number as PropType<CommentEntityTypes>, required: true },
 });
 
 const comment = ref('');
@@ -64,7 +66,10 @@ async function getComments(page: number = 1) {
   loading.value = true;
   try {
     pagination.value.page = page;
-    const res = await $api.get<GeneralItemsResponse<any>>(Endpoints.predictionSetComments(props.predictionSetId), {
+
+    const res = await $api.get<GeneralItemsResponse<any>>(Endpoints.comments, {
+      entityId: props.entityId,
+      entityType: props.entityType,
       orderBy: ['id'],
       page,
       limit: pagination.value.pageSize,
@@ -90,7 +95,8 @@ async function addComment(parentId: number = 0) {
   commentLoading.value = true;
   try {
     const res = await $api.post<GeneralResponse<any>>(Endpoints.comments, {
-      prediction_set_id: props.predictionSetId,
+      entity_id: props.entityId,
+      entityType: props.entityType,
       content: comment.value,
       ...(parentId ? { parent_comment_id: parentId } : {}),
     });

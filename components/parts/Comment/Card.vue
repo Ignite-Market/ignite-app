@@ -19,10 +19,7 @@
           {{ formatDistanceToNow(new Date(comment.createTime), { addSuffix: true }) }}
         </div>
         <div v-if="isConnected" class="ml-auto">
-          <PredictionSetCommentOptions
-            :comment="comment"
-            @delete="(deletedComment: any) => handleDelete(comment, deletedComment)"
-          />
+          <CommentOptions :comment="comment" @delete="(deletedComment: any) => handleDelete(comment, deletedComment)" />
         </div>
       </div>
 
@@ -93,7 +90,7 @@
                 {{ formatDistanceToNow(new Date(replyComment.createTime), { addSuffix: true }) }}
               </div>
               <div class="ml-auto">
-                <PredictionSetCommentOptions
+                <CommentOptions
                   :comment="replyComment"
                   @delete="(deletedComment: any) => handleDelete(replyComment, deletedComment)"
                 />
@@ -163,7 +160,7 @@
 import { formatDistanceToNow } from 'date-fns';
 import { useAccount } from '@wagmi/vue';
 import type { InputInst } from 'naive-ui';
-import type { CommentInterface } from '~/lib/types/prediction-set';
+import type { CommentInterface } from '~/lib/types/comment';
 import { SqlModelStatus } from '~/lib/types';
 import Endpoints from '~/lib/values/endpoints';
 
@@ -198,7 +195,8 @@ async function addReply(replyContent: string) {
     const parentId = props.comment.parent_comment_id ? props.comment.parent_comment_id : props.comment.id;
 
     const res = await $api.post<GeneralResponse<any>>(Endpoints.comments, {
-      prediction_set_id: props.comment.prediction_set_id,
+      entity_id: props.comment.entity_id,
+      entityType: props.comment.entityType,
       content: replyContent,
       parent_comment_id: parentId,
       reply_user_id: taggedUser.value,

@@ -215,7 +215,7 @@
               }"
             >
               <n-tab-pane name="Comments" tab="Comments">
-                <PredictionSetComments :prediction-set-id="predictionSet.id" />
+                <CommentListing :entity-id="predictionSet.id" :entity-type="CommentEntityTypes.PREDICTION_SET" />
               </n-tab-pane>
               <n-tab-pane name="Top holders" tab="Top holders">
                 <PredictionSetHolders :prediction-set-id="predictionSet.id" :outcomes="predictionSet.outcomes" />
@@ -275,6 +275,7 @@
 
 <script lang="ts" setup>
 import Status from '~/components/parts/PredictionSet/Status.vue';
+import { CommentEntityTypes } from '~/lib/types/comment';
 import {
   type OutcomeInterface,
   type PredictionSetInterface,

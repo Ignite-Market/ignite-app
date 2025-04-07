@@ -97,11 +97,12 @@
               </div>
             </div>
           </div>
-          <!-- Post -->
+
+          <CommentListing v-if="proposal" :entity-id="proposal.id" :entity-type="CommentEntityTypes.PROPOSAL" />
         </div>
 
         <!-- RIGHT -->
-        <div class="md:sticky top-6 self-start md:ml-8 lg:ml-24 w-full min-w-[260px] md:w-[409px] pt-2">
+        <div class="md:sticky top-6 self-start md:ml-8 lg:ml-24 w-full min-w-[260px] md:w-[409px]">
           <!-- Sidebar content -->
           <div v-if="round" class="border-1 border-grey-lighter rounded-lg p-6">
             <div class="rounded-lg border-1 border-grey-lighter mb-4 flex items-center justify-center py-3 px-4">
@@ -174,6 +175,7 @@ import {
   type ProposalVoteResponse,
 } from '~/lib/types/proposal';
 import Endpoints from '~/lib/values/endpoints';
+import { CommentEntityTypes } from '~/lib/types/comment';
 
 const { isConnected } = useAccount();
 const router = useRouter();
