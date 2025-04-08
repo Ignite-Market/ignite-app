@@ -28,7 +28,7 @@
               <div class="font-medium leading-[20px] mb-6 text-white/80">
                 <p class="mb-4 text-white/80 text-[14px]">
                   Ignite Market allows you to propose new prediction markets on any topic you're passionate about. Each
-                  round, the best proposal will receive rewards in tokens!
+                  round, the best proposal will receive rewards in points!
                 </p>
 
                 <h3 class="font-bold text-[16px] leading-[22px] mb-2 text-white">Submission Guidelines:</h3>
@@ -39,15 +39,17 @@
                   <li class="mb-0.5">
                     Specify possible outcomes (typically binary Yes/No, but can include multiple options)
                   </li>
-                  <li class="mb-0.5">Provide resolution criteria - how will the outcome be determined?</li>
-                  <li>Include any relevant images or references</li>
+                  <li class="mb-0.5">
+                    Describe the market and provide resolution criteria - how will the outcome be determined and from
+                    which sources can the outcome be verified?
+                  </li>
                 </ul>
 
                 <h3 class="font-bold text-[16px] leading-[22px] mb-2 text-white">Selection Process:</h3>
                 <p class="mb-4 text-white/80 text-[14px]">
                   Each round lasts two weeks. The community votes on proposals, and the proposal with the most votes
-                  will be selected and implemented as an official market. The creator will receive 100 tokens as a
-                  reward!
+                  will be selected and implemented as an official market. The creator will receive a predefined number
+                  of points as a reward!
                 </p>
               </div>
             </div>
