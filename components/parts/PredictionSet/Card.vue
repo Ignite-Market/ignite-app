@@ -60,7 +60,13 @@
       </div>
       <div class="ml-auto flex items-center justify-center">
         <div v-if="predictionSet.setStatus === PredictionSetStatus.FUNDING">
-          <BasicButton :size="'small'" :btn-class="['bg-statusBlue hover:bg-statusBlue-hover']">Fund</BasicButton>
+          <BasicButton
+            :size="'small'"
+            :btn-class="['bg-statusBlue hover:bg-statusBlue-hover']"
+            @click="openDetails(undefined, TransactionType.FUND)"
+          >
+            Fund
+          </BasicButton>
         </div>
         <!-- TODO: Check for potential return. -->
         <div v-else class="flex items-center justify-center">

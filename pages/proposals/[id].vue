@@ -4,7 +4,16 @@
       <!-- CONTENT -->
       <div class="flex flex-col-reverse md:flex-row justify-center">
         <!-- LEFT -->
-        <div class="flex flex-col min-w-[250px] max-w-[736px] pt-2">
+        <div class="flex flex-col min-w-[250px] max-w-[736px] pt-2 relative">
+          <Btn
+            class="left-[-72px] absolute"
+            btn-class="bg-grey-light h-8 w-8 rounded flex-cc hover:bg-grey-lighter"
+            type="link"
+            @click="router.back()"
+          >
+            <NuxtIcon name="icon/arrow-back" class="text-[24px]" />
+          </Btn>
+
           <!-- Main forum content goes here -->
           <div v-if="proposal" class="border-1 border-grey-lighter rounded-lg overflow-hidden">
             <!-- Voting sidebar -->

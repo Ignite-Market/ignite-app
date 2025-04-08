@@ -2,7 +2,16 @@
   <Dashboard :loading="loading">
     <div v-if="predictionSet" class="px-4 max-w-[1241px] m-auto">
       <!-- HEADER -->
-      <div class="flex mb-10 justify-between flex-wrap gap-4">
+      <div class="flex mb-10 justify-between flex-wrap gap-4 relative">
+        <Btn
+          class="left-[-72px] absolute"
+          btn-class="bg-grey-light h-8 w-8 rounded flex-cc hover:bg-grey-lighter"
+          type="link"
+          @click="router.back()"
+        >
+          <NuxtIcon name="icon/arrow-back" class="text-[24px]" />
+        </Btn>
+
         <div class="flex flex-wrap gap-x-8 gap-y-4">
           <div class="w-[80px] h-[80px] flex-shrink-0">
             <Image :src="predictionSet.imgUrl" class="rounded-[8px] w-full h-full object-cover" />
