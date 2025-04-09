@@ -18,7 +18,7 @@
         <div class="ml-[10px] text-[12px] leading-[16px] text-grey-lightest font-medium">
           {{ formatDistanceToNow(new Date(comment.createTime), { addSuffix: true }) }}
         </div>
-        <div v-if="isConnected" class="ml-auto">
+        <div v-if="isConnected && userStore.loggedIn" class="ml-auto">
           <CommentOptions :comment="comment" @delete="(deletedComment: any) => handleDelete(comment, deletedComment)" />
         </div>
       </div>

@@ -20,42 +20,37 @@
       <div class="flex flex-col-reverse md:flex-row justify-center">
         <!-- LEFT -->
         <div class="flex flex-col min-w-[250px] max-w-[736px]">
-          <!-- Main forum content goes here -->
-          <div>
-            <!-- Forum content placeholder -->
-            <div class="border-1 border-grey-lighter rounded-lg p-6">
-              <div class="font-bold text-[18px] leading-[24px] mb-4 text-white">How Market Proposals Work</div>
-              <div class="font-medium leading-[20px] mb-6 text-white/80">
-                <p class="mb-4 text-white/80 text-[14px]">
-                  Ignite Market allows you to propose new prediction markets on any topic you're passionate about. Each
-                  round, the best proposal will receive rewards in points!
-                </p>
+          <div class="border-1 border-grey-lighter rounded-lg p-6">
+            <div class="font-bold text-[18px] leading-[24px] mb-4 text-white">How Market Proposals Work</div>
+            <div class="font-medium leading-[20px] mb-6 text-white/80">
+              <p class="mb-4 text-white/80 text-[14px]">
+                Ignite Market allows you to propose new prediction markets on any topic you're passionate about. Each
+                round, the best proposal will receive rewards in points!
+              </p>
 
-                <h3 class="font-bold text-[16px] leading-[22px] mb-2 text-white">Submission Guidelines:</h3>
-                <ul class="list-disc pl-5 mb-4 text-white/80 text-[14px]">
-                  <li class="mb-0.5">
-                    Clearly define your market question (e.g., "Will Bitcoin reach $100k by end of 2024?")
-                  </li>
-                  <li class="mb-0.5">
-                    Specify possible outcomes (typically binary Yes/No, but can include multiple options)
-                  </li>
-                  <li class="mb-0.5">
-                    Describe the market and provide resolution criteria - how will the outcome be determined and from
-                    which sources can the outcome be verified?
-                  </li>
-                </ul>
+              <h3 class="font-bold text-[16px] leading-[22px] mb-2 text-white">Submission Guidelines:</h3>
+              <ul class="list-disc pl-5 mb-4 text-white/80 text-[14px]">
+                <li class="mb-0.5">
+                  Clearly define your market question (e.g., "Will Bitcoin reach $100k by end of 2024?")
+                </li>
+                <li class="mb-0.5">
+                  Specify possible outcomes (typically binary Yes/No, but can include multiple options)
+                </li>
+                <li class="mb-0.5">
+                  Describe the market and provide resolution criteria - how will the outcome be determined and from
+                  which sources can the outcome be verified?
+                </li>
+              </ul>
 
-                <h3 class="font-bold text-[16px] leading-[22px] mb-2 text-white">Selection Process:</h3>
-                <p class="mb-4 text-white/80 text-[14px]">
-                  Each round lasts two weeks. The community votes on proposals, and the proposal with the most votes
-                  will be selected and implemented as an official market. The creator will receive a predefined number
-                  of points as a reward!
-                </p>
-              </div>
+              <h3 class="font-bold text-[16px] leading-[22px] mb-2 text-white">Selection Process:</h3>
+              <p class="mb-4 text-white/80 text-[14px]">
+                Each round lasts two weeks. The community votes on proposals, and the proposal with the most votes will
+                be selected and implemented as an official market. The creator will receive a predefined number of
+                points as a reward!
+              </p>
             </div>
 
             <div class="border-1 border-grey-lighter rounded-lg mt-6 p-6">
-              <!-- Reddit-style filter tabs -->
               <div class="flex items-center mb-5 border-b-1 border-grey-lighter pb-2">
                 <div class="font-bold text-[18px] leading-[24px] text-white mr-2">Proposals</div>
 
@@ -212,14 +207,12 @@
                   </div>
                 </div>
               </div>
-              <!-- Post -->
             </div>
           </div>
         </div>
 
         <!-- RIGHT -->
         <div class="md:sticky top-6 self-start md:ml-8 lg:ml-24 w-full min-w-[260px] md:w-[409px] mb-6">
-          <!-- Sidebar content -->
           <div v-if="currentRound" class="border-1 border-grey-lighter rounded-lg p-6">
             <div class="rounded-lg border-1 border-grey-lighter mb-4">
               <n-select
@@ -319,6 +312,7 @@
                 :size="'large'"
                 :disabled="!isConnected || !userStore.loggedIn"
                 :loading="loading"
+                @click="router.push('/proposals/add')"
               >
                 Add proposal
               </BasicButton>

@@ -4,7 +4,7 @@
       <!-- CONTENT -->
       <div class="flex flex-col-reverse md:flex-row justify-center">
         <!-- LEFT -->
-        <div class="flex flex-col min-w-[250px] max-w-[736px] pt-2 relative">
+        <div class="flex flex-col min-w-[250px] max-w-[736px] pt-2 relative w-full">
           <Btn
             class="left-[-72px] absolute"
             btn-class="bg-grey-light h-8 w-8 rounded flex-cc hover:bg-grey-lighter"
@@ -15,7 +15,7 @@
           </Btn>
 
           <!-- Main forum content goes here -->
-          <div v-if="proposal" class="border-1 border-grey-lighter rounded-lg overflow-hidden">
+          <div v-if="proposal" class="border-1 border-grey-lighter rounded-lg overflow-hidden w-full">
             <!-- Voting sidebar -->
             <div class="flex">
               <div class="bg-grey-dark py-5 pr-0 flex flex-col items-center w-16">
@@ -31,6 +31,7 @@
                     !isConnected ||
                     !userStore.loggedIn ||
                     loadingVote ||
+                    proposal.user_id === userStore.user.id ||
                     round?.roundStatus !== ProposalRoundStatus.ACTIVE
                   "
                   @click="vote(ProposalVoteType.UPVOTE)"
@@ -54,6 +55,7 @@
                     !isConnected ||
                     !userStore.loggedIn ||
                     loadingVote ||
+                    proposal.user_id === userStore.user.id ||
                     round?.roundStatus !== ProposalRoundStatus.ACTIVE
                   "
                   @click="vote(ProposalVoteType.DOWNVOTE)"
@@ -91,6 +93,10 @@
                       {{ formatDistanceToNow(new Date(proposal.createTime), { addSuffix: true }) }}
                     </div>
                     <div class="bg-grey-lighter px-2 py-0.5 rounded-full text-xs ml-1">Crypto</div>
+
+                    <div v-if="isConnected && userStore.loggedIn" class="ml-auto">
+                      <ProposalOptions :proposal="proposal" :round="round" @delete="() => router.push('/proposals')" />
+                    </div>
                   </div>
                 </div>
 

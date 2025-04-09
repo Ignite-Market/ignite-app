@@ -1,5 +1,5 @@
 <template>
-  <Dashboard>
+  <Dashboard :loading="loading">
     <div class="px-4 max-w-[1241px] m-auto">
       <!-- HEADER -->
       <div class="flex mb-10 justify-between flex-wrap gap-4 relative">
@@ -14,9 +14,11 @@
 
         <div class="flex flex-wrap gap-x-8 gap-y-4">
           <div class="flex flex-col">
-            <div class="text-[24px] leading-[34px] font-bold text-white mt-[5px]">Add new proposal</div>
+            <div class="text-[24px] leading-[34px] font-bold text-white mt-[5px]">Edit your proposal</div>
             <div class="flex mt-4 items-center">
-              <div class="text-white/80 text-[14px] leading-[20px]">Submit your market ideas and earn rewards.</div>
+              <div class="text-white/80 text-[14px] leading-[20px]">
+                You can only make changes while the voting round is still active and your proposal is without votes.
+              </div>
             </div>
           </div>
         </div>
@@ -57,7 +59,7 @@
                   :disabled="!isConnected || !userStore.loggedIn"
                   :loading="proposalLoading"
                 >
-                  Submit Proposal
+                  Save Changes
                 </BasicButton>
               </div>
             </n-form>
@@ -99,6 +101,7 @@
 <script lang="ts" setup>
 import { useAccount } from '@wagmi/vue';
 import { type FormRules } from 'naive-ui';
+import type { ProposalResponse } from '~/lib/types/proposal';
 import Endpoints from '~/lib/values/endpoints';
 
 const { isConnected } = useAccount();
@@ -106,12 +109,15 @@ const router = useRouter();
 const userStore = useUserStore();
 const message = useMessage();
 const formRef = ref();
+const { params } = useRoute();
 
+const proposalId = ref(0);
+const loading = ref(true);
 const proposalLoading = ref(false);
 
 const form = ref({
   question: '',
-  outcomes: [],
+  outcomes: [] as any,
   generalResolutionDef: '',
 });
 
@@ -133,6 +139,39 @@ const rules: FormRules = {
   },
 };
 
+onMounted(async () => {
+  proposalId.value = Number(params?.id);
+  if (!proposalId.value) {
+    router.back();
+  }
+
+  await sleep(10);
+  await getProposal();
+});
+
+async function getProposal() {
+  try {
+    const res = await $api.get<ProposalResponse>(Endpoints.proposalById(proposalId.value));
+
+    form.value = {
+      question: res.data.question,
+      outcomes: res.data.outcomes,
+      generalResolutionDef: res.data.generalResolutionDef,
+    };
+
+    if (res.data.user_id !== userStore.user.id) {
+      router.push({
+        name: 'proposals-id',
+        params: { id: proposalId.value },
+      });
+    }
+  } catch (error) {
+    message.error(apiError(error));
+  } finally {
+    loading.value = false;
+  }
+}
+
 async function submit() {
   if (!isConnected.value || !userStore.loggedIn) {
     return;
@@ -146,14 +185,17 @@ async function submit() {
 
   proposalLoading.value = true;
   try {
-    await $api.post(Endpoints.proposals, {
+    await $api.patch(Endpoints.proposalById(proposalId.value), {
       question: form.value.question,
       outcomes: form.value.outcomes,
       generalResolutionDef: form.value.generalResolutionDef,
     });
 
-    message.success('Proposal submitted successfully.');
-    router.push('/proposals');
+    message.success('Proposal updated successfully.');
+    router.push({
+      name: 'proposals-id',
+      params: { id: proposalId.value },
+    });
   } catch (error) {
     message.error(apiError(error));
   } finally {

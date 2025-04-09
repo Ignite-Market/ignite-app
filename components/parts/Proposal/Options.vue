@@ -17,8 +17,8 @@
         <NuxtIcon name="icon/warn" class="text-primary text-[40px]" />
       </div>
 
-      <div class="flex items-center justify-center text-[16px] leading-[20px] font-bold">Delete comment</div>
-      <div class="text-center text-[14px] leading-[16px] mt-6 mb-4">Are you sure you want to delete this comment?</div>
+      <div class="flex items-center justify-center text-[16px] leading-[20px] font-bold">Delete proposal</div>
+      <div class="text-center text-[14px] leading-[16px] mt-6 mb-4">Are you sure you want to delete this proposal?</div>
 
       <div class="flex gap-x-4">
         <BasicButton
@@ -30,7 +30,7 @@
         >
           Cancel
         </BasicButton>
-        <BasicButton class="w-full mt-3" size="large" :loading="loadingDelete" @click="deleteComment">
+        <BasicButton class="w-full mt-3" size="large" :loading="loadingDelete" @click="deleteProposal">
           Yes
         </BasicButton>
       </div>
@@ -39,18 +39,19 @@
 </template>
 
 <script lang="ts" setup>
-import { SqlModelStatus } from '~/lib/types';
-import type { CommentInterface } from '~/lib/types/comment';
+import { ProposalRoundStatus, type Proposal, type ProposalRound } from '~/lib/types/proposal';
 import Endpoints from '~/lib/values/endpoints';
 
 const props = defineProps({
-  comment: { type: Object as PropType<CommentInterface>, default: () => {}, required: true },
+  proposal: { type: Object as PropType<Proposal>, default: () => {}, required: true },
+  round: { type: Object as PropType<ProposalRound>, default: () => {}, required: true },
 });
 
 const emit = defineEmits(['delete']);
 
 const message = useMessage();
 const userStore = useUserStore();
+const router = useRouter();
 
 const showDropdown = ref(false);
 const showDeleteModal = ref(false);
@@ -60,7 +61,7 @@ const show = ref(true);
 const options = ref<any[]>([]);
 
 onMounted(() => {
-  if (userStore.user.id !== props.comment.user_id) {
+  if (userStore.user.id !== props.proposal.user_id) {
     options.value = [
       {
         key: 'report',
@@ -68,7 +69,7 @@ onMounted(() => {
         disabled: true,
         props: {
           onClick: () => {
-            message.success('Comment reported.');
+            message.success('Proposal reported.');
             showDropdown.value = false;
           },
         },
@@ -118,56 +119,55 @@ onMounted(() => {
           );
         },
       },
-      /***
-       *
-       * TODO: Add edit option.
-       *
-       */
-      // {
-      //   key: 'edit',
-      //   type: 'render',
-      //   props: {
-      //     onClick: () => {
-      //       showDropdown.value = false;
-      //     },
-      //   },
-      //   render: () => {
-      //     return h(
-      //       'div',
-      //       {
-      //         class:
-      //           'flex items-center gap-1 px-2 text-[14px] cursor-pointer hover:text-primary-bright justify-start py-1 text-white/80',
-      //       },
-      //       [
-      //         h(resolveComponent('NuxtIcon'), {
-      //           name: 'icon/edit',
-      //           class: 'text-[15px]',
-      //         }),
-      //         'Edit',
-      //       ]
-      //     );
-      //   },
-      // },
     ];
-  }
 
-  if (props.comment.status === SqlModelStatus.DELETED) {
-    show.value = false;
+    if (props.round.roundStatus === ProposalRoundStatus.ACTIVE && props.proposal.totalVotes === 0) {
+      options.value.push({
+        key: 'edit',
+        type: 'render',
+        props: {
+          onClick: () => {
+            showDropdown.value = false;
+
+            router.push({
+              name: 'proposals-id-edit',
+              params: { id: props.proposal.id },
+            });
+          },
+        },
+        render: () => {
+          return h(
+            'div',
+            {
+              class:
+                'flex items-center gap-1 px-2 text-[14px] cursor-pointer hover:text-primary-bright justify-start py-1 text-white/80',
+            },
+            [
+              h(resolveComponent('NuxtIcon'), {
+                name: 'icon/edit',
+                class: 'text-[15px]',
+              }),
+              'Edit',
+            ]
+          );
+        },
+      });
+    }
   }
 });
 
-async function deleteComment() {
+async function deleteProposal() {
   loadingDelete.value = true;
 
   try {
-    const deletedComment = await $api.delete<GeneralResponse<any>>(Endpoints.commentById(props.comment.id));
+    await $api.delete<GeneralResponse<any>>(Endpoints.proposalById(props.proposal.id));
 
     showDeleteModal.value = false;
-    emit('delete', deletedComment.data);
+    emit('delete');
 
-    message.success('Comment deleted.');
+    message.success('Proposal deleted.');
   } catch (error) {
-    message.error('Error while deleting comment. Please try again.');
+    message.error('Error while deleting proposal. Please try again.');
   } finally {
     loadingDelete.value = false;
   }
