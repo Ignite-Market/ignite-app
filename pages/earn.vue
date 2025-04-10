@@ -22,7 +22,7 @@
       <div class="flex flex-col-reverse md:flex-row justify-center">
         <!-- LEFT -->
         <div class="flex flex-col min-w-[250px] max-w-[736px]">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pb-4">
             <n-card
               v-for="reward in rewards"
               :key="reward.id"
@@ -45,11 +45,11 @@
                   <BasicButton
                     v-if="reward.type === RewardType.DAILY_LOGIN"
                     :loading="claimLoading"
-                    :disabled="!canClaimDaily"
+                    :disabled="!canClaimDaily || !isConnected || !userStore.loggedIn"
                     :btn-class="['w-full', canClaimDaily ? 'bg-primary hover:bg-primary-hover' : 'bg-grey-lighter']"
                     @click="claimDailyReward"
                   >
-                    {{ canClaimDaily ? 'Claim Daily Reward' : 'Already Claimed' }}
+                    Claim Daily Reward
                   </BasicButton>
 
                   <BasicButton
@@ -87,6 +87,7 @@
                   <BasicButton
                     v-else-if="reward.type === RewardType.USER_REFERRAL"
                     class="w-full bg-primary hover:bg-primary-hover"
+                    :disabled="!isConnected || !userStore.loggedIn"
                     @click="showReferralModal = true"
                   >
                     Invite Friends
@@ -141,16 +142,29 @@ const canClaimDaily = ref(false);
 const showReferralModal = ref(false);
 
 const loading = ref(false);
-const userPointsLoading = ref(false);
-const claimLoading = ref(false);
+const userPointsLoading = ref(true);
+const claimLoading = ref(true);
 
-onMounted(() => {
-  getRewardPoints();
-  getUserPoints();
-  getCanClaimDaily();
+onMounted(async () => {
+  await getRewardPoints();
+  await getUserPoints();
+  await getCanClaimDaily();
 });
 
+watch(
+  () => userStore.loggedIn,
+  async _ => {
+    await getCanClaimDaily();
+    await getUserPoints();
+  }
+);
+
 async function getCanClaimDaily() {
+  if (!isConnected.value || !userStore.loggedIn) {
+    claimLoading.value = false;
+    return;
+  }
+
   claimLoading.value = true;
   try {
     const res = await $api.get<GeneralResponse<any>>(Endpoints.dailyReward);
@@ -184,13 +198,18 @@ async function getRewardPoints() {
     const res = await $api.get<GeneralItemsResponse<any>>(Endpoints.rewards);
     rewards.value = res.data.items;
   } catch (error) {
-    message.error(apiError(error));
+    console.log(error);
   } finally {
     loading.value = false;
   }
 }
 
 async function getUserPoints() {
+  if (!isConnected.value || !userStore.loggedIn) {
+    userPointsLoading.value = false;
+    return;
+  }
+
   userPointsLoading.value = true;
   try {
     const res = await $api.get<GeneralResponse<any>>(Endpoints.rewardsMe);

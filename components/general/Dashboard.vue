@@ -13,7 +13,7 @@
     <div v-if="loading">
       <transition name="fade" appear>
         <div v-if="loadingAnimation" class="w-full flex flex-col gap-2 h-screen items-center">
-          <div class="w-full flex flex-col gap-2 pt-4 max-w-[1241px] px-8" :style="heightScreen">
+          <div class="w-full flex flex-col gap-2 pt-6 max-w-[1241px] px-8" :style="heightScreen">
             <!-- Loading skeleton - on long page load show skeleton -->
             <n-skeleton height="80px" width="100%" class="rounded-[8px] min-h-[80px]" />
             <div class="flex md:gap-8 lg:gap-24 h-full mt-10">
@@ -34,7 +34,7 @@
         <n-layout class="">
           <n-layout-content>
             <n-infinite-scroll y-scrollable :style="scrollScreen" :distance="10" @load="onLoadMore">
-              <div class="flex flex-col gap-4 justify-between pt-4" :style="fullHeight ? heightScreen : {}">
+              <div class="flex flex-col gap-4 justify-between pt-6" :style="fullHeight ? heightScreen : {}">
                 <div class="flex flex-col items-center w-full">
                   <div class="xl:max-w-[1520px] w-full px-4">
                     <slot />
