@@ -10,7 +10,7 @@
 
     <div class="flex flex-col">
       <div v-if="canClaim" class="flex items-center justify-center mt-5">
-        <NuxtIcon name="icon/star2" class="text-primary text-[17px]" />
+        <NuxtIcon name="icon/points" class="text-primary text-[17px]" />
         <div class="ml-[4px] text-[14px] leading-[20px] font-medium mr-5 text-white/60">
           {{ formatCollateralAmount(claimBalance, tokenStore.decimals, 2) }} {{ tokenStore.symbol }}
         </div>

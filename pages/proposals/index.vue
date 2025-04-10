@@ -301,7 +301,7 @@
                 <div>Reward:</div>
                 <div class="flex items-center justify-center text-white/80 ml-auto font-bold">
                   <div class="mr-1">{{ currentRound.rewardPoints }}</div>
-                  <NuxtIcon name="icon/star2" class="text-primary" />
+                  <NuxtIcon name="icon/points" class="text-primary" />
                 </div>
               </div>
 
@@ -520,6 +520,7 @@ async function getProposalRounds() {
     const res = await $api.get<ProposalRoundsResponse>(Endpoints.proposalRounds, {
       orderBy: ['id'],
       desc: [true],
+      limit: 100,
     });
 
     proposalRounds.value = res.data.items;

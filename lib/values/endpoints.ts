@@ -37,6 +37,11 @@ const Endpoints = {
   proposalRounds: '/proposals/rounds',
   proposalRoundById: (id: number) => `/proposals/rounds/${id}`,
   voteOnProposal: (id: number) => `/proposals/${id}/vote`,
+
+  /** Rewards */
+  rewards: '/reward-points',
+  rewardsMe: '/reward-points/me',
+  dailyReward: '/reward-points/daily',
 };
 
 export default Endpoints;

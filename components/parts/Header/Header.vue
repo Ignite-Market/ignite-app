@@ -15,6 +15,14 @@
     <div class="flex">
       <div
         class="group flex flex-col items-center justify-center border-1 border-white border-opacity-[24%] rounded-lg w-[70px] h-auto mr-2 hover:bg-grey-dark cursor-pointer"
+        @click="router.push('/earn')"
+      >
+        <NuxtIcon class="text-[16px] text-white group-hover:text-primary" name="icon/points" />
+        <div class="text-[14px] leading-[20px] !text-white">Earn</div>
+      </div>
+
+      <div
+        class="group flex flex-col items-center justify-center border-1 border-white border-opacity-[24%] rounded-lg w-[70px] h-auto mr-2 hover:bg-grey-dark cursor-pointer"
       >
         <NuxtIcon class="text-[16px] text-white group-hover:text-primary" name="icon/book" />
         <div class="text-[14px] leading-[20px] !text-white">Learn</div>
@@ -49,4 +57,5 @@ import { useAccount } from '@wagmi/vue';
 
 const userStore = useUserStore();
 const { isConnected } = useAccount();
+const router = useRouter();
 </script>
