@@ -28,10 +28,7 @@
                   }"
                   type="link"
                   :disabled="
-                    !loggedIn ||
-                    loadingVote ||
-                    proposal.user_id === userStore.user.id ||
-                    round?.roundStatus !== ProposalRoundStatus.ACTIVE
+                    !loggedIn || loadingVote || proposal.user_id === userStore.user.id || !isProposalRoundActive(round)
                   "
                   @click="vote(ProposalVoteType.UPVOTE)"
                 >
@@ -51,10 +48,7 @@
                   }"
                   type="link"
                   :disabled="
-                    !loggedIn ||
-                    loadingVote ||
-                    proposal.user_id === userStore.user.id ||
-                    round?.roundStatus !== ProposalRoundStatus.ACTIVE
+                    !loggedIn || loadingVote || proposal.user_id === userStore.user.id || !isProposalRoundActive(round)
                   "
                   @click="vote(ProposalVoteType.DOWNVOTE)"
                 >
@@ -133,7 +127,7 @@
               <div class="font-bold text-white text-[16px] leading-[24px]">Round #{{ round.id }}</div>
               <div class="ml-auto">
                 <div
-                  v-if="round?.roundStatus === ProposalRoundStatus.ACTIVE"
+                  v-if="isProposalRoundActive(round)"
                   class="w-[7px] h-[7px] bg-statusGreen rounded-full animate-pulse mr-2"
                 ></div>
                 <div v-else class="w-[7px] h-[7px] bg-statusRed rounded-full mr-2"></div>
@@ -169,7 +163,7 @@
               </div>
 
               <BasicButton
-                v-if="round.roundStatus === ProposalRoundStatus.ACTIVE"
+                v-if="isProposalRoundActive(round)"
                 class="w-full mt-4"
                 :btn-class="['!font-bold']"
                 :size="'large'"

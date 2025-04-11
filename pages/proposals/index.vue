@@ -99,7 +99,7 @@
                           ),
                         }"
                         type="link"
-                        :disabled="!loggedIn || loadingVote || currentRound?.roundStatus !== ProposalRoundStatus.ACTIVE"
+                        :disabled="!loggedIn || loadingVote || !isProposalRoundActive(currentRound)"
                         @click="vote(proposal.id, ProposalVoteType.UPVOTE, idx)"
                       >
                         <NuxtIcon name="icon/arrow-down" class="text-[20px]" />
@@ -117,7 +117,7 @@
                           ),
                         }"
                         type="link"
-                        :disabled="!loggedIn || loadingVote || currentRound?.roundStatus !== ProposalRoundStatus.ACTIVE"
+                        :disabled="!loggedIn || loadingVote || !isProposalRoundActive(currentRound)"
                         @click="vote(proposal.id, ProposalVoteType.DOWNVOTE, idx)"
                       >
                         <NuxtIcon name="icon/arrow-down" class="text-[20px]" />
@@ -228,7 +228,7 @@
                       h(
                         'div',
                         {
-                          class: `w-[7px] h-[7px]  rounded-full ml-auto absolute right-5 ${option.status === ProposalRoundStatus.ACTIVE ? 'bg-statusGreen animate-pulse' : 'bg-statusRed'} `,
+                          class: `w-[7px] h-[7px]  rounded-full ml-auto absolute right-5 ${isProposalRoundActive(option.round) ? 'bg-statusGreen animate-pulse' : 'bg-statusRed'} `,
                         },
                         ''
                       ),
@@ -246,8 +246,8 @@
                   proposalRounds.map(p => {
                     return {
                       label: `Round #${p.id}`,
-                      status: p.roundStatus,
                       value: p.id,
+                      round: p,
                     };
                   })
                 "
@@ -256,7 +256,7 @@
                 <template #arrow>
                   <div class="flex items-center mr-4">
                     <div
-                      v-if="currentRound?.roundStatus === ProposalRoundStatus.ACTIVE"
+                      v-if="isProposalRoundActive(currentRound)"
                       class="w-[7px] h-[7px] bg-statusGreen rounded-full animate-pulse mr-2"
                     ></div>
                     <div v-else class="w-[7px] h-[7px] bg-statusRed rounded-full mr-2"></div>
@@ -296,7 +296,7 @@
               </div>
 
               <BasicButton
-                v-if="currentRound.roundStatus === ProposalRoundStatus.ACTIVE"
+                v-if="isProposalRoundActive(currentRound)"
                 class="w-full mt-4"
                 :btn-class="['!font-bold']"
                 :size="'large'"
@@ -354,7 +354,6 @@
 import { formatDistanceToNow } from 'date-fns';
 import { h } from 'vue';
 import {
-  ProposalRoundStatus,
   ProposalVoteType,
   type Proposal,
   type ProposalRound,

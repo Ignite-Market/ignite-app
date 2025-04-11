@@ -39,7 +39,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ProposalRoundStatus, type Proposal, type ProposalRound } from '~/lib/types/proposal';
+import { type Proposal, type ProposalRound } from '~/lib/types/proposal';
 import Endpoints from '~/lib/values/endpoints';
 
 const props = defineProps({
@@ -92,6 +92,7 @@ onMounted(() => {
       },
     ];
   } else {
+    // TODO: Can you delete if round is not active anymore?
     options.value = [
       {
         key: 'delete',
@@ -121,7 +122,7 @@ onMounted(() => {
       },
     ];
 
-    if (props.round.roundStatus === ProposalRoundStatus.ACTIVE && props.proposal.totalVotes === 0) {
+    if (isProposalRoundActive(props.round) && props.proposal.totalVotes === 0) {
       options.value.push({
         key: 'edit',
         type: 'render',
