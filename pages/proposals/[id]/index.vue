@@ -97,8 +97,20 @@
                   <div class="text-white font-medium text-[20px] mb-2 line-clamp-3">
                     {{ proposal.question }}
                   </div>
-                  <div class="text-white/80 text-[14px]">
+                  <div class="text-white/80 text-[14px] mb-5">
                     {{ proposal.generalResolutionDef }}
+                  </div>
+                  <div v-if="proposal.outcomes && proposal.outcomes.length">
+                    <div class="text-white text-[14px] font-medium mb-2">Possible outcomes:</div>
+                    <ul class="list-disc pl-5 mb-1">
+                      <li
+                        v-for="(outcome, index) in proposal.outcomes"
+                        :key="index"
+                        class="text-white/90 text-[14px] mb-1"
+                      >
+                        {{ outcome }}
+                      </li>
+                    </ul>
                   </div>
                 </div>
 
@@ -169,6 +181,7 @@
                 :size="'large'"
                 :disabled="!loggedIn"
                 :loading="loading"
+                @click="router.push('/proposals/add')"
               >
                 Add proposal
               </BasicButton>
@@ -220,7 +233,6 @@
 import { formatDistanceToNow } from 'date-fns';
 import { CommentEntityTypes } from '~/lib/types/comment';
 import {
-  ProposalRoundStatus,
   ProposalVoteType,
   type Proposal,
   type ProposalRound,
