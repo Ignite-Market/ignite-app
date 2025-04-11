@@ -42,7 +42,7 @@
         <div class="text-[14px] leading-[20px] !text-white">Ranks</div>
       </div>
 
-      <div v-if="isConnected && userStore.loggedIn" class="flex-cc text-white">
+      <div v-if="loggedIn" class="flex-cc text-white">
         <!-- <HeaderNotifications /> -->
 
         <HeaderProfile />
@@ -53,9 +53,6 @@
 </template>
 
 <script setup lang="ts">
-import { useAccount } from '@wagmi/vue';
-
-const userStore = useUserStore();
-const { isConnected } = useAccount();
+const { loggedIn } = useLoggedIn();
 const router = useRouter();
 </script>

@@ -151,8 +151,8 @@ const { getFundingBalance, removeFunding } = useFixedMarketMaker();
 const { ensureCorrectNetwork } = useContracts();
 const { getTokenStore } = useCollateralToken();
 const { address } = useAccount();
+const { loggedIn } = useLoggedIn();
 const tokenStore = getTokenStore();
-const userStore = useUserStore();
 const message = useMessage();
 const txWait = useTxWait();
 
@@ -180,7 +180,7 @@ onMounted(async () => {
 });
 
 watch(
-  () => userStore.loggedIn,
+  () => loggedIn.value,
   async _ => {
     await updateClaimBalance();
     await updateFundingBalance();

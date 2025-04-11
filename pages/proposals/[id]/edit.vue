@@ -56,7 +56,7 @@
                 <BasicButton
                   :btn-class="['!font-bold']"
                   :size="'large'"
-                  :disabled="!isConnected || !userStore.loggedIn"
+                  :disabled="!loggedIn"
                   :loading="proposalLoading"
                 >
                   Save Changes
@@ -99,17 +99,16 @@
 </template>
 
 <script lang="ts" setup>
-import { useAccount } from '@wagmi/vue';
 import { type FormRules } from 'naive-ui';
 import type { ProposalResponse } from '~/lib/types/proposal';
 import Endpoints from '~/lib/values/endpoints';
 
-const { isConnected } = useAccount();
+const { loggedIn } = useLoggedIn();
+const { params } = useRoute();
 const router = useRouter();
 const userStore = useUserStore();
 const message = useMessage();
 const formRef = ref();
-const { params } = useRoute();
 
 const proposalId = ref(0);
 const loading = ref(true);
@@ -173,7 +172,7 @@ async function getProposal() {
 }
 
 async function submit() {
-  if (!isConnected.value || !userStore.loggedIn) {
+  if (!loggedIn.value) {
     return;
   }
 

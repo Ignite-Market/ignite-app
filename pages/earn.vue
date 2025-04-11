@@ -45,7 +45,7 @@
                   <BasicButton
                     v-if="reward.type === RewardType.DAILY_LOGIN"
                     :loading="claimLoading"
-                    :disabled="!canClaimDaily || !isConnected || !userStore.loggedIn"
+                    :disabled="!canClaimDaily || !loggedIn"
                     :btn-class="['w-full', canClaimDaily ? 'bg-primary hover:bg-primary-hover' : 'bg-grey-lighter']"
                     @click="claimDailyReward"
                   >
@@ -87,7 +87,7 @@
                   <BasicButton
                     v-else-if="reward.type === RewardType.USER_REFERRAL"
                     class="w-full bg-primary hover:bg-primary-hover"
-                    :disabled="!isConnected || !userStore.loggedIn"
+                    :disabled="!loggedIn"
                     @click="showReferralModal = true"
                   >
                     Invite Friends
@@ -107,7 +107,7 @@
                 Points are earned by participating in various activities on Ignite Market. The more you participate, the
                 more points you can earn!
               </div>
-              <div v-if="userStore.loggedIn && isConnected" class="mt-4 pt-4 border-t border-grey-lighter">
+              <div v-if="loggedIn" class="mt-4 pt-4 border-t border-grey-lighter">
                 <div class="flex items-center justify-between">
                   <div class="text-[14px] font-bold text-white">Your Points</div>
                   <div class="flex items-center">
@@ -125,14 +125,12 @@
 </template>
 
 <script lang="ts" setup>
-import { useAccount } from '@wagmi/vue';
 import Endpoints from '~/lib/values/endpoints';
 import BasicButton from '~/components/general/BasicButton.vue';
 import { RewardType } from '~/lib/types/reward';
 
-const { isConnected } = useAccount();
+const { loggedIn } = useLoggedIn();
 const message = useMessage();
-const userStore = useUserStore();
 const router = useRouter();
 
 const userPoints = ref<number>(0);
@@ -152,7 +150,7 @@ onMounted(async () => {
 });
 
 watch(
-  () => userStore.loggedIn,
+  () => loggedIn.value,
   async _ => {
     await getCanClaimDaily();
     await getUserPoints();
@@ -160,7 +158,7 @@ watch(
 );
 
 async function getCanClaimDaily() {
-  if (!isConnected.value || !userStore.loggedIn) {
+  if (!loggedIn.value) {
     claimLoading.value = false;
     return;
   }
@@ -205,7 +203,7 @@ async function getRewardPoints() {
 }
 
 async function getUserPoints() {
-  if (!isConnected.value || !userStore.loggedIn) {
+  if (!loggedIn.value) {
     userPointsLoading.value = false;
     return;
   }

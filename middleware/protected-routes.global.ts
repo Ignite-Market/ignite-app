@@ -1,5 +1,5 @@
 import { removeLastSlash } from '~/lib/misc/strings';
-import { useUserStore } from '~/stores/user';
+
 interface ProtectedRouteInterface {
   path?: string;
   regex?: RegExp;
@@ -12,7 +12,7 @@ const protectedRoutes: Array<ProtectedRouteInterface> = [{ regex: /^\/dashboard/
  */
 export default defineNuxtRouteMiddleware((to, _from) => {
   const decodedUrl = removeLastSlash(decodeURI(to.path));
-  const userStore = useUserStore();
+  const { loggedIn } = useLoggedIn();
 
   /** Redirect protected routes */
   for (const protectedRoute of protectedRoutes) {
@@ -21,7 +21,7 @@ export default defineNuxtRouteMiddleware((to, _from) => {
     }
     if (
       ((protectedRoute.regex && protectedRoute.regex.test(decodedUrl)) || decodedUrl === protectedRoute.path) &&
-      !userStore.loggedIn
+      !loggedIn
     ) {
       return navigateTo(protectedRoute.redirect, { redirectCode: 301 });
     }

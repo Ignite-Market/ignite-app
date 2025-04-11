@@ -28,8 +28,7 @@
                   }"
                   type="link"
                   :disabled="
-                    !isConnected ||
-                    !userStore.loggedIn ||
+                    !loggedIn ||
                     loadingVote ||
                     proposal.user_id === userStore.user.id ||
                     round?.roundStatus !== ProposalRoundStatus.ACTIVE
@@ -52,8 +51,7 @@
                   }"
                   type="link"
                   :disabled="
-                    !isConnected ||
-                    !userStore.loggedIn ||
+                    !loggedIn ||
                     loadingVote ||
                     proposal.user_id === userStore.user.id ||
                     round?.roundStatus !== ProposalRoundStatus.ACTIVE
@@ -94,7 +92,7 @@
                     </div>
                     <div class="bg-grey-lighter px-2 py-0.5 rounded-full text-xs ml-1">Crypto</div>
 
-                    <div v-if="isConnected && userStore.loggedIn" class="ml-auto">
+                    <div v-if="loggedIn" class="ml-auto">
                       <ProposalOptions :proposal="proposal" :round="round" @delete="() => router.push('/proposals')" />
                     </div>
                   </div>
@@ -175,7 +173,7 @@
                 class="w-full mt-4"
                 :btn-class="['!font-bold']"
                 :size="'large'"
-                :disabled="!isConnected || !userStore.loggedIn"
+                :disabled="!loggedIn"
                 :loading="loading"
               >
                 Add proposal
@@ -225,7 +223,6 @@
 </template>
 
 <script lang="ts" setup>
-import { useAccount } from '@wagmi/vue';
 import { formatDistanceToNow } from 'date-fns';
 import { CommentEntityTypes } from '~/lib/types/comment';
 import {
@@ -239,11 +236,11 @@ import {
 } from '~/lib/types/proposal';
 import Endpoints from '~/lib/values/endpoints';
 
-const { isConnected } = useAccount();
 const router = useRouter();
 const userStore = useUserStore();
 const message = useMessage();
 const { params } = useRoute();
+const { loggedIn } = useLoggedIn();
 
 const round = ref<ProposalRound>();
 const proposal = ref<Proposal>();

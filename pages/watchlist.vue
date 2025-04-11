@@ -5,10 +5,10 @@
 </template>
 
 <script lang="ts" setup>
-const { loggedIn } = useUserStore();
+const { loggedIn } = useLoggedIn();
 const router = useRouter();
 
 onMounted(() => {
-  if (!loggedIn) router.replace('/');
+  if (!loggedIn.value) router.replace('/');
 });
 </script>

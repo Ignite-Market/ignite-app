@@ -99,12 +99,7 @@
                           ),
                         }"
                         type="link"
-                        :disabled="
-                          !isConnected ||
-                          !userStore.loggedIn ||
-                          loadingVote ||
-                          currentRound?.roundStatus !== ProposalRoundStatus.ACTIVE
-                        "
+                        :disabled="!loggedIn || loadingVote || currentRound?.roundStatus !== ProposalRoundStatus.ACTIVE"
                         @click="vote(proposal.id, ProposalVoteType.UPVOTE, idx)"
                       >
                         <NuxtIcon name="icon/arrow-down" class="text-[20px]" />
@@ -122,12 +117,7 @@
                           ),
                         }"
                         type="link"
-                        :disabled="
-                          !isConnected ||
-                          !userStore.loggedIn ||
-                          loadingVote ||
-                          currentRound?.roundStatus !== ProposalRoundStatus.ACTIVE
-                        "
+                        :disabled="!loggedIn || loadingVote || currentRound?.roundStatus !== ProposalRoundStatus.ACTIVE"
                         @click="vote(proposal.id, ProposalVoteType.DOWNVOTE, idx)"
                       >
                         <NuxtIcon name="icon/arrow-down" class="text-[20px]" />
@@ -310,7 +300,7 @@
                 class="w-full mt-4"
                 :btn-class="['!font-bold']"
                 :size="'large'"
-                :disabled="!isConnected || !userStore.loggedIn"
+                :disabled="!loggedIn"
                 :loading="loading"
                 @click="router.push('/proposals/add')"
               >
@@ -361,7 +351,6 @@
 </template>
 
 <script lang="ts" setup>
-import { useAccount } from '@wagmi/vue';
 import { formatDistanceToNow } from 'date-fns';
 import { h } from 'vue';
 import {
@@ -380,7 +369,7 @@ enum Sort {
   NEW = 'id',
 }
 
-const { isConnected } = useAccount();
+const { loggedIn } = useLoggedIn();
 const router = useRouter();
 const userStore = useUserStore();
 const message = useMessage();

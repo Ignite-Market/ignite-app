@@ -54,7 +54,7 @@
                 <BasicButton
                   :btn-class="['!font-bold']"
                   :size="'large'"
-                  :disabled="!isConnected || !userStore.loggedIn"
+                  :disabled="!loggedIn"
                   :loading="proposalLoading"
                 >
                   Submit Proposal
@@ -97,13 +97,11 @@
 </template>
 
 <script lang="ts" setup>
-import { useAccount } from '@wagmi/vue';
 import { type FormRules } from 'naive-ui';
 import Endpoints from '~/lib/values/endpoints';
 
-const { isConnected } = useAccount();
+const { loggedIn } = useLoggedIn();
 const router = useRouter();
-const userStore = useUserStore();
 const message = useMessage();
 const formRef = ref();
 
@@ -134,7 +132,7 @@ const rules: FormRules = {
 };
 
 async function submit() {
-  if (!isConnected.value || !userStore.loggedIn) {
+  if (!loggedIn.value) {
     return;
   }
 

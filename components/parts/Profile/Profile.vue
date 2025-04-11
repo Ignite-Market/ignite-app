@@ -45,7 +45,8 @@ const props = defineProps({
 
 const message = useMessage();
 const router = useRouter();
-const { loggedIn, user: authUser } = useUserStore();
+const { user: authUser } = useUserStore();
+const { loggedIn } = useLoggedIn();
 
 const isCurrentUser = computed(() => user.value?.id === authUser.id);
 
@@ -60,7 +61,7 @@ async function getUserProfile() {
   loading.value = true;
   try {
     if (!props.id) {
-      if (!loggedIn) {
+      if (!loggedIn.value) {
         message.error('Not logged in!');
         router.push('/');
       }

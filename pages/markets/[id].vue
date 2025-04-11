@@ -314,11 +314,10 @@ const REFRESH_INTERVAL = 10_000;
 
 const { getTokenStore } = useCollateralToken();
 const { params, query } = useRoute();
+const { isMd } = useScreen();
+const { loggedIn } = useLoggedIn();
 const router = useRouter();
 const config = useRuntimeConfig();
-const { loggedIn } = useUserStore();
-const userStore = useUserStore();
-const { isMd } = useScreen();
 const tokenStore = getTokenStore();
 
 const loading = ref<boolean>(true);
@@ -352,7 +351,7 @@ onUnmounted(() => {
 });
 
 watch(
-  () => userStore.loggedIn,
+  () => loggedIn.value,
   async () => {
     await getPredictionSet(true);
   }
@@ -410,7 +409,7 @@ async function getPredictionSet(silent: boolean = false) {
 }
 
 async function toggleWatchlist() {
-  if (!predictionSet.value || !loggedIn || watchlistLoading.value) {
+  if (!predictionSet.value || !loggedIn.value || watchlistLoading.value) {
     return;
   }
   watchlistLoading.value = true;

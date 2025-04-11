@@ -18,7 +18,7 @@
         <div class="ml-[10px] text-[12px] leading-[16px] text-grey-lightest font-medium">
           {{ formatDistanceToNow(new Date(comment.createTime), { addSuffix: true }) }}
         </div>
-        <div v-if="isConnected && userStore.loggedIn" class="ml-auto">
+        <div v-if="loggedIn" class="ml-auto">
           <CommentOptions :comment="comment" @delete="(deletedComment: any) => handleDelete(comment, deletedComment)" />
         </div>
       </div>
@@ -89,7 +89,7 @@
               <div class="ml-[10px] text-[12px] leading-[16px] text-grey-lightest font-medium">
                 {{ formatDistanceToNow(new Date(replyComment.createTime), { addSuffix: true }) }}
               </div>
-              <div class="ml-auto">
+              <div v-if="loggedIn" class="ml-auto">
                 <CommentOptions
                   :comment="replyComment"
                   @delete="(deletedComment: any) => handleDelete(replyComment, deletedComment)"
@@ -171,6 +171,7 @@ const props = defineProps({
 const { isConnected } = useAccount();
 const router = useRouter();
 const userStore = useUserStore();
+const { loggedIn } = useLoggedIn();
 
 const firstReply = ref('');
 const secondReply = ref('');

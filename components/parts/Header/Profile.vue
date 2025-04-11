@@ -1,6 +1,6 @@
 <template>
   <n-dropdown
-    v-if="userStore.loggedIn"
+    v-if="loggedIn"
     v-model:show="isOpened"
     class="rounded-lg"
     placement="bottom-end"
@@ -31,6 +31,7 @@ const { t } = useI18n();
 const router = useRouter();
 const { address } = useAccount();
 const userStore = useUserStore();
+const { loggedIn } = useLoggedIn();
 
 const isOpened = ref(false);
 

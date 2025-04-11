@@ -21,7 +21,7 @@ const { isConnected, isConnecting, isReconnecting } = useAccount();
 const { connectors, connect } = useConnect();
 
 const $i18n = useI18n();
-window.$i18n = $i18n;
+window.$i18n = $i18n as any;
 
 const lang = computed(() => {
   return $i18n.locale.value;
