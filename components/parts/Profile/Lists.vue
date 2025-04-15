@@ -14,9 +14,9 @@
           <ProfileListTable :tab="ProfileTabs.PREDICTIONS" :user-id="userId" />
         </div>
       </n-tab-pane>
-      <n-tab-pane :name="ProfileTabs.ACTIVITIES" :tab="ProfileTabs.ACTIVITIES">
+      <n-tab-pane :name="ProfileTabs.ACTIVITY" :tab="ProfileTabs.ACTIVITY">
         <div class="mb-3">
-          <ProfileListTable :tab="ProfileTabs.ACTIVITIES" :user-id="userId" />
+          <ProfileListTable :tab="ProfileTabs.ACTIVITY" :user-id="userId" />
         </div>
       </n-tab-pane>
     </n-tabs>

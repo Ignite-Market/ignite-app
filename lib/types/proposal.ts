@@ -35,6 +35,7 @@ export interface Proposal extends GeneralInterface {
   generalResolutionDef: string;
   outcomes: string[];
   totalVotes: number;
+  totalComments: number;
   username: string;
   userWallet: string;
   votes: ProposalVote[];

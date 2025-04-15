@@ -99,7 +99,12 @@
                           ),
                         }"
                         type="link"
-                        :disabled="!loggedIn || loadingVote || !isProposalRoundActive(currentRound)"
+                        :disabled="
+                          !loggedIn ||
+                          loadingVote ||
+                          !isProposalRoundActive(currentRound) ||
+                          proposal.user_id === userStore?.user?.id
+                        "
                         @click="vote(proposal.id, ProposalVoteType.UPVOTE, idx)"
                       >
                         <NuxtIcon name="icon/arrow-down" class="text-[20px]" />
@@ -117,7 +122,12 @@
                           ),
                         }"
                         type="link"
-                        :disabled="!loggedIn || loadingVote || !isProposalRoundActive(currentRound)"
+                        :disabled="
+                          !loggedIn ||
+                          loadingVote ||
+                          !isProposalRoundActive(currentRound) ||
+                          proposal.user_id === userStore?.user?.id
+                        "
                         @click="vote(proposal.id, ProposalVoteType.DOWNVOTE, idx)"
                       >
                         <NuxtIcon name="icon/arrow-down" class="text-[20px]" />
@@ -181,13 +191,20 @@
                       <div class="p-3 flex items-center text-white/60 text-xs">
                         <div
                           class="flex items-center justify-center mr-2 bg-grey-light hover:bg-grey-lighter p-1.5 rounded cursor-pointer group"
+                          @click="
+                            router.push({
+                              name: 'proposals-id',
+                              params: { id: proposal.id },
+                            })
+                          "
                         >
                           <NuxtIcon name="icon/comment" class="mr-1 text-[16px] group-hover:text-primary" />
-                          <span>8 Comments</span>
+                          <span>{{ proposal.totalComments || 0 }} Comments</span>
                         </div>
 
                         <div
                           class="flex items-center justify-center bg-grey-light hover:bg-grey-lighter p-1.5 rounded cursor-pointer group"
+                          @click="copyLink(proposal.id)"
                         >
                           <NuxtIcon name="icon/share" class="mr-1 text-[16px] group-hover:text-primary" />
                           <span>Share</span>
@@ -533,5 +550,9 @@ function openUserProfile(userId: number) {
     name: 'profile-id',
     params: { id: userId },
   });
+}
+
+function copyLink(id: number) {
+  copyToClipboard(`${window.location.href}/${id}`);
 }
 </script>

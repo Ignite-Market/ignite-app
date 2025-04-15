@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import type { GlobalThemeOverrides, MessageProviderProps } from 'naive-ui';
 import { colors } from '~/tailwind.config';
 
@@ -107,12 +108,14 @@ export const themeOverrides: GlobalThemeOverrides = {
     buttonColor: colors.grey.light,
     buttonColorHover: colors.grey.lighter,
     buttonColorPressed: colors.grey.lighter,
-    buttonIconColor: colors.grey.DEFAULT,
+    buttonIconColor: colors.primary.DEFAULT,
+    buttonIconColorHover: colors.primary.DEFAULT,
+    buttonIconColorPressed: colors.primary.DEFAULT,
     itemTextColor: colors.white,
     itemTextColorActive: colors.white,
     itemTextColorHover: colors.white,
     itemTextColorPressed: colors.white,
-    itemTextColorDisabled: colors.grey.light,
+    itemTextColorDisabled: colors.primary.dark,
   },
   Radio: {
     buttonHeightSmall: '26px',

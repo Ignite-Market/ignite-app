@@ -16,7 +16,7 @@ export enum SqlModelStatus {
 
 export enum ProfileTabs {
   PREDICTIONS = 'Predictions',
-  ACTIVITIES = 'Activities',
+  ACTIVITY = 'Activity',
 }
 
 declare global {

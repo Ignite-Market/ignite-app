@@ -11,6 +11,7 @@ import { ProfileTabs } from '~/lib/types';
 import Endpoints from '~/lib/values/endpoints';
 import { TransactionType, type ActivityInterface, type UserPredictionInterface } from '~/lib/types/prediction-set';
 import type { TableFilters } from '~/lib/types/config';
+import { colors } from '~/tailwind.config';
 
 const props = defineProps({
   tab: { type: String as PropType<ProfileTabs>, required: true },
@@ -32,8 +33,31 @@ const predictionColumns = [
     minWidth: 150,
     render(row: UserPredictionInterface) {
       return h(resolveComponent('NuxtLink'), { to: { path: `/markets/${row.id}` } }, () => [
-        h('div', {}, row.question),
-        h('div', {}, row.outcomeName),
+        h('div', { style: { display: 'flex', gap: '12px' } }, [
+          row.imgUrl
+            ? h('div', { style: { width: '60px', height: '60px', flexShrink: 0 } }, [
+                h('img', {
+                  src: row.imgUrl,
+                  style: { width: '100%', height: '100%', borderRadius: '4px', objectFit: 'cover' },
+                }),
+              ])
+            : null,
+          h('div', { style: { display: 'flex', flexDirection: 'column', justifyContent: 'center' } }, [
+            h('span', { style: { fontSize: '16px', fontWeight: '500', marginBottom: '4px' } }, row.question),
+            h('div', { style: { display: 'flex', alignItems: 'center', gap: '8px' } }, [
+              h(
+                'span',
+                { style: { fontSize: '15px', fontWeight: '600', color: colors.primary.DEFAULT } },
+                row.outcomeName
+              ),
+              h(
+                'span',
+                { style: { fontSize: '14px', color: '#777', fontWeight: '400' } },
+                `${formatTokenAmount(row.outcomeTokens)} shares`
+              ),
+            ]),
+          ]),
+        ]),
       ]);
     },
   },
@@ -83,8 +107,27 @@ const activitiesColumns = [
     minWidth: 150,
     render(row: ActivityInterface) {
       return h(resolveComponent('NuxtLink'), { to: { path: `/markets/${row.id}` } }, () => [
-        h('div', {}, row.question),
-        h('div', {}, row.outcomeName),
+        h('div', { style: { display: 'flex', gap: '12px' } }, [
+          row.imgUrl
+            ? h('div', { style: { width: '60px', height: '60px', flexShrink: 0 } }, [
+                h('img', {
+                  src: row.imgUrl,
+                  style: { width: '100%', height: '100%', borderRadius: '4px', objectFit: 'cover' },
+                }),
+              ])
+            : null,
+          h('div', { style: { display: 'flex', flexDirection: 'column', justifyContent: 'center' } }, [
+            h('span', { style: { fontSize: '16px', fontWeight: '500', marginBottom: '4px' } }, row.question),
+            h('div', { style: { display: 'flex', alignItems: 'center', gap: '8px' } }, [
+              h('span', { style: { fontSize: '15px', fontWeight: '600', color: '#F96B6B' } }, row.outcomeName),
+              h(
+                'span',
+                { style: { fontSize: '14px', color: '#777', fontWeight: '400' } },
+                `${formatTokenAmount(row.outcomeTokens)} shares`
+              ),
+            ]),
+          ]),
+        ]),
       ]);
     },
   },
@@ -146,7 +189,7 @@ const filters = {
     value: null,
   },
 
-  ...(props.tab === ProfileTabs.ACTIVITIES
+  ...(props.tab === ProfileTabs.ACTIVITY
     ? {
         type: {
           show: true,

@@ -73,7 +73,7 @@
           </div>
 
           <!-- OPEN POSITIONS -->
-          <div v-if="predictionSet.positions.length">
+          <div v-if="predictionSet.positions.length && loggedIn">
             <PredictionSetPositions
               :positions="predictionSet.positions"
               :contract-address="predictionSet.chainData.contractAddress"

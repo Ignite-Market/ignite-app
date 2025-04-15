@@ -1,17 +1,18 @@
 <template>
-  <div class="card !px-6 !pt-8">
-    <div class="flex-bc mb-4 gap-2 flex-wrap">
-      <h4>{{ title }}</h4>
-      <div class="flex gap-4 flex-wrap">
-        <FormInputSearch
-          v-if="filters?.search"
-          v-model:value="filters.search.value"
-          class="min-w-32 w-full xs:w-[12vw] max-w-xs"
-        />
-        <TableFilters v-if="filters" :filters="filters" :loading="loading" />
-      </div>
+  <div class="flex-bc mb-4 gap-2 flex-wrap">
+    <h4>{{ title }}</h4>
+    <div class="flex gap-4 flex-wrap">
+      <FormInputSearch
+        v-if="filters?.search"
+        v-model:value="filters.search.value"
+        class="min-w-32 w-full xs:w-[12vw] max-w-xs"
+      />
+      <TableFilters v-if="filters" :filters="filters" :loading="loading" />
     </div>
-    <div v-if="items.length === 0 && !loading" class="w-full bg-grey-light p-6 mb-4 text-center">
+  </div>
+
+  <div class="card !px-0 !pt-0 !bg-grey-dark border-1 border-grey-lighter rounded-lg overflow-hidden">
+    <div v-if="items.length === 0 && !loading" class="w-full bg-grey-dark p-6 mb-4 text-center">
       <n-empty description="No data" />
     </div>
     <n-data-table
@@ -24,6 +25,18 @@
       :pagination="pagination"
       :row-props="() => rowProps"
       remote
+      :theme-overrides="{
+        tdColor: colors.grey.dark,
+        thColor: colors.grey.dark,
+        borderColor: colors.transparent,
+        borderRadius: '8px',
+        thColorHover: colors.grey.dark,
+        tdColorHover: colors.grey.light,
+        thPaddingMedium: '12px 12px 12px 1.5rem',
+        tdPaddingMedium: '12px 12px 12px 1.5rem',
+        thTextColor: colors.grey.lightest,
+        paginationMargin: '12px 20px 12px 12px',
+      }"
       @update:page="(page: number) => getItems(page, pagination.pageSize)"
       @update:page-size="(pageSize: number) => getItems(1, pageSize)"
       @update:sorter="handleSorterChange"
@@ -38,6 +51,7 @@ import type { DataTableColumns, DataTableInst, DataTableSortState } from 'naive-
 import type { PropType } from 'vue';
 import type { PaginationConfig, TableFilters } from '~/lib/types/config';
 import { PAGINATION_LIMIT } from '~/lib/values/general.values';
+import { colors } from '~/tailwind.config';
 
 const props = defineProps({
   columns: { type: Array as PropType<DataTableColumns<any>>, default: () => [] },
@@ -126,3 +140,13 @@ async function getItems(page: number = 1, limit: number = PAGINATION_LIMIT) {
   }
 }
 </script>
+
+<style>
+.n-base-loading .n-base-suffix {
+  padding-left: 10px;
+}
+
+:deep(.n-base-selection-input__content) {
+  padding-right: 10px;
+}
+</style>

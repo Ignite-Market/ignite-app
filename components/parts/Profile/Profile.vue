@@ -54,7 +54,9 @@ const loading = ref(false);
 const user = ref<UserInterface | null>(null);
 
 onMounted(() => {
-  getUserProfile();
+  setTimeout(async () => {
+    await getUserProfile();
+  }, 200);
 });
 
 async function getUserProfile() {
