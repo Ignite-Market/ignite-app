@@ -7,10 +7,9 @@
     <template #header>
       <div v-if="selectedTab === TransactionType.FUND" class="flex items-center justify-center">
         <div class="text-[12px] leading-[16px] pt-[19px] pb-[19px]">Fund this market</div>
-        <!-- TODO: ADD LINK TO DOCS. -->
         <IconInfo
           size="sm"
-          tooltip="Provide liquidity to earn trading fees and profit from market movement. </br> You can withdraw funding and claim rewards when the market closes.</br> Learn more about <a href='' target='_blank' class='underline'>funding the markets.</a>"
+          tooltip="Provide liquidity to earn trading fees and profit from market movement. </br> You can withdraw funding and claim rewards when the market closes.</br> Learn more about <a href='https://docs.ignitemarket.xyz/' target='_blank' class='underline'>funding the markets.</a>"
         />
       </div>
       <div v-else class="bg-grey-light rounded-[8px] p-3 flex flex-row items-center justify-center">
