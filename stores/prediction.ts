@@ -21,6 +21,9 @@ export const usePredictionStore = defineStore('prediction', {
       sort: {
         value: null as string | null,
       },
+      collateralTokenId: {
+        value: null as number | null,
+      },
     },
   }),
   getters: {

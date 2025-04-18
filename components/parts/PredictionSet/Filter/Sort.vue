@@ -1,7 +1,11 @@
 <template>
   <n-select
     v-model:value="sort"
-    :theme-overrides="{ peers: { InternalSelection: { color: '#292929' } } }"
+    :theme-overrides="{
+      peers: {
+        InternalSelection: { color: '#292929', clearColor: '#C56AC6' },
+      },
+    }"
     placeholder="Sort by"
     :options="options"
     clearable

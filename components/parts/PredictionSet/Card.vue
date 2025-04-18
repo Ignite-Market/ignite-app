@@ -53,6 +53,8 @@
       ></div>
     </div>
 
+    <!-- TODO: Add claim button. -->
+
     <div class="flex flex-row mt-[10px] items-center justify-center text-[12px] leading-[16px]">
       <Status :status="predictionSet.setStatus" :end-time="new Date(predictionSet.endTime)" />
       <div class="ml-[10px] text-[#888888]">
@@ -70,8 +72,16 @@
         </div>
         <!-- TODO: Check for potential return. -->
         <div v-else class="flex items-center justify-center">
-          <NuxtIcon name="icon/points" class="text-primary" />
-          <div class="ml-[6px] font-medium">0.35$</div>
+          <div v-if="collateralToken?.imgUrl">
+            <Image
+              :src="collateralToken.imgUrl"
+              :title="collateralToken.name"
+              class="rounded-full w-[16px] h-[16px] object-cover mr-1"
+            />
+          </div>
+          <div class="font-medium">
+            {{ formatTokenAmount(predictionSet.volume || 0) }} {{ collateralToken?.symbol || '' }}
+          </div>
         </div>
       </div>
     </div>
@@ -88,6 +98,8 @@ const props = defineProps({
 });
 
 const router = useRouter();
+const tokensStore = useTokensStore();
+const collateralToken = ref();
 
 function openDetails(outcome?: number, transaction?: TransactionType, value?: number) {
   let query: any = null;
@@ -104,6 +116,11 @@ function openDetails(outcome?: number, transaction?: TransactionType, value?: nu
     query,
   });
 }
+
+onMounted(async () => {
+  await tokensStore.ensureLoaded();
+  collateralToken.value = tokensStore.getToken(props.predictionSet.collateral_token_id);
+});
 </script>
 
 <style scoped>

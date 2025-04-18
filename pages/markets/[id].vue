@@ -339,6 +339,7 @@
             :outcome="winningOutcome"
             :contract-address="predictionSet.chainData.contractAddress"
             :condition-id="predictionSet.chainData.conditionId"
+            :collateral-token="collateralToken"
           />
         </div>
       </div>

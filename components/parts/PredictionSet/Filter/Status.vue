@@ -1,7 +1,11 @@
 <template>
   <n-select
     v-model:value="status"
-    :theme-overrides="{ peers: { InternalSelection: { color: '#292929' } } }"
+    :theme-overrides="{
+      peers: {
+        InternalSelection: { color: '#292929', clearColor: '#C56AC6' },
+      },
+    }"
     placeholder="Status"
     :options="options"
     clearable
