@@ -83,7 +83,8 @@ export interface PredictionSetInterface extends GeneralInterface {
   outcomes: OutcomeInterface[];
   chainData: ChainDataInterface;
   isWatched?: boolean;
-  volume?: number;
+  fundingVolume?: number;
+  transactionsVolume?: number;
   positions: any[];
 }
 export interface PredictionSetResponse extends GeneralResponse<PredictionSetInterface> {}

@@ -35,16 +35,71 @@
 
               <div class="mx-4 border-r-1 border-r-white/25 h-[14px]"></div>
 
-              <div v-if="collateralToken?.imgUrl">
+              <!-- <div v-if="collateralToken?.imgUrl">
                 <Image
                   :src="collateralToken.imgUrl"
                   :title="collateralToken.name"
                   class="rounded-full w-[18px] h-[18px] object-cover mr-1"
                 />
               </div>
-              <div class="text-white/80 text-[14px] leading-[20px]">
-                {{ formatTokenAmount(predictionSet.volume || 0, 2) }} {{ collateralToken?.symbol || '' }}
-              </div>
+              <div
+                class="text-white/80 text-[14px] leading-[20px]"
+                :title="`Funding volume: ${formatTokenAmount(predictionSet.fundingVolume || 0)} ${collateralToken?.symbol || ''}\nTransactions volume: ${formatTokenAmount(predictionSet.transactionsVolume || 0)} ${collateralToken?.symbol || ''}`"
+              >
+                {{ formatTokenAmount((predictionSet.fundingVolume || 0) + (predictionSet.transactionsVolume || 0), 2) }}
+                {{ collateralToken?.symbol || '' }}
+              </div> -->
+
+              <n-popover trigger="hover" raw :show-arrow="false" placement="bottom-start">
+                <template #trigger>
+                  <div class="flex items-center justify-center cursor-pointer">
+                    <div v-if="collateralToken?.imgUrl">
+                      <Image
+                        :src="collateralToken.imgUrl"
+                        :title="collateralToken.name"
+                        class="rounded-full w-[18px] h-[18px] object-cover mr-1"
+                      />
+                    </div>
+                    <div class="text-white/80 text-[14px] leading-[20px]">
+                      {{
+                        formatTokenAmount(
+                          (predictionSet.fundingVolume || 0) + (predictionSet.transactionsVolume || 0),
+                          2
+                        )
+                      }}
+                      {{ collateralToken?.symbol || '' }}
+                    </div>
+                  </div>
+                </template>
+                <div class="flex flex-col text-[12px]">
+                  <div class="flex items-center">
+                    <div class="font-semibold">Funding volume:</div>
+                    <div v-if="collateralToken?.imgUrl">
+                      <Image
+                        :src="collateralToken.imgUrl"
+                        :title="collateralToken.name"
+                        class="rounded-full w-[14px] h-[14px] object-cover mx-1"
+                      />
+                    </div>
+
+                    {{ formatTokenAmount(predictionSet.fundingVolume || 0) }}
+                    {{ collateralToken?.symbol || '' }}
+                  </div>
+
+                  <div class="flex items-center">
+                    <div class="font-semibold">Transactions volume:</div>
+                    <div v-if="collateralToken?.imgUrl">
+                      <Image
+                        :src="collateralToken.imgUrl"
+                        :title="collateralToken.name"
+                        class="rounded-full w-[14px] h-[14px] object-cover mx-1"
+                      />
+                    </div>
+                    {{ formatTokenAmount(predictionSet.transactionsVolume || 0) }}
+                    {{ collateralToken?.symbol || '' }}
+                  </div>
+                </div>
+              </n-popover>
             </div>
           </div>
         </div>

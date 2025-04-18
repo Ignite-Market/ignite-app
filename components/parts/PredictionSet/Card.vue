@@ -22,7 +22,7 @@
           >
             <div>{{ outcome.name }}</div>
             <div class="flex ml-auto justify-center items-center">
-              <div class="mr-[6px]">{{ (outcome.chance * 100).toFixed(0) }}%</div>
+              <div class="mr-[6px]">{{ (outcome.latestChance * 100).toFixed(0) }}%</div>
               <div v-if="tradeEnabled(predictionSet.setStatus, predictionSet.endTime)" class="flex">
                 <div
                   class="mr-[6px] px-1.5 border-1 bg-statusGreen/20 border-statusGreen rounded-[8px] hover:bg-statusGreen"
