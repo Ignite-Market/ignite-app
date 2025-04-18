@@ -20,13 +20,18 @@
           <span class="text-primary">
             {{ formatTokenAmount(item.outcomeTokens) }} <span class="font-bold">{{ item.outcomeName }}</span>
           </span>
-          for <span class="font-bold">{{ formatTokenAmount(item.userAmount) }} {{ tokenStore.symbol }}</span>
+          for
+          <span class="font-bold">
+            {{ formatTokenAmount(item.userAmount) }} {{ tokensStore.getToken(item.collateral_token_id).symbol }}
+          </span>
         </span>
         <span v-else>
           {{ item.type === TransactionType.FUND ? ' funded ' : ' removed funding ' }}
           <span v-if="item.type === TransactionType.FUND">
             for
-            <span class="font-bold">{{ formatTokenAmount(item.userAmount) }} {{ tokenStore.symbol }} </span>
+            <span class="font-bold">
+              {{ formatTokenAmount(item.userAmount) }} {{ tokensStore.getToken(item.collateral_token_id).symbol }}
+            </span>
           </span>
           <a
             :href="`${getExplorer()}/tx/${item.txHash}`"
@@ -54,10 +59,9 @@ defineProps({
   item: { type: Object as PropType<ActivityInterface>, default: () => {}, required: true },
 });
 
-const { getTokenStore } = useCollateralToken();
 const router = useRouter();
 const userStore = useUserStore();
-const tokenStore = getTokenStore();
+const tokensStore = useTokensStore();
 
 function openUserProfile(userId: number) {
   if (userId === userStore.user.id) {

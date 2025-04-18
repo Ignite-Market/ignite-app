@@ -14,32 +14,7 @@ export const useUserStore = defineStore('user', {
     promises: {
       profile: null as any,
     },
-    collateralToken: {
-      balance: BigInt(0),
-      parsedBalance: '0.0',
-      decimals: 6,
-      symbol: '',
-      loaded: false,
-      loading: false,
-    },
 
-    token: {
-      base: {
-        allowance: BigInt(0),
-        balance: BigInt(0),
-        symbol: '',
-      },
-      bsc: {
-        allowance: BigInt(0),
-        balance: BigInt(0),
-        symbol: '',
-      },
-      moonbeam: {
-        allowance: BigInt(0),
-        balance: BigInt(0),
-        symbol: '',
-      },
-    },
     user: {} as UserInterface,
   }),
   getters: {

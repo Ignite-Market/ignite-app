@@ -29,13 +29,12 @@ import type { PredictionSetInterface } from '~/lib/types/prediction-set';
 import { colors } from '~/tailwind.config';
 
 const { calcSellAmountInCollateral } = useFixedMarketMaker();
-const { getTokenStore } = useCollateralToken();
-const tokenStore = getTokenStore();
 
 const props = defineProps({
   positions: { type: Array<any>, default: [], required: true },
   contractAddress: { type: String as PropType<Address>, default: null, required: true },
   predictionSet: { type: Object as PropType<PredictionSetInterface>, default: null, required: true },
+  collateralToken: { type: Object as PropType<CollateralToken>, default: () => {}, required: true },
 });
 
 const emit = defineEmits(['sell']);
@@ -47,10 +46,11 @@ watchEffect(async () => {
   const enriched = await Promise.all(
     props.positions.map(async pos => {
       const collateralAmount = await calcSellAmountInCollateral(
-        Number(pos.sharesAmount) / Math.pow(10, tokenStore.decimals),
+        Number(pos.sharesAmount) / Math.pow(10, props.collateralToken.decimals),
         pos.outcomeIndex,
         props.contractAddress,
-        props.predictionSet.outcomes.map(o => o.positionId)
+        props.predictionSet.outcomes.map(o => o.positionId),
+        props.collateralToken.decimals
       );
 
       return {
@@ -76,7 +76,11 @@ onMounted(() => {
       title: 'QTY',
       key: 'sharesAmount',
       render(row: any) {
-        return h('div', { class: 'text-white/80' }, formatTokenAmount(row.sharesAmount, tokenStore.decimals));
+        return h(
+          'div',
+          { class: 'text-white/80' },
+          formatTokenAmount(row.sharesAmount, props.collateralToken.decimals)
+        );
       },
     },
     {
@@ -90,14 +94,19 @@ onMounted(() => {
       title: 'Value',
       key: 'returnAmount',
       render(row: any) {
-        return h('div', { class: 'text-white/80' }, (row.returnAmount / Math.pow(10, tokenStore.decimals)).toFixed(2));
+        return h(
+          'div',
+          { class: 'text-white/80' },
+          (row.returnAmount / Math.pow(10, props.collateralToken.decimals)).toFixed(2)
+        );
       },
     },
     {
       title: 'Return',
       key: 'calculatedReturn',
       render(row: any) {
-        const collateralReturn = (row.returnAmount - row.collateralAmount) / Math.pow(10, tokenStore.decimals || 6);
+        const collateralReturn =
+          (row.returnAmount - row.collateralAmount) / Math.pow(10, props.collateralToken.decimals || 6);
         const returnPercentage = ((row.returnAmount - row.collateralAmount) / row.collateralAmount) * 100;
 
         const displayCollateral = `${collateralReturn > 0 ? '+' : ''}` + collateralReturn.toFixed(2);
@@ -123,7 +132,7 @@ onMounted(() => {
             type: 'secondary',
             size: 'small',
             onClick: () =>
-              emit('sell', row.outcomeId, Number(formatTokenAmount(row.sharesAmount, tokenStore.decimals))),
+              emit('sell', row.outcomeId, Number(formatTokenAmount(row.sharesAmount, props.collateralToken.decimals))),
           },
           {
             default: () => 'Sell',

@@ -42,6 +42,9 @@ const Endpoints = {
   rewards: '/reward-points',
   rewardsMe: '/reward-points/me',
   dailyReward: '/reward-points/daily',
+
+  /** Collateral tokens */
+  collateralTokens: '/collateral-tokens',
 };
 
 export default Endpoints;

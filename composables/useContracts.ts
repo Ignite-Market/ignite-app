@@ -29,7 +29,7 @@ export default function useContracts() {
    * @returns
    */
   function initReadContract(contractType: ContractType, contractAddress?: Address) {
-    if (contractType === ContractType.FPMM && !contractAddress) {
+    if ((contractType === ContractType.FPMM || contractType === ContractType.COLLATERAL_TOKEN) && !contractAddress) {
       throw new Error('FPMM contract address must be provided!');
     }
 
@@ -56,7 +56,7 @@ export default function useContracts() {
    * @returns
    */
   async function initContract(contractType: ContractType, contractAddress?: Address) {
-    if (contractType === ContractType.FPMM && !contractAddress) {
+    if ((contractType === ContractType.FPMM || contractType === ContractType.COLLATERAL_TOKEN) && !contractAddress) {
       throw new Error('FPMM contract address must be provided!');
     }
 
@@ -119,9 +119,6 @@ export default function useContracts() {
     switch (type) {
       case ContractType.CONDITIONAL_TOKEN:
         return config.public.CONDITIONAL_TOKEN_CONTRACT as Address;
-
-      case ContractType.COLLATERAL_TOKEN:
-        return config.public.COLLATERAL_TOKEN_CONTRACT as Address;
     }
 
     return undefined;

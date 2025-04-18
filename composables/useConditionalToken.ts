@@ -3,7 +3,6 @@ import { type Address, zeroHash } from 'viem';
 import { ContractType } from '~/lib/config/contracts';
 
 export default function useConditionalToken() {
-  const { getTokenStore } = useCollateralToken();
   const { initContract } = useContracts();
   const { address, isConnected } = useAccount();
   const txWait = useTxWait();
@@ -57,13 +56,13 @@ export default function useConditionalToken() {
    * Parses conditional token balance with the decimals of collateral token.
    *
    * @param balance Conditional tokens balance.
+   * @param collateralDecimals Number of decimal places of collateral token.
    * @returns Parsed balance.
    */
-  function parseConditionalBalance(balance: bigint) {
-    const tokenStore = getTokenStore();
-    const parsedBalance = Number(balance) / Math.pow(10, tokenStore.decimals);
+  function parseConditionalBalance(balance: bigint, collateralDecimals: number) {
+    const parsedBalance = Number(balance) / Math.pow(10, collateralDecimals);
 
-    return parsedBalance.toFixed(tokenStore.decimals);
+    return parsedBalance.toFixed(collateralDecimals);
   }
 
   /**

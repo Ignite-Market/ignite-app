@@ -17,9 +17,7 @@
           <Image :src="outcome.imgUrl" class="rounded-[48px] w-full h-full object-cover" />
         </div>
         <div class="ml-2 text-[12px] leading-[16px] font-bold">{{ outcome.name }}</div>
-        <div class="text-[12px] leading-[16px] font-bold ml-auto">
-          {{ pricePerShare ? (pricePerShare * 100).toFixed(0) : 0.0 }} %
-        </div>
+        <div class="text-[12px] leading-[16px] font-bold ml-auto">{{ (outcome.latestChance * 100).toFixed(0) }} %</div>
 
         <div
           class="min-w-[20px] min-h-[20px] rounded-[4px] flex items-center justify-center bg-none hover:bg-grey-dark ml-[10px] cursor-pointer"
@@ -110,7 +108,7 @@
               <div class="font-bold">Amount</div>
               <div class="ml-auto flex font-medium">
                 <div class="text-grey-lightest">Balance:</div>
-                <div class="text-white/80 ml-1">{{ tokenStore.parsedBalance }} {{ tokenStore.symbol }}</div>
+                <div class="text-white/80 ml-1">{{ collateralToken.parsedBalance }} {{ collateralToken.symbol }}</div>
               </div>
             </div>
 
@@ -121,7 +119,7 @@
               class="min-w-full text-center"
               type="number"
               :show-button="true"
-              :max="tokenStore.parsedBalance"
+              :max="collateralToken.parsedBalance"
               button-placement="both"
               :disabled="loading"
               :validator="buyValidator"
@@ -163,7 +161,7 @@
             <div class="flex items-center justify-center">
               <div>Avg price</div>
               <div class="ml-auto text-primary">
-                {{ pricePerShare ? pricePerShare.toFixed(3) : 0.0 }} {{ tokenStore.symbol }}
+                {{ pricePerShare ? pricePerShare.toFixed(3) : 0.0 }} {{ collateralToken.symbol }}
               </div>
             </div>
             <div class="flex items-center justify-center mt-2">
@@ -172,7 +170,7 @@
             </div>
             <div class="flex items-center justify-center mt-2">
               <div>Potential return</div>
-              <div class="ml-auto text-statusGreen">{{ potentialReturn }} {{ tokenStore.symbol }}</div>
+              <div class="ml-auto text-statusGreen">{{ potentialReturn }} {{ collateralToken.symbol }}</div>
             </div>
           </div>
         </n-tab-pane>
@@ -189,7 +187,9 @@
               <div class="font-bold">Amount</div>
               <div class="ml-auto flex font-medium">
                 <div class="text-grey-lightest">Balance:</div>
-                <div class="text-white/80 ml-1">{{ parseConditionalBalance(conditionalBalance) }}</div>
+                <div class="text-white/80 ml-1">
+                  {{ parseConditionalBalance(conditionalBalance, props.collateralToken.decimals) }}
+                </div>
               </div>
             </div>
 
@@ -202,7 +202,7 @@
               type="number"
               :show-button="true"
               button-placement="both"
-              :max="parseConditionalBalance(conditionalBalance)"
+              :max="parseConditionalBalance(conditionalBalance, props.collateralToken.decimals)"
               :validator="sellValidator"
               :disabled="loading"
               @blur="onSellBlur"
@@ -243,12 +243,12 @@
             <div class="flex items-center justify-center">
               <div>Avg price</div>
               <div class="ml-auto text-primary">
-                {{ pricePerShare ? pricePerShare.toFixed(3) : 0.0 }} {{ tokenStore.symbol }}
+                {{ pricePerShare ? pricePerShare.toFixed(3) : 0.0 }} {{ collateralToken.symbol }}
               </div>
             </div>
             <div class="flex items-center justify-center mt-2">
               <div>Potential return</div>
-              <div class="ml-auto text-statusGreen">{{ potentialReturn }} {{ tokenStore.symbol }}</div>
+              <div class="ml-auto text-statusGreen">{{ potentialReturn }} {{ collateralToken.symbol }}</div>
             </div>
           </div>
         </n-tab-pane>
@@ -260,7 +260,7 @@
               <div class="font-bold">Amount</div>
               <div class="ml-auto flex font-medium">
                 <div class="text-grey-lightest">Balance:</div>
-                <div class="text-white/80 ml-1">{{ tokenStore.parsedBalance }} {{ tokenStore.symbol }}</div>
+                <div class="text-white/80 ml-1">{{ collateralToken.parsedBalance }} {{ collateralToken.symbol }}</div>
               </div>
             </div>
 
@@ -273,7 +273,7 @@
               type="number"
               :show-button="true"
               button-placement="both"
-              :max="tokenStore.parsedBalance"
+              :max="collateralToken.parsedBalance"
               :disabled="loading"
             >
               <template #minus-icon>
@@ -335,7 +335,7 @@
       <div class="flex flex-col items-center justify-center mt-5">
         <div v-if="selectedTab === TransactionType.FUND" class="text-center mb-2">
           You have successfully funded this market for
-          <span class="font-bold"> {{ givenAmount }} {{ tokenStore.symbol }} </span>.
+          <span class="font-bold"> {{ givenAmount }} {{ collateralToken.symbol }} </span>.
         </div>
         <div v-else class="flex flex-col items-center justify-center text-center">
           <div v-if="selectedTab === TransactionType.BUY">
@@ -346,7 +346,7 @@
             <span class="font-bold">
               {{ givenAmount }}
             </span>
-            <span class="font-normal text-statusGreen"> ({{ obtainedAmount }} {{ tokenStore.symbol }})</span>
+            <span class="font-normal text-statusGreen"> ({{ obtainedAmount }} {{ collateralToken.symbol }})</span>
             shares of outcome:
           </div>
 
@@ -403,7 +403,7 @@
       >
         Buy&nbsp;
         <span class="font-extrabold">{{ outcome.name }}</span>
-        &nbsp;shares for {{ amount }} {{ tokenStore.symbol }}.
+        &nbsp;shares for {{ amount }} {{ collateralToken.symbol }}.
       </div>
 
       <div
@@ -465,19 +465,19 @@ const props = defineProps({
   endTime: { type: String, default: null, required: false },
   outcomes: { type: Array as PropType<OutcomeInterface[]>, default: () => [], required: true },
   defaultValue: { type: Number, default: 0 },
+  collateralToken: { type: Object as PropType<CollateralToken>, default: () => {}, required: true },
 });
 
 const emit = defineEmits(['actionChanged']);
 
 const { getMinTokensToBuy, addFunding, buy, sell, calcSellAmountInCollateral, getPricePerShare, getTotalFunding } =
   useFixedMarketMaker();
-const { refreshCollateralBalance, getTokenStore, checkCollateralAllowance } = useCollateralToken();
+const { refreshCollateralBalance, checkCollateralAllowance } = useCollateralToken();
 const { getConditionalBalance, parseConditionalBalance, checkConditionalApprove } = useConditionalToken();
 const { ensureCorrectNetwork } = useContracts();
 const { isConnected, address } = useAccount();
 const message = useMessage();
 const txWait = useTxWait();
-const tokenStore = getTokenStore();
 
 const selectedTab = ref(TransactionType.BUY);
 const isFundEnabled = ref(true);
@@ -556,21 +556,21 @@ watch(
 );
 
 const enoughConditionalBalance = computed(() => {
-  const scaledAmount = BigInt(Math.round((amount.value || 0) * 10 ** tokenStore.decimals));
+  const scaledAmount = BigInt(Math.round((amount.value || 0) * 10 ** props.collateralToken.decimals));
   return conditionalBalance.value >= scaledAmount;
 });
 
 const enoughCollateralBalance = computed(() => {
-  const scaledAmount = BigInt(Math.round((amount.value || 0) * 10 ** tokenStore.decimals));
-  return tokenStore.balance >= scaledAmount;
+  const scaledAmount = BigInt(Math.round((amount.value || 0) * 10 ** props.collateralToken.decimals));
+  return props.collateralToken.balance >= scaledAmount;
 });
 
 const buyFundLimit = computed(() => {
   let max = (BigInt(totalFundAmount.value) * 10n) / 100n;
-  if (tokenStore.balance < max) {
-    max = tokenStore.balance;
+  if (props.collateralToken.balance < max) {
+    max = props.collateralToken.balance;
   }
-  return bigIntToNum(max, tokenStore.decimals || 6);
+  return bigIntToNum(max, props.collateralToken.decimals || 6);
 });
 
 const sellFundLimit = computed(() => {
@@ -578,7 +578,7 @@ const sellFundLimit = computed(() => {
   if (conditionalBalance.value < max) {
     max = conditionalBalance.value;
   }
-  return bigIntToNum(max, tokenStore.decimals || 6);
+  return bigIntToNum(max, props.collateralToken.decimals || 6);
 });
 
 onMounted(async () => {
@@ -588,14 +588,21 @@ onMounted(async () => {
     selectedTab.value = props.action;
   }
 
-  await refreshCollateralBalance();
+  await refreshCollateralBalance(props.collateralToken.id);
   totalFundAmount.value = await getTotalFunding(props.contractAddress);
 });
 
 watchEffect(async () => {
   if (props.outcome.positionId) {
     conditionalBalance.value = await getConditionalBalance(props.outcome.positionId);
-    pricePerShare.value = await getPricePerShare(props.contractAddress, props.outcome.outcomeIndex);
+
+    if (props.status !== PredictionSetStatus.FUNDING) {
+      pricePerShare.value = await getPricePerShare(
+        props.contractAddress,
+        props.outcome.outcomeIndex,
+        props.collateralToken.decimals
+      );
+    }
   }
 });
 
@@ -685,9 +692,13 @@ function openExplorer(txHash: string) {
  */
 async function refreshBalances() {
   try {
-    await refreshCollateralBalance();
+    await refreshCollateralBalance(props.collateralToken.id);
     conditionalBalance.value = await getConditionalBalance(props.outcome.positionId);
-    pricePerShare.value = await getPricePerShare(props.contractAddress, props.outcome.outcomeIndex);
+    pricePerShare.value = await getPricePerShare(
+      props.contractAddress,
+      props.outcome.outcomeIndex,
+      props.collateralToken.decimals
+    );
     totalFundAmount.value = await getTotalFunding(props.contractAddress);
   } catch (error) {
     console.log(error);
@@ -703,11 +714,12 @@ async function updateBuyAmount() {
     props.contractAddress,
     amount.value,
     props.outcome.outcomeIndex,
-    slippage.value
+    slippage.value,
+    props.collateralToken.decimals
   );
 
-  returnAmount.value = (Number(minTokensToBuy) / Math.pow(10, tokenStore.decimals)).toString();
-  potentialReturn.value = (Number(minTokensToBuyNoSlippage) / Math.pow(10, tokenStore.decimals)).toFixed(3);
+  returnAmount.value = (Number(minTokensToBuy) / Math.pow(10, props.collateralToken.decimals)).toString();
+  potentialReturn.value = (Number(minTokensToBuyNoSlippage) / Math.pow(10, props.collateralToken.decimals)).toFixed(3);
 }
 
 async function updateSellAmount() {
@@ -719,10 +731,11 @@ async function updateSellAmount() {
     amount.value,
     props.outcome.outcomeIndex,
     props.contractAddress,
-    props.outcomes.map(o => o.positionId)
+    props.outcomes.map(o => o.positionId),
+    props.collateralToken.decimals
   );
 
-  potentialReturn.value = (Number(result) / Math.pow(10, tokenStore.decimals)).toString();
+  potentialReturn.value = (Number(result) / Math.pow(10, props.collateralToken.decimals)).toString();
 }
 
 /**
@@ -737,7 +750,7 @@ async function fund() {
   showTransactionModal.value = true;
   loading.value = true;
   try {
-    await refreshCollateralBalance();
+    await refreshCollateralBalance(props.collateralToken.id);
 
     if (!enoughCollateralBalance.value) {
       loading.value = false;
@@ -745,14 +758,14 @@ async function fund() {
     }
     await ensureCorrectNetwork();
 
-    const allowance = await checkCollateralAllowance(props.contractAddress);
+    const allowance = await checkCollateralAllowance(props.collateralToken.id, props.contractAddress);
     if (!allowance) {
       loading.value = false;
       return;
     }
     transactionStep.value = TransactionStep.CONFIRM;
 
-    txWait.hash.value = await addFunding(props.contractAddress, amount.value);
+    txWait.hash.value = await addFunding(props.contractAddress, amount.value, props.collateralToken.decimals);
     const receipt = await txWait.wait();
 
     if (receipt.status === 'success') {
@@ -806,7 +819,8 @@ async function sellOutcome() {
       amount.value,
       props.outcome.outcomeIndex,
       props.contractAddress,
-      props.outcomes.map(o => o.positionId)
+      props.outcomes.map(o => o.positionId),
+      props.collateralToken.decimals
     );
 
     txWait.hash.value = await sell(props.contractAddress, collateralAmount, props.outcome.outcomeIndex, slippage.value);
@@ -816,13 +830,13 @@ async function sellOutcome() {
       const parsedGiven = parseSingleTransfersERC1155(receipt);
       if (parsedGiven.length) {
         const event = parsedGiven.find((e: any) => e.from === address.value);
-        givenAmount.value = formatCollateralAmount(event.amount, tokenStore.decimals);
+        givenAmount.value = formatCollateralAmount(event.amount, props.collateralToken.decimals);
       }
 
       const parsedObtained = parseTransfersERC20(receipt);
       if (parsedObtained.length) {
         const event = parsedObtained.find((e: any) => e.to === address.value);
-        obtainedAmount.value = formatCollateralAmount(event.amount, tokenStore.decimals);
+        obtainedAmount.value = formatCollateralAmount(event.amount, props.collateralToken.decimals);
       }
 
       givenAmount.value = amount.value;
@@ -856,28 +870,34 @@ async function buyOutcome() {
   showTransactionModal.value = true;
   loading.value = true;
   try {
-    await refreshCollateralBalance();
+    await refreshCollateralBalance(props.collateralToken.id);
     if (buyFundLimit.value < amount.value || !enoughCollateralBalance.value) {
       loading.value = false;
       return;
     }
     await ensureCorrectNetwork();
 
-    const allowance = await checkCollateralAllowance(props.contractAddress);
+    const allowance = await checkCollateralAllowance(props.collateralToken.id, props.contractAddress);
     if (!allowance) {
       loading.value = false;
       return;
     }
     transactionStep.value = TransactionStep.CONFIRM;
 
-    txWait.hash.value = await buy(props.contractAddress, amount.value, props.outcome.outcomeIndex, slippage.value);
+    txWait.hash.value = await buy(
+      props.contractAddress,
+      amount.value,
+      props.outcome.outcomeIndex,
+      slippage.value,
+      props.collateralToken.decimals
+    );
     const receipt = await txWait.wait();
 
     if (receipt.status === 'success') {
       const parsed = parseSingleTransfersERC1155(receipt);
       if (parsed.length) {
         const event = parsed.find((e: any) => e.to === address.value);
-        obtainedAmount.value = formatCollateralAmount(event.amount, tokenStore.decimals);
+        obtainedAmount.value = formatCollateralAmount(event.amount, props.collateralToken.decimals);
       }
 
       showSuccessModal.value = true;

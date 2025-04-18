@@ -36,7 +36,6 @@ import BasicButton from '~/components/general/BasicButton.vue';
 
 const { resetContracts, ensureCorrectNetwork } = useContracts();
 const { $wagmiConfig } = useNuxtApp();
-const { loadToken } = useCollateralToken();
 
 const messageProvider = useMessage();
 const userStore = useUserStore();
@@ -64,8 +63,6 @@ onBeforeMount(() => {
     disconnect();
     resetContracts();
   }
-
-  loadToken(false);
 });
 
 watch(

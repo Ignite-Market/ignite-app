@@ -14,24 +14,19 @@ const SLIPPAGE_SCALE = 100;
  * Use Fixed Market Maker (FMM) Contract.
  */
 export default function useFixedMarketMaker() {
-  const { getTokenStore, loadToken } = useCollateralToken();
   const { initContract, initReadContract } = useContracts();
   const { address, isConnected } = useAccount();
-  const tokenStore = getTokenStore();
 
   /**
    * Gets current share price.
    *
    * @param fpmmContractAddress FPMM contract address.
    * @param outcomeIndex Outcome index.
+   * @param collateralDecimals Number of decimal places of collateral token.
    * @returns Price per share.
    */
-  async function getPricePerShare(fpmmContractAddress: Address, outcomeIndex: number) {
-    if (!tokenStore.loaded) {
-      await loadToken();
-    }
-
-    const amount = BigInt(Math.round(1 * 10 ** tokenStore.decimals));
+  async function getPricePerShare(fpmmContractAddress: Address, outcomeIndex: number, collateralDecimals: number) {
+    const amount = BigInt(Math.round(1 * 10 ** collateralDecimals));
     const contract = await initReadContract(ContractType.FPMM, fpmmContractAddress);
     const expectedShares = await contract.read.calcBuyAmount([amount, outcomeIndex]);
 
@@ -70,21 +65,19 @@ export default function useFixedMarketMaker() {
    * @param amount Amount of collateral to spend.
    * @param outcomeIndex Outcome index.
    * @param slippage Slippage.
+   * @param collateralDecimals Number of decimal places of collateral token.
    * @returns Min tokens to buy.
    */
   async function getMinTokensToBuy(
     fpmmContractAddress: Address,
     amount: number,
     outcomeIndex: number,
-    slippage: number
+    slippage: number,
+    collateralDecimals: number
   ) {
-    if (!tokenStore.loaded) {
-      await loadToken();
-    }
-
     const contract = await initContract(ContractType.FPMM, fpmmContractAddress);
 
-    const scaledAmount = BigInt(Math.round(amount * 10 ** tokenStore.decimals));
+    const scaledAmount = BigInt(Math.round(amount * 10 ** collateralDecimals));
     const minTokensToBuyNoSlippage = await contract.read.calcBuyAmount([scaledAmount, outcomeIndex]);
     const minTokensToBuy =
       (minTokensToBuyNoSlippage * BigInt(100 * SLIPPAGE_SCALE - slippage * SLIPPAGE_SCALE)) /
@@ -100,21 +93,30 @@ export default function useFixedMarketMaker() {
    * @param amount Buy amount in collateral token.
    * @param outcomeIndex Outcome index to buy.
    * @param slippage Slippage percentage.
+   * @param collateralDecimals Number of decimal places of collateral token.
    * @returns Buy TX.
    */
-  async function buy(fpmmContractAddress: Address, amount: number, outcomeIndex: number, slippage: number) {
+  async function buy(
+    fpmmContractAddress: Address,
+    amount: number,
+    outcomeIndex: number,
+    slippage: number,
+    collateralDecimals: number
+  ) {
     if (!isConnected.value) {
       return;
-    }
-
-    if (!tokenStore.loaded) {
-      await loadToken();
     }
     const contract = await initContract(ContractType.FPMM, fpmmContractAddress);
 
     // Make sure that you check for collateral allowance separately.
-    const { minTokensToBuy } = await getMinTokensToBuy(fpmmContractAddress, amount, outcomeIndex, slippage);
-    const scaledAmount = BigInt(Math.round(amount * 10 ** tokenStore.decimals));
+    const { minTokensToBuy } = await getMinTokensToBuy(
+      fpmmContractAddress,
+      amount,
+      outcomeIndex,
+      slippage,
+      collateralDecimals
+    );
+    const scaledAmount = BigInt(Math.round(amount * 10 ** collateralDecimals));
 
     return await contract.write.buy([scaledAmount, outcomeIndex, minTokensToBuy]);
   }
@@ -133,9 +135,6 @@ export default function useFixedMarketMaker() {
       return;
     }
 
-    if (!tokenStore.loaded) {
-      await loadToken();
-    }
     const contract = await initContract(ContractType.FPMM, fpmmContractAddress);
 
     // Make sure that you check for conditional allowance separately.
@@ -163,19 +162,16 @@ export default function useFixedMarketMaker() {
    *
    * @param fpmmContractAddress FPMM contract address.
    * @param amount Funding amount in collateral token.
+   * @param collateralDecimals Number of decimal places of collateral token.
    */
-  async function addFunding(fpmmContractAddress: Address, amount: number) {
+  async function addFunding(fpmmContractAddress: Address, amount: number, collateralDecimals: number) {
     if (!isConnected.value) {
       return;
-    }
-
-    if (!tokenStore.loaded) {
-      await loadToken();
     }
     const contract = await initContract(ContractType.FPMM, fpmmContractAddress);
 
     // Make sure that you check for collateral allowance separately.
-    const scaledAmount = BigInt(Math.round(amount * 10 ** tokenStore.decimals));
+    const scaledAmount = BigInt(Math.round(amount * 10 ** collateralDecimals));
     return await contract.write.addFunding([scaledAmount, []]);
   }
 
@@ -213,13 +209,15 @@ export default function useFixedMarketMaker() {
    * @param outcomeIndex Outcome index.
    * @param fpmmContractAddress FPMM contract address.
    * @param positionIds Array of position IDs.
+   * @param collateralDecimals Number of decimal places of collateral token.
    * @returns Shares amount in collateral.
    */
   async function calcSellAmountInCollateral(
     sharesAmount: number,
     outcomeIndex: number,
     fpmmContractAddress: Address,
-    positionIds: string[]
+    positionIds: string[],
+    collateralDecimals: number
   ) {
     Big.DP = 90;
 
@@ -238,7 +236,7 @@ export default function useFixedMarketMaker() {
     const marketNonSellingSharesAmounts = marketSharesAmounts
       .filter((_: any, index: any) => index !== outcomeIndex)
       .map((marketShares: any) => new Big(marketShares));
-    const sharesToSell = new Big(Math.round(sharesAmount * 10 ** tokenStore.decimals));
+    const sharesToSell = new Big(Math.round(sharesAmount * 10 ** collateralDecimals));
 
     const f = (r: any) => {
       /* For three outcomes, where the `x` is the one being sold, the formula is:

@@ -12,7 +12,7 @@
       <div v-if="canClaim" class="flex items-center justify-center mt-5">
         <NuxtIcon name="icon/points" class="text-primary text-[17px]" />
         <div class="ml-[4px] text-[14px] leading-[20px] font-medium mr-5 text-white/60">
-          {{ formatCollateralAmount(claimBalance, tokenStore.decimals, 2) }} {{ tokenStore.symbol }}
+          {{ formatCollateralAmount(claimBalance, collateralToken.decimals, 2) }} {{ collateralToken.symbol }}
         </div>
         <BasicButton :loading="loading" size="small" class="py-[6px] px-[10px]" @click="claimWinnings">
           Claim
@@ -61,7 +61,7 @@
         <span class="font-extrabold"> {{ outcome.name }} </span>:
       </div>
       <span class="flex items-center justify-center text-[14px] leading-[20px] font-bold text-statusGreen mt-3">
-        {{ formatCollateralAmount(claimBalance, tokenStore.decimals, 2) }} {{ tokenStore.symbol }}
+        {{ formatCollateralAmount(claimBalance, collateralToken.decimals, 2) }} {{ collateralToken.symbol }}
       </span>
     </div>
 
@@ -102,18 +102,18 @@
       <div v-if="selectedAction === SelectedAction.CLAIM" class="flex flex-col items-center justify-center mt-5">
         <div class="text-center">You have claimed your reward of:</div>
         <span class="flex items-center justify-center text-[14px] leading-[20px] font-bold text-statusGreen mt-3">
-          {{ obtainedAmount }} {{ tokenStore.symbol }}
+          {{ obtainedAmount }} {{ collateralToken.symbol }}
         </span>
       </div>
 
       <div v-else class="flex flex-col items-center justify-center mt-5">
         <div class="text-center">You have removed your funding and obtained a reward of:</div>
         <span class="flex items-center justify-center text-[14px] leading-[20px] font-bold text-statusGreen my-3">
-          {{ obtainedFeeReward }} {{ tokenStore.symbol }}
+          {{ obtainedFeeReward }} {{ collateralToken.symbol }}
         </span>
         <div class="text-center">You can now also claim your remaining funding of:</div>
         <span class="flex items-center justify-center text-[14px] leading-[20px] font-bold text-statusGreen my-3">
-          {{ obtainedAmount }} {{ tokenStore.symbol }}
+          {{ obtainedAmount }} {{ collateralToken.symbol }}
         </span>
       </div>
 
@@ -135,8 +135,8 @@
 </template>
 
 <script lang="ts" setup>
-import type { Address } from 'viem';
 import { useAccount } from '@wagmi/vue';
+import type { Address } from 'viem';
 import ConfettiExplosion from 'vue-confetti-explosion';
 import type { OutcomeInterface } from '~/lib/types/prediction-set';
 import { colors } from '~/tailwind.config';
@@ -149,10 +149,8 @@ enum SelectedAction {
 const { getConditionalBalance, claim } = useConditionalToken();
 const { getFundingBalance, removeFunding } = useFixedMarketMaker();
 const { ensureCorrectNetwork } = useContracts();
-const { getTokenStore } = useCollateralToken();
 const { address } = useAccount();
 const { loggedIn } = useLoggedIn();
-const tokenStore = getTokenStore();
 const message = useMessage();
 const txWait = useTxWait();
 
@@ -160,6 +158,7 @@ const props = defineProps({
   contractAddress: { type: String as PropType<Address>, default: null, required: true },
   conditionId: { type: String, default: null, required: true },
   outcome: { type: Object as PropType<OutcomeInterface>, default: () => {}, required: true },
+  collateralToken: { type: Object as PropType<CollateralToken>, default: () => {}, required: true },
 });
 
 const claimBalance = ref(BigInt(0));
@@ -229,7 +228,7 @@ async function claimWinnings() {
       const parsed = parseTransfersERC20(receipt);
       if (parsed.length) {
         const event = parsed.find((e: any) => e.to === address.value);
-        obtainedAmount.value = formatCollateralAmount(event.amount, tokenStore.decimals, 2);
+        obtainedAmount.value = formatCollateralAmount(event.amount, props.collateralToken.decimals, 2);
       }
 
       showSuccessModal.value = true;
@@ -275,7 +274,7 @@ async function withdrawFunding() {
       if (parsed.length) {
         const event = parsed.find((e: any) => e.to === address.value);
         if (event) {
-          obtainedFeeReward.value = formatCollateralAmount(event.amount, tokenStore.decimals, 2);
+          obtainedFeeReward.value = formatCollateralAmount(event.amount, props.collateralToken.decimals, 2);
         }
       }
 
@@ -285,7 +284,7 @@ async function withdrawFunding() {
         if (event) {
           const index = event?.ids?.findIndex((id: string) => id === props.outcome.positionId) || 0;
           const amount = event.values[index] || 0;
-          obtainedAmount.value = formatCollateralAmount(amount, tokenStore.decimals, 2);
+          obtainedAmount.value = formatCollateralAmount(amount, props.collateralToken.decimals, 2);
         }
       }
 

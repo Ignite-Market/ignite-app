@@ -26,14 +26,24 @@
 
               <div class="mx-4 border-r-1 border-r-white/25 h-[14px]"></div>
 
-              <div class="text-white/80 text-[14px] leading-[20px]">
+              <div
+                class="text-white/80 text-[14px] leading-[20px]"
+                :title="dateTimeToDateAndTime(predictionSet.endTime)"
+              >
                 Ends on {{ toMonthAndYear(predictionSet.endTime) }}
               </div>
 
               <div class="mx-4 border-r-1 border-r-white/25 h-[14px]"></div>
 
+              <div v-if="collateralToken?.imgUrl">
+                <Image
+                  :src="collateralToken.imgUrl"
+                  :title="collateralToken.name"
+                  class="rounded-full w-[18px] h-[18px] object-cover mr-1"
+                />
+              </div>
               <div class="text-white/80 text-[14px] leading-[20px]">
-                {{ formatTokenAmount(predictionSet.volume || 0, 2) }} {{ tokenStore.symbol }}
+                {{ formatTokenAmount(predictionSet.volume || 0, 2) }} {{ collateralToken?.symbol || '' }}
               </div>
             </div>
           </div>
@@ -78,6 +88,7 @@
               :positions="predictionSet.positions"
               :contract-address="predictionSet.chainData.contractAddress"
               :prediction-set="predictionSet"
+              :collateral-token="collateralToken"
               @sell="(id: number, amount: number) => sellPosition(id, amount)"
             />
           </div>
@@ -122,8 +133,18 @@
                       {{ outcome.name }}
                     </div>
 
-                    <div class="text-[14px] leading-[20px] font-medium text-grey-lightest mt-[4px]">
-                      {{ formatTokenAmount(outcome.volume, 2) }} {{ tokenStore.symbol }}
+                    <div class="flex flex-row items-center justify-center mt-[4px]">
+                      <div v-if="collateralToken?.imgUrl">
+                        <Image
+                          :src="collateralToken.imgUrl"
+                          :title="collateralToken.name"
+                          class="rounded-full w-[14px] h-[14px] object-cover mr-1"
+                        />
+                      </div>
+
+                      <div class="text-[14px] leading-[20px] font-medium text-grey-lightest">
+                        {{ formatTokenAmount(outcome.volume, 2) }} {{ collateralToken?.symbol || '' }}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -132,7 +153,7 @@
                   v-if="predictionSet.setStatus !== PredictionSetStatus.FINALIZED"
                   class="font-bold text-[16px] leading-[24px]"
                 >
-                  {{ Number(outcome.latestChance.chance * 100).toFixed(0) }} %
+                  {{ Number(outcome.latestChance * 100).toFixed(0) }} %
                 </div>
                 <div v-if="winningOutcome?.id === outcome.id" class="flex items-center justify-center">
                   <NuxtIcon class="text-primary text-[24px]" name="icon/complete" />
@@ -248,6 +269,7 @@
               :end-time="predictionSet.endTime.toString()"
               :outcomes="predictionSet.outcomes"
               :default-value="defaultActionValue"
+              :collateral-token="collateralToken"
               @action-changed="(action: TransactionType) => (selectedAction = action)"
             />
           </div>
@@ -277,6 +299,7 @@
       :end-time="predictionSet.endTime.toString()"
       :outcomes="predictionSet.outcomes"
       :default-value="defaultActionValue"
+      :collateral-token="collateralToken"
       @action-changed="(action: TransactionType) => (selectedAction = action)"
     />
   </n-drawer>
@@ -312,13 +335,12 @@ const outcomeColors = [
 
 const REFRESH_INTERVAL = 10_000;
 
-const { getTokenStore } = useCollateralToken();
 const { params, query } = useRoute();
 const { isMd } = useScreen();
 const { loggedIn } = useLoggedIn();
 const router = useRouter();
 const config = useRuntimeConfig();
-const tokenStore = getTokenStore();
+const tokensStore = useTokensStore();
 
 const loading = ref<boolean>(true);
 const refreshInterval = ref<NodeJS.Timeout>();
@@ -330,6 +352,7 @@ const graphOutcomes = ref();
 const watchlistLoading = ref(false);
 const actionModal = ref(false);
 const defaultActionValue = ref(0);
+const collateralToken = ref<CollateralToken>();
 
 onMounted(async () => {
   await sleep(10);
@@ -384,6 +407,11 @@ async function getPredictionSet(silent: boolean = false) {
       name: o.name,
       color: outcomeColors?.[i],
     }));
+
+    if (!collateralToken.value) {
+      await tokensStore.ensureLoaded();
+      collateralToken.value = tokensStore.getToken(predictionSet.value.collateral_token_id);
+    }
 
     if (predictionSet.value.setStatus === PredictionSetStatus.FINALIZED) {
       winningOutcome.value = predictionSet.value.outcomes.find(o => o.id === predictionSet.value?.winner_outcome_id);

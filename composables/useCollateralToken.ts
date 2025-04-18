@@ -3,24 +3,30 @@ import { maxUint256, type Address } from 'viem';
 import { ContractType } from '~/lib/config/contracts';
 
 export default function useCollateralToken() {
-  const { ensureCorrectNetwork, initContract, initReadContract } = useContracts();
+  const { ensureCorrectNetwork, initContract } = useContracts();
   const { address, isConnected } = useAccount();
   const txWait = useTxWait();
   const message = useMessage();
-  const userStore = useUserStore();
+  const tokensStore = useTokensStore();
 
   /**
    * Checks collateral token balance and increases it if it is not sufficient.
    *
+   * @param collateralId Collateral token ID.
    * @param fpmmContractAddress FPMM contract address.
    * @returns Boolean.
    */
-  async function checkCollateralAllowance(fpmmContractAddress: Address): Promise<boolean> {
+  async function checkCollateralAllowance(collateralId: number, fpmmContractAddress: Address): Promise<boolean> {
     if (!isConnected.value) {
       return false;
     }
 
-    const contract = await initContract(ContractType.COLLATERAL_TOKEN);
+    const token = tokensStore.getToken(collateralId);
+    if (!token) {
+      return false;
+    }
+
+    const contract = await initContract(ContractType.COLLATERAL_TOKEN, token.address);
     try {
       await ensureCorrectNetwork();
 
@@ -42,37 +48,21 @@ export default function useCollateralToken() {
   /**
    * Get collateral token balance.
    *
+   * @param collateralId Collateral token ID.
    * @returns Collateral token balance.
    */
-  async function getCollateralBalance() {
+  async function getCollateralBalance(collateralId: number) {
     if (!isConnected.value) {
       return BigInt(0);
     }
 
-    const contract = await initContract(ContractType.COLLATERAL_TOKEN);
+    const token = tokensStore.getToken(collateralId);
+    if (!token) {
+      return BigInt(0);
+    }
+
+    const contract = await initContract(ContractType.COLLATERAL_TOKEN, token.address);
     return await contract.read.balanceOf([address.value]);
-  }
-
-  /**
-   * Get collateral token symbol.
-   *
-   * @returns Collateral token symbol.
-   */
-  async function getSymbol(): Promise<string> {
-    const contract = await initReadContract(ContractType.COLLATERAL_TOKEN);
-
-    return await contract.read.symbol([]);
-  }
-
-  /**
-   * Get collateral token decimals.
-   *
-   * @returns Collateral token decimals.
-   */
-  async function getDecimals(): Promise<number> {
-    const contract = await initReadContract(ContractType.COLLATERAL_TOKEN);
-
-    return await contract.read.decimals([]);
   }
 
   /**
@@ -81,78 +71,27 @@ export default function useCollateralToken() {
    * @param fixed TO how many decimal points should the balance be parsed.
    * @returns Parsed balance.
    */
-  function parseBalance(fixed: number = 3) {
-    const tokenStore = getTokenStore();
-
-    const balance = Number(tokenStore.balance) / Math.pow(10, tokenStore.decimals);
-    return balance.toFixed(fixed);
-  }
-
-  /**
-   * Loads collateral token.
-   */
-  async function loadToken(refreshBalance: boolean = true) {
-    const tokenStore = getTokenStore();
-
-    try {
-      await ensureCorrectNetwork();
-
-      tokenStore.loading = true;
-      tokenStore.decimals = await getDecimals();
-      tokenStore.symbol = await getSymbol();
-
-      if (refreshBalance) {
-        tokenStore.balance = await getCollateralBalance();
-        tokenStore.parsedBalance = parseBalance();
-      }
-
-      tokenStore.loaded = true;
-    } catch (e) {
-      console.error(e);
-      message.error(contractError(e));
-
-      tokenStore.balance = BigInt(0);
-      tokenStore.parsedBalance = '0.0';
-      tokenStore.decimals = 0;
-      tokenStore.symbol = '';
-      tokenStore.loaded = false;
-    } finally {
-      tokenStore.loading = false;
-    }
+  function parseBalance(balance: bigint, decimals: number, fixed: number = 3) {
+    return (Number(balance) / Math.pow(10, decimals)).toFixed(fixed);
   }
 
   /**
    * Refreshes collateral token.
    */
-  async function refreshCollateralBalance() {
-    const tokenStore = getTokenStore();
-
-    if (!tokenStore.loaded) {
-      await loadToken();
-    } else {
-      tokenStore.loading = true;
-      tokenStore.balance = await getCollateralBalance();
-      tokenStore.parsedBalance = parseBalance();
-      tokenStore.loading = false;
+  async function refreshCollateralBalance(collateralId: number) {
+    const token = tokensStore.getToken(collateralId);
+    if (!token) {
+      return;
     }
-  }
 
-  /**
-   * Returns collateral token store.
-   *
-   * @returns Collateral token store.
-   */
-  function getTokenStore() {
-    return userStore.collateralToken;
+    token.balance = await getCollateralBalance(collateralId);
+    token.parsedBalance = parseBalance(token.balance, token.decimals);
   }
 
   return {
-    getTokenStore,
     checkCollateralAllowance,
     getCollateralBalance,
-    getSymbol,
     refreshCollateralBalance,
-    loadToken,
     parseBalance,
   };
 }

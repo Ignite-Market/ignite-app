@@ -50,7 +50,7 @@ export interface OutcomeInterface extends GeneralInterface {
   outcomeIndex: number;
   positionId: string;
   name: string;
-  latestChance: OutcomeChance;
+  latestChance: number;
   volume: number;
   imgUrl: string;
 }
@@ -63,8 +63,10 @@ export interface ChainDataInterface extends GeneralInterface {
   lastProcessedBlock: number;
   parseBlockSize: number;
 }
+
 export interface PredictionSetInterface extends GeneralInterface {
   winner_outcome_id: number;
+  collateral_token_id: number;
   setId: string;
   question: string;
   description: string;
@@ -127,3 +129,16 @@ export interface UserPredictionInterface extends Omit<PredictionSetInterface, 'o
   outcomeTokens: number;
 }
 export interface UserPredictionsResponse extends GeneralItemsResponse<UserPredictionInterface> {}
+
+/**
+ * Collateral token
+ */
+export interface CollateralTokenInterface extends GeneralInterface {
+  name: string;
+  symbol: string;
+  address: Address;
+  decimals: number;
+  fundingThreshold?: string;
+  imgUrl?: string;
+}
+export interface CollateralTokensResponse extends GeneralItemsResponse<CollateralTokensResponse> {}

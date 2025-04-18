@@ -1,6 +1,6 @@
 <template>
   <Dashboard @load-more="loadMore">
-    <div class="flex justify-between items-center mb-8">
+    <div class="flex justify-between items-center mb-3">
       <h1 class="text-2xl font-semibold text-white">Activity</h1>
     </div>
 
@@ -43,14 +43,19 @@
                     {{ activity.outcomeName }}
                   </span>
                 </div>
-                <div class="flex items-center gap-2">
-                  <span class="text-white/80 text-sm">
-                    for {{ formatTokenAmount(activity.userAmount) }} {{ tokenStore.symbol }}
-                  </span>
-                  <span v-if="activity.outcomeTokens" class="text-grey-lightest text-xs">
-                    {{ formatTokenAmount(activity.outcomeTokens) }} shares
-                  </span>
+                <div class="flex gap-2 items-center justify-center text-white/80 text-sm">
+                  for
+                  <Image
+                    :src="tokensStore.getToken(activity.collateral_token_id).imgUrl"
+                    :title="tokensStore.getToken(activity.collateral_token_id).name"
+                    class="rounded-full w-[15px] h-[15px] object-cover"
+                  />
+                  {{ formatTokenAmount(activity.userAmount) }}
+                  {{ tokensStore.getToken(activity.collateral_token_id).symbol }}
                 </div>
+                <span v-if="activity.outcomeTokens" class="text-grey-lightest text-xs">
+                  {{ formatTokenAmount(activity.outcomeTokens) }} shares
+                </span>
               </div>
             </div>
             <div class="text-grey-lightest text-xs whitespace-nowrap">
@@ -72,8 +77,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { TransactionType, type ActivityInterface } from '~/lib/types/prediction-set';
 import Endpoints from '~/lib/values/endpoints';
 
-const { getTokenStore, loadToken } = useCollateralToken();
-const tokenStore = getTokenStore();
+const tokensStore = useTokensStore();
 
 const activities = ref<ActivityInterface[]>([]);
 const loading = ref(true);
@@ -133,9 +137,5 @@ function loadMore() {
 
 onMounted(async () => {
   await loadActivities();
-
-  if (!tokenStore.loaded) {
-    await loadToken(false);
-  }
 });
 </script>
