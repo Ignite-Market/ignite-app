@@ -12,17 +12,21 @@ import Endpoints from '~/lib/values/endpoints';
 import { TransactionType, type ActivityInterface, type UserPredictionInterface } from '~/lib/types/prediction-set';
 import type { TableFilters } from '~/lib/types/config';
 import { colors } from '~/tailwind.config';
+import { useTokensStore } from '~/stores/collateral-tokens';
 
 const props = defineProps({
   tab: { type: String as PropType<ProfileTabs>, required: true },
   userId: { type: Number, required: true },
 });
 
+const tokensStore = useTokensStore();
+
 const transactionType = {
   [TransactionType.BUY]: { label: 'Buy', color: '#5DCE46' },
   [TransactionType.SELL]: { label: 'Sell', color: '#DE4941' },
   [TransactionType.FUND]: { label: 'Fund', color: '#5272FF' },
   [TransactionType.REMOVE_FUND]: { label: 'Remove fund', color: '#5272FF' },
+  [TransactionType.CLAIM]: { label: 'Claim winnings', color: '#D88ADC' },
 };
 
 const predictionColumns = [
@@ -74,7 +78,20 @@ const predictionColumns = [
     title: 'Bought Amount',
     sorter: 'default',
     render(row: UserPredictionInterface) {
-      return formatTokenAmount(row.boughtAmount);
+      const collateralToken = tokensStore.getToken(row.collateral_token_id);
+
+      return h('div', { style: { display: 'flex', alignItems: 'center' } }, [
+        collateralToken?.imgUrl
+          ? h('div', { style: { marginRight: '4px' } }, [
+              h('img', {
+                src: collateralToken.imgUrl,
+                title: collateralToken.name,
+                style: { width: '18px', height: '18px', borderRadius: '50%', objectFit: 'cover' },
+              }),
+            ])
+          : null,
+        h('span', {}, `${formatTokenAmount(row.boughtAmount)} ${collateralToken?.symbol || ''}`),
+      ]);
     },
   },
   {
@@ -82,7 +99,20 @@ const predictionColumns = [
     title: 'Sold Amount',
     sorter: 'default',
     render(row: UserPredictionInterface) {
-      return formatTokenAmount(row.soldAmount);
+      const collateralToken = tokensStore.getToken(row.collateral_token_id);
+
+      return h('div', { style: { display: 'flex', alignItems: 'center' } }, [
+        collateralToken?.imgUrl
+          ? h('div', { style: { marginRight: '4px' } }, [
+              h('img', {
+                src: collateralToken.imgUrl,
+                title: collateralToken.name,
+                style: { width: '18px', height: '18px', borderRadius: '50%', objectFit: 'cover' },
+              }),
+            ])
+          : null,
+        h('span', {}, `${formatTokenAmount(row.soldAmount)} ${collateralToken?.symbol || ''}`),
+      ]);
     },
   },
   {
@@ -144,7 +174,20 @@ const activitiesColumns = [
     title: 'Amount',
     sorter: 'default',
     render(row: ActivityInterface) {
-      return formatTokenAmount(row.userAmount);
+      const collateralToken = tokensStore.getToken(row.collateral_token_id);
+
+      return h('div', { style: { display: 'flex', alignItems: 'center' } }, [
+        collateralToken?.imgUrl
+          ? h('div', { style: { marginRight: '4px' } }, [
+              h('img', {
+                src: collateralToken.imgUrl,
+                title: collateralToken.name,
+                style: { width: '18px', height: '18px', borderRadius: '50%', objectFit: 'cover' },
+              }),
+            ])
+          : null,
+        h('span', {}, `${formatTokenAmount(row.userAmount)} ${collateralToken?.symbol || ''}`),
+      ]);
     },
   },
   {

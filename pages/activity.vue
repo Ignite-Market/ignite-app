@@ -90,6 +90,7 @@ const transactionType = {
   [TransactionType.SELL]: { label: 'sold', color: '#DE4941' },
   [TransactionType.FUND]: { label: 'funded', color: '#5272FF' },
   [TransactionType.REMOVE_FUND]: { label: 'removed funding', color: '#5272FF' },
+  [TransactionType.CLAIM]: { label: 'claimed winnings with', color: '#D88ADC' },
 };
 
 const getTypeLabel = (type: TransactionType) => transactionType[type]?.label || '';

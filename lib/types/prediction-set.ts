@@ -29,6 +29,7 @@ export enum TransactionType {
   SELL = 2,
   FUND = 3,
   REMOVE_FUND = 4,
+  CLAIM = 5,
 }
 
 /**
