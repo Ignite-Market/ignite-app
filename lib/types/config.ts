@@ -42,7 +42,6 @@ declare global {
     url: string;
     apiUrl: string;
     CONDITIONAL_TOKEN_CONTRACT: Address;
-    FPMM_FACTORY_CONTRACT: Address;
     ORACLE_CONTRACT: Address;
   }
 }
