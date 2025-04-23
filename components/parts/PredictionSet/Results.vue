@@ -221,7 +221,7 @@ async function claimWinnings() {
   try {
     await ensureCorrectNetwork();
 
-    txWait.hash.value = await claim(props.conditionId, props.outcome.outcomeIndex);
+    txWait.hash.value = await claim(props.conditionId, props.outcome.outcomeIndex, props.collateralToken.address);
     const receipt = await txWait.wait();
 
     if (receipt.status === 'success') {

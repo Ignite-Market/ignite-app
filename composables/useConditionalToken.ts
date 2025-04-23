@@ -7,7 +7,6 @@ export default function useConditionalToken() {
   const { address, isConnected } = useAccount();
   const txWait = useTxWait();
   const message = useMessage();
-  const config = useRuntimeConfig();
 
   /**
    * Checks if conditional tokens are approved for all on given FPMM contract, and approves them if they are not.
@@ -70,9 +69,10 @@ export default function useConditionalToken() {
    *
    * @param conditionId Condition ID.
    * @param winningIndex Winning index.
+   * @param collateralAddress Collateral token address.
    * @returns Redeem positions transaction.
    */
-  async function claim(conditionId: string, winningIndex: number) {
+  async function claim(conditionId: string, winningIndex: number, collateralAddress: Address) {
     if (!isConnected.value) {
       return;
     }
@@ -85,12 +85,7 @@ export default function useConditionalToken() {
     // - The number 3 (binary 011) represents a token that covers outcomes 0 and 1.
     const indexSet = 1 << winningIndex;
 
-    return await contract.write.redeemPositions([
-      config.public.COLLATERAL_TOKEN_CONTRACT,
-      zeroHash,
-      conditionId,
-      [indexSet],
-    ]);
+    return await contract.write.redeemPositions([collateralAddress, zeroHash, conditionId, [indexSet]]);
   }
 
   return {
