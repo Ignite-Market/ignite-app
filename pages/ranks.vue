@@ -19,7 +19,7 @@
               {{ period }}
             </button>
           </div>
-          <div class="w-[200px]">
+          <div class="w-[150px]">
             <n-select
               v-model:value="collateralToken"
               :theme-overrides="{
@@ -145,23 +145,26 @@ async function fetchLeaderboardData() {
     loading.value = true;
     const range = periodMap[timeFilter.value as keyof typeof periodMap];
 
+    const volumeParams: Record<string, any> = {
+      page: 1,
+      limit: 20,
+      range,
+    };
+
+    const profitParams: Record<string, any> = {
+      page: 1,
+      limit: 20,
+      range,
+    };
+
+    if (collateralToken.value) {
+      volumeParams.collateralTokenId = collateralToken.value;
+      profitParams.collateralTokenId = collateralToken.value;
+    }
+
     const [volumeRes, earningsRes] = await Promise.all([
-      $api.get<GeneralItemsResponse<LeaderboardEntry>>(Endpoints.leaderboardVolume, {
-        predictionId: 0,
-        page: 1,
-        limit: 20,
-        orderBy: 'totalVolume',
-        desc: true,
-        range,
-      }),
-      $api.get<GeneralItemsResponse<LeaderboardEntry>>(Endpoints.leaderboardProfit, {
-        predictionId: 0,
-        page: 1,
-        limit: 20,
-        orderBy: 'totalProfit',
-        desc: true,
-        range,
-      }),
+      $api.get<GeneralItemsResponse<LeaderboardEntry>>(Endpoints.leaderboardVolume, volumeParams),
+      $api.get<GeneralItemsResponse<LeaderboardEntry>>(Endpoints.leaderboardProfit, profitParams),
     ]);
 
     volumeLeaders.value = volumeRes.data.items;
@@ -199,3 +202,5 @@ watch(timeFilter, () => {
   fetchLeaderboardData();
 });
 </script>
+
+<style scoped></style>
