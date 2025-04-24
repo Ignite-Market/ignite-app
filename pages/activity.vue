@@ -1,10 +1,10 @@
 <template>
   <Dashboard @load-more="loadMore">
-    <div class="flex justify-between items-center mb-3">
+    <div class="flex justify-center items-center mb-3">
       <h1 class="text-2xl font-semibold text-white">Activity</h1>
     </div>
 
-    <div class="flex flex-col gap-5">
+    <div class="flex flex-col max-w-[1000px] mx-auto gap-5">
       <div v-if="loading && activities.length === 0" class="flex flex-col gap-4">
         <n-skeleton v-for="i in 10" :key="i" height="80px" class="rounded-lg" />
       </div>

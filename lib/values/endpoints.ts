@@ -45,6 +45,10 @@ const Endpoints = {
 
   /** Collateral tokens */
   collateralTokens: '/collateral-tokens',
+
+  /** Leaderboards */
+  leaderboardVolume: '/stats/leaderboard/volume',
+  leaderboardProfit: '/stats/leaderboard/profit',
 };
 
 export default Endpoints;

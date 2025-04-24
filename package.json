@@ -50,6 +50,8 @@
     "eslint-plugin-prettier": "^5.2.1",
     "naive-ui": "^2.40.2",
     "nuxtjs-naive-ui": "^1.0.2",
+    "postcss": "^8.5.3",
+    "postcss-loader": "^8.1.1",
     "prettier": "^3.4.1",
     "typescript": "^5.7.2",
     "unplugin-auto-import": "^0.18.6",
