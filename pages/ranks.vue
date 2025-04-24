@@ -9,10 +9,8 @@
               v-for="period in ['Day', 'Week', 'Month', 'All']"
               :key="period"
               :class="[
-                'px-4 py-1 rounded-full text-sm transition-colors duration-200',
-                timeFilter === period
-                  ? 'bg-primary text-white'
-                  : 'text-grey-lightest hover:text-white hover:bg-primary border border-grey-light/30',
+                'flex items-center px-2 py-1 hover:bg-grey-lighter/20 rounded-full text-sm font-medium border-1 border-grey-lighter cursor-pointer',
+                timeFilter === period ? ' text-white border-primary' : 'text-white/60',
               ]"
               @click="timeFilter = period"
             >
@@ -60,13 +58,28 @@
           <div v-else-if="volumeLeaders.length" class="flex flex-col gap-3">
             <div v-for="(user, index) in volumeLeaders" :key="user.id" class="flex items-center gap-2">
               <div class="w-4 text-grey-lightest text-sm">{{ index + 1 }}</div>
-              <div class="w-6 h-6">
-                <img :src="user.avatarUrl" class="rounded-full w-full h-full object-cover" :alt="user.username" />
+              <NuxtLink :to="`/profile/${user.id}`" class="flex items-center flex-grow gap-2">
+                <div class="w-6 h-6">
+                  <img
+                    :src="getAvatarUrl(user.walletAddress)"
+                    class="rounded-full w-full h-full object-cover"
+                    :alt="user.username"
+                  />
+                </div>
+                <div class="text-sm font-medium text-white/80 hover:text-primary transition-colors duration-200">
+                  {{ user.username }}
+                </div>
+              </NuxtLink>
+              <div class="text-right font-medium text-sm flex items-center gap-1">
+                <img
+                  v-if="collateralToken"
+                  :src="tokensStore.getToken(collateralToken).imgUrl"
+                  class="w-4 h-4 rounded-full object-cover"
+                  :alt="tokensStore.getToken(collateralToken).symbol"
+                />
+                {{ formatTokenAmount(user.totalVolume || 0) }}
+                {{ collateralToken ? tokensStore.getToken(collateralToken).symbol : '' }}
               </div>
-              <div class="flex-grow">
-                <div class="text-sm">{{ user.username }}</div>
-              </div>
-              <div class="text-right font-medium text-sm">${{ formatNumber(user.amount) }}</div>
             </div>
           </div>
           <div v-if="loading" class="flex flex-col gap-3">
@@ -91,13 +104,28 @@
           <div v-else-if="earningLeaders.length" class="flex flex-col gap-3">
             <div v-for="(user, index) in earningLeaders" :key="user.id" class="flex items-center gap-2">
               <div class="w-4 text-grey-lightest text-sm">{{ index + 1 }}</div>
-              <div class="w-6 h-6">
-                <img :src="user.avatarUrl" class="rounded-full w-full h-full object-cover" :alt="user.username" />
+              <NuxtLink :to="`/profile/${user.id}`" class="flex items-center flex-grow gap-2">
+                <div class="w-6 h-6">
+                  <img
+                    :src="getAvatarUrl(user.walletAddress)"
+                    class="rounded-full w-full h-full object-cover"
+                    :alt="user.username"
+                  />
+                </div>
+                <div class="text-sm font-medium text-white/80 hover:text-primary transition-colors duration-200">
+                  {{ user.username }}
+                </div>
+              </NuxtLink>
+              <div class="text-right font-medium text-sm flex items-center gap-1">
+                <img
+                  v-if="collateralToken"
+                  :src="tokensStore.getToken(collateralToken).imgUrl"
+                  class="w-4 h-4 rounded-full object-cover"
+                  :alt="tokensStore.getToken(collateralToken).symbol"
+                />
+                {{ formatTokenAmount(user.totalProfit || 0) }}
+                {{ collateralToken ? tokensStore.getToken(collateralToken).symbol : '' }}
               </div>
-              <div class="flex-grow">
-                <div class="text-sm">{{ user.username }}</div>
-              </div>
-              <div class="text-right font-medium text-sm">${{ formatNumber(user.amount) }}</div>
             </div>
           </div>
           <div v-if="loading" class="flex flex-col gap-3">
@@ -112,13 +140,14 @@
 <script setup lang="ts">
 import Endpoints from '~/lib/values/endpoints';
 import { useTokensStore } from '~/stores/collateral-tokens';
-import { usePredictionStore } from '~/stores/prediction';
 
 interface LeaderboardEntry {
   id: number;
   username: string;
-  avatarUrl: string;
-  amount: number;
+  walletAddress: string;
+  totalVolume?: number;
+  totalProfit?: number;
+  collateral_token_id: number;
 }
 
 const timeFilter = ref('Day');
@@ -126,9 +155,8 @@ const volumeLeaders = ref<LeaderboardEntry[]>([]);
 const earningLeaders = ref<LeaderboardEntry[]>([]);
 const loading = ref(false);
 const tokensStore = useTokensStore();
-const predictionStore = usePredictionStore();
 
-const collateralToken = ref(null);
+const collateralToken = ref<number | null>(null);
 const options = ref<{ label: string; value: number }[]>([]);
 
 const periodMap = {
@@ -138,6 +166,10 @@ const periodMap = {
   All: 'ALL',
 };
 
+function getAvatarUrl(address: string) {
+  return `https://effigy.im/a/${address}.svg`;
+}
+
 async function fetchLeaderboardData() {
   if (loading.value) return;
 
@@ -145,26 +177,19 @@ async function fetchLeaderboardData() {
     loading.value = true;
     const range = periodMap[timeFilter.value as keyof typeof periodMap];
 
-    const volumeParams: Record<string, any> = {
-      page: 1,
-      limit: 20,
-      range,
-    };
-
-    const profitParams: Record<string, any> = {
+    const params: Record<string, any> = {
       page: 1,
       limit: 20,
       range,
     };
 
     if (collateralToken.value) {
-      volumeParams.collateralTokenId = collateralToken.value;
-      profitParams.collateralTokenId = collateralToken.value;
+      params.collateralTokenId = collateralToken.value;
     }
 
     const [volumeRes, earningsRes] = await Promise.all([
-      $api.get<GeneralItemsResponse<LeaderboardEntry>>(Endpoints.leaderboardVolume, volumeParams),
-      $api.get<GeneralItemsResponse<LeaderboardEntry>>(Endpoints.leaderboardProfit, profitParams),
+      $api.get<GeneralItemsResponse<LeaderboardEntry>>(Endpoints.leaderboardVolume, params),
+      $api.get<GeneralItemsResponse<LeaderboardEntry>>(Endpoints.leaderboardProfit, params),
     ]);
 
     volumeLeaders.value = volumeRes.data.items;
@@ -178,27 +203,22 @@ async function fetchLeaderboardData() {
 
 onMounted(async () => {
   await tokensStore.ensureLoaded();
-  predictionStore.filters.collateralTokenId.value = null;
   options.value = Object.values(tokensStore.items).map(token => ({
     label: token.symbol,
     value: token.id,
   }));
+  // first available currency on list
+  if (options.value.length > 0) {
+    collateralToken.value = options.value[0].value;
+  }
   fetchLeaderboardData();
 });
 
-onUnmounted(() => {
-  predictionStore.filters.collateralTokenId.value = null;
+watch(timeFilter, () => {
+  fetchLeaderboardData();
 });
 
-watch(
-  () => collateralToken.value,
-  async value => {
-    predictionStore.filters.collateralTokenId.value = value;
-    fetchLeaderboardData();
-  }
-);
-
-watch(timeFilter, () => {
+watch(collateralToken, () => {
   fetchLeaderboardData();
 });
 </script>
