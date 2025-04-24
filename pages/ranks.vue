@@ -17,25 +17,30 @@
               {{ period }}
             </button>
           </div>
-          <div class="w-[150px]">
-            <n-select
-              v-model:value="collateralToken"
-              :theme-overrides="{
-                peers: {
-                  InternalSelection: {
-                    color: '#292929',
-                    clearColor: '#C56AC6',
+          <div>
+            <div class="w-[150px] no-left-pad">
+              <n-select
+                v-model:value="collateralToken"
+                :theme-overrides="{
+                  peers: {
+                    InternalSelection: {
+                      color: '#292929',
+                      clearColor: '#C56AC6',
+                    },
                   },
-                },
-              }"
-              placeholder="Currency"
-              :options="options"
-              clearable
-            >
-              <template #arrow>
-                <NuxtIcon name="icon/arrow-down" class="icon-auto !inline-flex flex-cc" />
-              </template>
-            </n-select>
+                }"
+                placeholder="Currency"
+                :options="options"
+                :show-arrow="true"
+              >
+                <template #arrow>
+                  <NuxtIcon name="icon/arrow-down" class="icon-auto !inline-flex flex-cc" />
+                </template>
+                <template #default="{ option }">
+                  <span class="text-white text-sm pl-0">{{ option.label }}</span>
+                </template>
+              </n-select>
+            </div>
           </div>
         </div>
       </div>
@@ -60,11 +65,7 @@
               <div class="w-4 text-grey-lightest text-sm">{{ index + 1 }}</div>
               <NuxtLink :to="`/profile/${user.id}`" class="flex items-center flex-grow gap-2">
                 <div class="w-6 h-6">
-                  <img
-                    :src="getAvatarUrl(user.walletAddress)"
-                    class="rounded-full w-full h-full object-cover"
-                    :alt="user.username"
-                  />
+                  <jazzicon :address="user.walletAddress" :diameter="24" />
                 </div>
                 <div class="text-sm font-medium text-white/80 hover:text-primary transition-colors duration-200">
                   {{ user.username }}
@@ -106,11 +107,7 @@
               <div class="w-4 text-grey-lightest text-sm">{{ index + 1 }}</div>
               <NuxtLink :to="`/profile/${user.id}`" class="flex items-center flex-grow gap-2">
                 <div class="w-6 h-6">
-                  <img
-                    :src="getAvatarUrl(user.walletAddress)"
-                    class="rounded-full w-full h-full object-cover"
-                    :alt="user.username"
-                  />
+                  <jazzicon :address="user.walletAddress" :diameter="24" />
                 </div>
                 <div class="text-sm font-medium text-white/80 hover:text-primary transition-colors duration-200">
                   {{ user.username }}
@@ -175,6 +172,10 @@ async function fetchLeaderboardData() {
 
   try {
     loading.value = true;
+    /*clear user data when reloading or switching the filters */
+    volumeLeaders.value = [];
+    earningLeaders.value = [];
+
     const range = periodMap[timeFilter.value as keyof typeof periodMap];
 
     const params: Record<string, any> = {
@@ -223,4 +224,9 @@ watch(collateralToken, () => {
 });
 </script>
 
-<style scoped></style>
+<style scoped>
+.no-left-pad :deep(.n-base-selection-label) {
+  padding-left: 0 !important;
+  margin-left: 0 !important;
+}
+</style>
