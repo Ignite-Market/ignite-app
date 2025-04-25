@@ -18,8 +18,9 @@
             </button>
           </div>
           <div>
-            <div class="w-[150px] no-left-pad">
+            <div class="w-[150px]">
               <n-select
+                class="text-left"
                 v-model:value="collateralToken"
                 :theme-overrides="{
                   peers: {
@@ -223,10 +224,3 @@ watch(collateralToken, () => {
   fetchLeaderboardData();
 });
 </script>
-
-<style scoped>
-.no-left-pad :deep(.n-base-selection-label) {
-  padding-left: 0 !important;
-  margin-left: 0 !important;
-}
-</style>
