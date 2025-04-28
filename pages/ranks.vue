@@ -20,8 +20,8 @@
           <div>
             <div class="w-[150px]">
               <n-select
-                class="text-left"
                 v-model:value="collateralToken"
+                class="text-left"
                 :theme-overrides="{
                   peers: {
                     InternalSelection: {
@@ -164,16 +164,12 @@ const periodMap = {
   All: 'ALL',
 };
 
-function getAvatarUrl(address: string) {
-  return `https://effigy.im/a/${address}.svg`;
-}
-
 async function fetchLeaderboardData() {
   if (loading.value) return;
 
   try {
     loading.value = true;
-    /*clear user data when reloading or switching the filters */
+    /* clear user data when reloading or switching the filters */
     volumeLeaders.value = [];
     earningLeaders.value = [];
 
@@ -209,7 +205,8 @@ onMounted(async () => {
     label: token.symbol,
     value: token.id,
   }));
-  // first available currency on list
+
+  // First available currency on list.
   if (options.value.length > 0) {
     collateralToken.value = options.value[0].value;
   }
