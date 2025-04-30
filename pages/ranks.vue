@@ -2,7 +2,7 @@
   <Dashboard>
     <div class="flex flex-col gap-6 max-w-[900px] mx-auto">
       <div class="text-center">
-        <h1 class="text-2xl font-bold mb-6">Leaderboard</h1>
+        <h1 class="text-[24px] leading-[34px] font-bold text-white mb-6">Leaderboard</h1>
         <div class="flex justify-center gap-4">
           <div class="bg-grey-dark rounded-full p-1 flex gap-1">
             <button

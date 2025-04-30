@@ -1,7 +1,7 @@
 <template>
   <Dashboard @load-more="loadMore">
     <div class="flex justify-center items-center mb-3">
-      <h1 class="text-2xl font-semibold text-white">Activity</h1>
+      <h1 class="text-[24px] leading-[34px] font-bold text-white mb-3">Activity</h1>
     </div>
 
     <div class="flex flex-col max-w-[1000px] mx-auto gap-5">
