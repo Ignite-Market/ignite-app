@@ -35,21 +35,6 @@
 
               <div class="mx-4 border-r-1 border-r-white/25 h-[14px]"></div>
 
-              <!-- <div v-if="collateralToken?.imgUrl">
-                <Image
-                  :src="collateralToken.imgUrl"
-                  :title="collateralToken.name"
-                  class="rounded-full w-[18px] h-[18px] object-cover mr-1"
-                />
-              </div>
-              <div
-                class="text-white/80 text-[14px] leading-[20px]"
-                :title="`Funding volume: ${formatTokenAmount(predictionSet.fundingVolume || 0)} ${collateralToken?.symbol || ''}\nTransactions volume: ${formatTokenAmount(predictionSet.transactionsVolume || 0)} ${collateralToken?.symbol || ''}`"
-              >
-                {{ formatTokenAmount((predictionSet.fundingVolume || 0) + (predictionSet.transactionsVolume || 0), 2) }}
-                {{ collateralToken?.symbol || '' }}
-              </div> -->
-
               <n-popover trigger="hover" raw :show-arrow="false" placement="bottom-start">
                 <template #trigger>
                   <div class="flex items-center justify-center cursor-pointer">
@@ -144,8 +129,12 @@
               :contract-address="predictionSet.chainData.contractAddress"
               :prediction-set="predictionSet"
               :collateral-token="collateralToken"
+              :loading="positionsLoading"
               @sell="(id: number, amount: number) => sellPosition(id, amount)"
             />
+          </div>
+          <div v-else-if="loggedIn && positionsLoading">
+            <n-skeleton height="169px" width="100%" class="rounded-[8px]" />
           </div>
 
           <!-- OUTCOMES -->
@@ -326,6 +315,7 @@
               :default-value="defaultActionValue"
               :collateral-token="collateralToken"
               @action-changed="(action: TransactionType) => (selectedAction = action)"
+              @transaction-successful="poolForPositionsChanges"
             />
           </div>
 
@@ -357,6 +347,7 @@
       :default-value="defaultActionValue"
       :collateral-token="collateralToken"
       @action-changed="(action: TransactionType) => (selectedAction = action)"
+      @transaction-successful="poolForPositionsChanges"
     />
   </n-drawer>
 </template>
@@ -390,6 +381,8 @@ const outcomeColors = [
 ];
 
 const REFRESH_INTERVAL = 10_000;
+const POSITIONS_POLLING_INTERVAL = 5_000;
+const POSITIONS_POLLING_TIMEOUT = 30_000;
 
 const { params, query } = useRoute();
 const { isMd } = useScreen();
@@ -399,6 +392,7 @@ const config = useRuntimeConfig();
 const tokensStore = useTokensStore();
 
 const loading = ref<boolean>(true);
+const positionsLoading = ref<boolean>(false);
 const refreshInterval = ref<NodeJS.Timeout>();
 const predictionSet = ref<PredictionSetInterface | null>();
 const selectedOutcome = ref();
@@ -496,21 +490,24 @@ async function toggleWatchlist() {
   if (!predictionSet.value || !loggedIn.value || watchlistLoading.value) {
     return;
   }
+
   watchlistLoading.value = true;
   if (predictionSet.value.isWatched) {
     // Delete if already watched.
     try {
-      await $api.delete(Endpoints.predictionSetUserWatchlist(predictionSet.value.id));
       predictionSet.value.isWatched = false;
+      await $api.delete(Endpoints.predictionSetUserWatchlist(predictionSet.value.id));
     } catch (error) {
+      predictionSet.value.isWatched = true;
       console.error(error);
     }
   } else {
     // Add to watchlist.
     try {
-      await $api.post(Endpoints.predictionSetUserWatchlist(predictionSet.value.id));
       predictionSet.value.isWatched = true;
+      await $api.post(Endpoints.predictionSetUserWatchlist(predictionSet.value.id));
     } catch (error) {
+      predictionSet.value.isWatched = false;
       console.error(error);
     }
   }
@@ -525,5 +522,44 @@ function openExplorer(address: string) {
   const explorer = getExplorer();
 
   window.open(`${explorer}/address/${address}`, '_blank');
+}
+
+function poolForPositionsChanges() {
+  let positionsInterval = null as any;
+  positionsLoading.value = true;
+
+  setTimeout(() => {
+    if (positionsInterval) {
+      clearInterval(positionsInterval);
+      positionsLoading.value = false;
+    }
+  }, POSITIONS_POLLING_TIMEOUT);
+
+  return new Promise(function (resolve) {
+    positionsInterval = setInterval(async () => {
+      try {
+        const res = await $api.get<GeneralResponse<any>>(Endpoints.predictionSetPositions(Number(params?.id)));
+
+        console.log(res.data);
+
+        const currentPositions = predictionSet.value?.positions || [];
+        const newPositions = res.data || [];
+
+        if (predictionSet.value) {
+          predictionSet.value.positions = newPositions;
+        }
+
+        if (JSON.stringify(currentPositions) !== JSON.stringify(newPositions)) {
+          clearInterval(positionsInterval);
+          positionsLoading.value = false;
+          resolve(newPositions);
+        }
+      } catch (error) {
+        console.error(error);
+        clearInterval(positionsInterval);
+        positionsLoading.value = false;
+      }
+    }, POSITIONS_POLLING_INTERVAL);
+  });
 }
 </script>

@@ -468,7 +468,7 @@ const props = defineProps({
   collateralToken: { type: Object as PropType<CollateralToken>, default: () => {}, required: true },
 });
 
-const emit = defineEmits(['actionChanged']);
+const emit = defineEmits(['actionChanged', 'transactionSuccessful']);
 
 const { getMinTokensToBuy, addFunding, buy, sell, calcSellAmountInCollateral, getPricePerShare, getTotalFunding } =
   useFixedMarketMaker();
@@ -778,6 +778,8 @@ async function fund() {
 
     amount.value = 0 as any;
     await refreshBalances();
+
+    emit('transactionSuccessful');
   } catch (error) {
     console.error(error);
     message.error(contractError(error));
@@ -848,6 +850,8 @@ async function sellOutcome() {
 
     amount.value = 0 as any;
     await refreshBalances();
+
+    emit('transactionSuccessful');
   } catch (error) {
     console.error(error);
     message.error(contractError(error));
@@ -908,6 +912,8 @@ async function buyOutcome() {
 
     amount.value = 0 as any;
     await refreshBalances();
+
+    emit('transactionSuccessful');
   } catch (error) {
     console.error(error);
   } finally {

@@ -40,7 +40,7 @@ export const usePredictionStore = defineStore('prediction', {
       syncFilters(this.filters, args);
 
       if (args.category === 'all') {
-        args.category = null;
+        delete args.category;
       }
 
       if (args.category) {

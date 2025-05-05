@@ -2,7 +2,7 @@
   <Dashboard>
     <div class="flex flex-col gap-6 max-w-[900px] mx-auto">
       <div class="text-center">
-        <h1 class="text-2xl font-bold mb-6">Leaderboard</h1>
+        <h1 class="text-[24px] leading-[34px] font-bold text-white mb-6">Leaderboard</h1>
         <div class="flex justify-center gap-4">
           <div class="bg-grey-dark rounded-full p-1 flex gap-1">
             <button
@@ -18,9 +18,10 @@
             </button>
           </div>
           <div>
-            <div class="w-[150px] no-left-pad">
+            <div class="w-[150px]">
               <n-select
                 v-model:value="collateralToken"
+                class="text-left"
                 :theme-overrides="{
                   peers: {
                     InternalSelection: {
@@ -163,16 +164,12 @@ const periodMap = {
   All: 'ALL',
 };
 
-function getAvatarUrl(address: string) {
-  return `https://effigy.im/a/${address}.svg`;
-}
-
 async function fetchLeaderboardData() {
   if (loading.value) return;
 
   try {
     loading.value = true;
-    /*clear user data when reloading or switching the filters */
+    /* clear user data when reloading or switching the filters */
     volumeLeaders.value = [];
     earningLeaders.value = [];
 
@@ -208,7 +205,8 @@ onMounted(async () => {
     label: token.symbol,
     value: token.id,
   }));
-  // first available currency on list
+
+  // First available currency on list.
   if (options.value.length > 0) {
     collateralToken.value = options.value[0].value;
   }
@@ -223,10 +221,3 @@ watch(collateralToken, () => {
   fetchLeaderboardData();
 });
 </script>
-
-<style scoped>
-.no-left-pad :deep(.n-base-selection-label) {
-  padding-left: 0 !important;
-  margin-left: 0 !important;
-}
-</style>

@@ -1,5 +1,8 @@
 <template>
-  <div class="border-1 border-grey-lighter rounded-lg mt-10 flex-col p-6 px-0 text-wrap break-words">
+  <div
+    class="border-1 border-grey-lighter rounded-lg mt-10 flex-col p-6 px-0 text-wrap break-words"
+    :class="{ 'animate-pulse': loading }"
+  >
     <div class="font-bold text-[14px] leading-[20px] mb-4 text-white px-6">Positions</div>
 
     <div class="text-[12px]">
@@ -35,6 +38,7 @@ const props = defineProps({
   contractAddress: { type: String as PropType<Address>, default: null, required: true },
   predictionSet: { type: Object as PropType<PredictionSetInterface>, default: null, required: true },
   collateralToken: { type: Object as PropType<CollateralToken>, default: () => {}, required: true },
+  loading: { type: Boolean, default: false, required: true },
 });
 
 const emit = defineEmits(['sell']);

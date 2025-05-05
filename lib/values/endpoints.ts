@@ -20,6 +20,7 @@ const Endpoints = {
   predictionSetChanceHistory: (id: number) => `/prediction-sets/${id}/chance-history`,
   predictionSetActivity: `/prediction-sets/activity`,
   predictionSetHolders: `/prediction-sets/holders`,
+  predictionSetPositions: (id: number) => `/prediction-sets/${id}/positions`,
 
   /** Prediction set comments */
   comments: '/comments',
