@@ -43,5 +43,6 @@ declare global {
     apiUrl: string;
     CONDITIONAL_TOKEN_CONTRACT: Address;
     ORACLE_CONTRACT: Address;
+    THIRDWEB_CLIENT_KEY: string;
   }
 }
