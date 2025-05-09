@@ -1,6 +1,6 @@
 <template>
   <Dashboard :loading="loading" @load-more="loadMore">
-    <div class="px-4 max-w-[1241px] m-auto">
+    <div class="px-4 max-w-[1241px] m-auto mb-16">
       <!-- HEADER -->
       <div class="flex mb-10 justify-between flex-wrap gap-4">
         <div class="flex flex-wrap gap-x-8 gap-y-4">
@@ -48,6 +48,41 @@
                 be selected and implemented as an official market. The creator will receive a predefined number of
                 points as a reward!
               </p>
+
+              <h3 class="font-bold text-[16px] leading-[22px] mb-2 text-white">Voting Requirements:</h3>
+              <p class="mb-4 text-white/80 text-[14px]">
+                To verify your voting eligibility, you need to hold at least the minimum amount of one of these tokens:
+              </p>
+              <div class="mb-4 text-white/80 text-[14px]">
+                <div v-for="token in votingTokens" :key="token.id" class="flex items-center my-2">
+                  <div class="mr-2 text-sm">•</div>
+                  <div class="w-4 h-4 mr-1.5">
+                    <img :src="token.imgUrl" class="w-full h-full object-contain" :alt="token.symbol" />
+                  </div>
+                  <div class="font-medium text-sm">
+                    {{
+                      token.requiredVotingAmount
+                        ? formatCollateralAmount(token.requiredVotingAmount, token.decimals)
+                        : '0'
+                    }}
+                    {{ token.symbol }}
+                  </div>
+                  <div v-if="loggedIn && userBalances[token.id]" class="ml-auto pl-3">
+                    <NuxtIcon
+                      v-if="userBalances[token.id].hasEnough"
+                      name="icon/complete"
+                      class="text-statusGreen text-[14px]"
+                      :title="`You have ${formatCollateralAmount(userBalances[token.id].balance.toString(), token.decimals)} ${token.symbol}`"
+                    />
+                    <NuxtIcon
+                      v-else
+                      name="icon/no"
+                      class="text-statusRed text-[14px]"
+                      :title="`You have ${formatCollateralAmount(userBalances[token.id].balance.toString(), token.decimals)} ${token.symbol}`"
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div class="border-1 border-grey-lighter rounded-lg mt-6 p-6">
@@ -103,7 +138,8 @@
                           !loggedIn ||
                           loadingVote ||
                           !isProposalRoundActive(currentRound) ||
-                          proposal.user_id === userStore?.user?.id
+                          proposal.user_id === userStore?.user?.id ||
+                          !hasRequiredTokens
                         "
                         @click="vote(proposal.id, ProposalVoteType.UPVOTE, idx)"
                       >
@@ -126,7 +162,8 @@
                           !loggedIn ||
                           loadingVote ||
                           !isProposalRoundActive(currentRound) ||
-                          proposal.user_id === userStore?.user?.id
+                          proposal.user_id === userStore?.user?.id ||
+                          !hasRequiredTokens
                         "
                         @click="vote(proposal.id, ProposalVoteType.DOWNVOTE, idx)"
                       >
@@ -165,6 +202,7 @@
                           <div class="mr-2" :title="dateTimeToDateAndTime(proposal.createTime)">
                             {{ formatDistanceToNow(new Date(proposal.createTime), { addSuffix: true }) }}
                           </div>
+                          <!-- TODO: tags? -->
                           <div class="bg-grey-lighter px-2 py-0.5 rounded-full text-xs ml-1">Crypto</div>
                         </div>
                       </div>
@@ -378,7 +416,11 @@ import {
   type ProposalsResponse,
   type ProposalVoteResponse,
 } from '~/lib/types/proposal';
+import { type CollateralTokenInterface } from '~/lib/types/prediction-set';
+import { useTokensStore } from '~/stores/collateral-tokens';
+import { formatCollateralAmount } from '~/lib/utils/numbers';
 import Endpoints from '~/lib/values/endpoints';
+import useCollateralToken from '~/composables/useCollateralToken';
 
 enum Sort {
   TOP = 'totalVotes',
@@ -388,7 +430,9 @@ enum Sort {
 const { loggedIn } = useLoggedIn();
 const router = useRouter();
 const userStore = useUserStore();
+const tokensStore = useTokensStore();
 const message = useMessage();
+const { getCollateralBalance } = useCollateralToken();
 
 const search = ref('');
 const sortFilter = ref(Sort.TOP);
@@ -397,6 +441,8 @@ const selectedRound = ref<string | number>();
 const currentRound = ref<ProposalRound>();
 const proposalRounds = ref<ProposalRound[]>([]);
 const proposals = ref<Proposal[]>([]);
+const votingTokens = ref<CollateralTokenInterface[]>([]);
+const userBalances = ref<{ [id: number]: { balance: bigint; hasEnough: boolean } }>({});
 
 const loading = ref(false);
 const loadingProposals = ref(false);
@@ -406,8 +452,25 @@ const page = ref(1);
 const limit = ref(20);
 const total = ref(0);
 
-onMounted(() => {
-  getProposalRounds();
+const hasRequiredTokens = computed(() => {
+  if (!loggedIn.value || !votingTokens.value.length || Object.keys(userBalances.value).length === 0) {
+    return false;
+  }
+
+  return Object.values(userBalances.value).some(balance => balance.hasEnough);
+});
+
+onMounted(async () => {
+  await getProposalRounds();
+
+  await tokensStore.ensureLoaded();
+  votingTokens.value = Object.values(tokensStore.items).filter(
+    token => !!token.requiredVotingAmount && token.requiredVotingAmount !== '0'
+  );
+
+  if (loggedIn.value) {
+    checkUserTokenBalances();
+  }
 });
 
 watch(selectedRound, newValue => {
@@ -418,6 +481,17 @@ watch(selectedRound, newValue => {
     }
   }
 });
+
+watch(
+  () => loggedIn.value,
+  newValue => {
+    if (newValue) {
+      checkUserTokenBalances();
+    } else {
+      userBalances.value = {};
+    }
+  }
+);
 
 watchDebounced(
   () => currentRound.value,
@@ -554,5 +628,25 @@ function openUserProfile(userId: number) {
 
 function copyLink(id: number) {
   copyToClipboard(`${window.location.href}/${id}`);
+}
+
+async function checkUserTokenBalances() {
+  if (!loggedIn.value || !votingTokens.value.length) return;
+
+  for (const token of votingTokens.value) {
+    try {
+      if (!token.requiredVotingAmount) continue;
+
+      const balance = await getCollateralBalance(token.id);
+      const requiredAmount = BigInt(token.requiredVotingAmount);
+
+      userBalances.value[token.id] = {
+        balance,
+        hasEnough: balance >= requiredAmount,
+      };
+    } catch (error) {
+      console.error(`Error checking balance for token ${token.symbol}:`, error);
+    }
+  }
 }
 </script>

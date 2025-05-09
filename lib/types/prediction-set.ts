@@ -142,5 +142,6 @@ export interface CollateralTokenInterface extends GeneralInterface {
   decimals: number;
   fundingThreshold?: string;
   imgUrl?: string;
+  requiredVotingAmount?: string;
 }
 export interface CollateralTokensResponse extends GeneralItemsResponse<CollateralTokensResponse> {}

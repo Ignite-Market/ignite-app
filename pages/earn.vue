@@ -1,6 +1,6 @@
 <template>
   <Dashboard :loading="loading">
-    <div class="px-4 max-w-[1241px] m-auto">
+    <div class="px-4 max-w-[1241px] m-auto mb-16">
       <!-- HEADER -->
       <div class="flex mb-10 justify-between flex-wrap gap-4">
         <div class="flex flex-wrap gap-x-8 gap-y-4">

@@ -1,6 +1,6 @@
 <template>
   <Dashboard :loading="loading">
-    <div class="px-4 max-w-[1241px] m-auto">
+    <div class="px-4 max-w-[1241px] m-auto mb-16">
       <!-- CONTENT -->
       <div class="flex flex-col-reverse md:flex-row justify-center">
         <!-- LEFT -->
@@ -84,6 +84,7 @@
                     <div class="mr-2" :title="dateTimeToDateAndTime(proposal.createTime)">
                       {{ formatDistanceToNow(new Date(proposal.createTime), { addSuffix: true }) }}
                     </div>
+                    <!-- TODO: tags? -->
                     <div class="bg-grey-lighter px-2 py-0.5 rounded-full text-xs ml-1">Crypto</div>
 
                     <div v-if="loggedIn" class="ml-auto">
