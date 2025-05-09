@@ -86,7 +86,7 @@
 
               <h3 class="font-bold text-[16px] leading-[22px] mb-2 text-white">Selection Process:</h3>
               <p class="mb-4 text-white/80 text-[14px]">
-                Each round lasts two weeks. The community votes on proposals, and the proposal with the most votes will
+                Each round lasts one week. The community votes on proposals, and the proposal with the most votes will
                 be selected and implemented as an official market. The creator will receive a predefined number of
                 points as a reward!
               </p>
