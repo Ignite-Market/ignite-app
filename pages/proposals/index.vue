@@ -44,7 +44,7 @@
 
               <h3 class="font-bold text-[16px] leading-[22px] mb-2 text-white">Selection Process:</h3>
               <p class="mb-4 text-white/80 text-[14px]">
-                Each round lasts two weeks. The community votes on proposals, and the proposal with the most votes will
+                Each round lasts one week. The community votes on proposals, and the proposal with the most votes will
                 be selected and implemented as an official market. The creator will receive a predefined number of
                 points as a reward!
               </p>
@@ -72,14 +72,8 @@
                       v-if="userBalances[token.id].hasEnough"
                       name="icon/complete"
                       class="text-statusGreen text-[14px]"
-                      :title="`You have ${formatCollateralAmount(userBalances[token.id].balance.toString(), token.decimals)} ${token.symbol}`"
                     />
-                    <NuxtIcon
-                      v-else
-                      name="icon/no"
-                      class="text-statusRed text-[14px]"
-                      :title="`You have ${formatCollateralAmount(userBalances[token.id].balance.toString(), token.decimals)} ${token.symbol}`"
-                    />
+                    <NuxtIcon v-else name="icon/no" class="text-statusRed text-[14px]" />
                   </div>
                 </div>
               </div>
@@ -558,6 +552,11 @@ async function getProposals() {
 
 async function vote(proposalId: number, voteType: ProposalVoteType, idx: number) {
   if (!currentRound?.value?.id) {
+    return;
+  }
+
+  if (!hasRequiredTokens.value) {
+    message.error('You need to hold the required tokens to vote.');
     return;
   }
 
