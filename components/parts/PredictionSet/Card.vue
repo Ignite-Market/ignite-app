@@ -54,7 +54,6 @@
     </div>
 
     <!-- TODO: Add claim button. -->
-
     <div class="flex flex-row mt-[10px] items-center justify-center text-[12px] leading-[16px]">
       <Status :status="predictionSet.setStatus" :end-time="new Date(predictionSet.endTime)" />
       <div class="ml-[10px] text-[#888888]">
@@ -80,7 +79,8 @@
             />
           </div>
           <div class="font-medium">
-            {{ formatTokenAmount(predictionSet.volume || 0) }} {{ collateralToken?.symbol || '' }}
+            {{ formatCollateralAmount(predictionSet.volume || 0, collateralToken?.decimals || 0) }}
+            {{ collateralToken?.symbol || '' }}
           </div>
         </div>
       </div>

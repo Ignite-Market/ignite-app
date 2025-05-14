@@ -18,11 +18,13 @@
         <span v-if="item.type < TransactionType.FUND">
           {{ item.type === TransactionType.BUY ? ' bought ' : ' sold ' }}
           <span class="text-primary">
-            {{ formatTokenAmount(item.outcomeTokens) }} <span class="font-bold">{{ item.outcomeName }}</span>
+            {{ formatCollateralAmount(item.outcomeTokens, tokensStore.getToken(item.collateral_token_id).decimals) }}
+            <span class="font-bold">{{ item.outcomeName }}</span>
           </span>
           for
           <span class="font-bold">
-            {{ formatTokenAmount(item.userAmount) }} {{ tokensStore.getToken(item.collateral_token_id).symbol }}
+            {{ formatCollateralAmount(item.userAmount, tokensStore.getToken(item.collateral_token_id).decimals) }}
+            {{ tokensStore.getToken(item.collateral_token_id).symbol }}
           </span>
         </span>
         <span v-else>
@@ -30,7 +32,8 @@
           <span v-if="item.type === TransactionType.FUND">
             for
             <span class="font-bold">
-              {{ formatTokenAmount(item.userAmount) }} {{ tokensStore.getToken(item.collateral_token_id).symbol }}
+              {{ formatCollateralAmount(item.userAmount, tokensStore.getToken(item.collateral_token_id).decimals) }}
+              {{ tokensStore.getToken(item.collateral_token_id).symbol }}
             </span>
           </span>
           <a

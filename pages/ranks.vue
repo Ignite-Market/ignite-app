@@ -79,7 +79,12 @@
                   class="w-4 h-4 rounded-full object-cover"
                   :alt="tokensStore.getToken(collateralToken).symbol"
                 />
-                {{ formatTokenAmount(user.totalVolume || 0) }}
+                {{
+                  formatCollateralAmount(
+                    user.totalVolume || 0,
+                    tokensStore.getToken(collateralToken || 0).decimals || 0
+                  )
+                }}
                 {{ collateralToken ? tokensStore.getToken(collateralToken).symbol : '' }}
               </div>
             </div>
@@ -121,7 +126,12 @@
                   class="w-4 h-4 rounded-full object-cover"
                   :alt="tokensStore.getToken(collateralToken).symbol"
                 />
-                {{ formatTokenAmount(user.totalProfit || 0) }}
+                {{
+                  formatCollateralAmount(
+                    user.totalProfit || 0,
+                    tokensStore.getToken(collateralToken || 0).decimals || 0
+                  )
+                }}
                 {{ collateralToken ? tokensStore.getToken(collateralToken).symbol : '' }}
               </div>
             </div>

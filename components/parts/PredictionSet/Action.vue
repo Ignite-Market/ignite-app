@@ -779,7 +779,7 @@ async function fund() {
     amount.value = 0 as any;
     await refreshBalances();
 
-    emit('transactionSuccessful');
+    emit('transactionSuccessful', TransactionType.FUND);
   } catch (error) {
     console.error(error);
     message.error(contractError(error));
@@ -851,7 +851,7 @@ async function sellOutcome() {
     amount.value = 0 as any;
     await refreshBalances();
 
-    emit('transactionSuccessful');
+    emit('transactionSuccessful', TransactionType.SELL);
   } catch (error) {
     console.error(error);
     message.error(contractError(error));
@@ -913,7 +913,7 @@ async function buyOutcome() {
     amount.value = 0 as any;
     await refreshBalances();
 
-    emit('transactionSuccessful');
+    emit('transactionSuccessful', TransactionType.BUY);
   } catch (error) {
     console.error(error);
   } finally {

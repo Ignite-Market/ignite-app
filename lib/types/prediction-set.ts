@@ -86,7 +86,8 @@ export interface PredictionSetInterface extends GeneralInterface {
   isWatched?: boolean;
   fundingVolume?: number;
   transactionsVolume?: number;
-  positions: any[];
+  positions?: any[];
+  fundingPositions?: number;
 }
 export interface PredictionSetResponse extends GeneralResponse<PredictionSetInterface> {}
 export interface PredictionSetsResponse extends GeneralItemsResponse<any> {}

@@ -83,7 +83,7 @@ onMounted(() => {
         return h(
           'div',
           { class: 'text-white/80' },
-          formatTokenAmount(row.sharesAmount, props.collateralToken.decimals)
+          formatCollateralAmount(row.sharesAmount, props.collateralToken.decimals)
         );
       },
     },
@@ -141,7 +141,11 @@ onMounted(() => {
             type: 'secondary',
             size: 'small',
             onClick: () =>
-              emit('sell', row.outcomeId, Number(formatTokenAmount(row.sharesAmount, props.collateralToken.decimals))),
+              emit(
+                'sell',
+                row.outcomeId,
+                Number(formatCollateralAmount(row.sharesAmount, props.collateralToken.decimals))
+              ),
           },
           {
             default: () => 'Sell',

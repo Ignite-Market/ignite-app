@@ -21,7 +21,7 @@ const Endpoints = {
   predictionSetActivity: `/prediction-sets/activity`,
   predictionSetHolders: `/prediction-sets/holders`,
   predictionSetPositions: (id: number) => `/prediction-sets/${id}/positions`,
-
+  predictionSetFundingPositions: (id: number) => `/prediction-sets/${id}/funding-positions`,
   /** Prediction set comments */
   comments: '/comments',
   commentById: (id: number) => `/comments/${id}`,

@@ -50,11 +50,22 @@
                     :title="tokensStore.getToken(activity.collateral_token_id).name"
                     class="rounded-full w-[15px] h-[15px] object-cover"
                   />
-                  {{ formatTokenAmount(activity.userAmount) }}
+                  {{
+                    formatCollateralAmount(
+                      activity.userAmount,
+                      tokensStore.getToken(activity.collateral_token_id).decimals
+                    )
+                  }}
                   {{ tokensStore.getToken(activity.collateral_token_id).symbol }}
                 </div>
                 <span v-if="activity.outcomeTokens" class="text-grey-lightest text-xs">
-                  {{ formatTokenAmount(activity.outcomeTokens) }} shares
+                  {{
+                    formatCollateralAmount(
+                      activity.outcomeTokens,
+                      tokensStore.getToken(activity.collateral_token_id).decimals
+                    )
+                  }}
+                  shares
                 </span>
               </div>
             </div>

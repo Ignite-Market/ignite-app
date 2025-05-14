@@ -47,9 +47,9 @@
                     </div>
                     <div class="text-white/80 text-[14px] leading-[20px]">
                       {{
-                        formatTokenAmount(
+                        formatCollateralAmount(
                           (predictionSet.fundingVolume || 0) + (predictionSet.transactionsVolume || 0),
-                          2
+                          collateralToken?.decimals || 0
                         )
                       }}
                       {{ collateralToken?.symbol || '' }}
@@ -67,7 +67,7 @@
                       />
                     </div>
 
-                    {{ formatTokenAmount(predictionSet.fundingVolume || 0) }}
+                    {{ formatCollateralAmount(predictionSet.fundingVolume || 0, collateralToken?.decimals || 0) }}
                     {{ collateralToken?.symbol || '' }}
                   </div>
 
@@ -80,7 +80,7 @@
                         class="rounded-full w-[14px] h-[14px] object-cover mx-1"
                       />
                     </div>
-                    {{ formatTokenAmount(predictionSet.transactionsVolume || 0) }}
+                    {{ formatCollateralAmount(predictionSet.transactionsVolume || 0, collateralToken?.decimals || 0) }}
                     {{ collateralToken?.symbol || '' }}
                   </div>
                 </div>
@@ -125,7 +125,10 @@
           <!-- OPEN POSITIONS -->
           <div
             v-if="
-              predictionSet.positions.length && loggedIn && predictionSet.setStatus !== PredictionSetStatus.FINALIZED
+              predictionSet.positions &&
+              predictionSet.positions.length &&
+              loggedIn &&
+              predictionSet.setStatus !== PredictionSetStatus.FINALIZED
             "
           >
             <PredictionSetPositions
@@ -139,6 +142,41 @@
           </div>
           <div v-else-if="loggedIn && positionsLoading">
             <n-skeleton height="169px" width="100%" class="rounded-[8px]" />
+          </div>
+
+          <!-- FUNDING POSITIONS -->
+          <div
+            v-if="
+              predictionSet.fundingPositions &&
+              predictionSet.fundingPositions > 0 &&
+              loggedIn &&
+              predictionSet.setStatus !== PredictionSetStatus.FINALIZED
+            "
+          >
+            <div
+              class="border-1 border-grey-lighter rounded-lg mt-10 p-6 text-wrap break-words flex justify-center"
+              :class="{ 'animate-pulse': fundingPositionsLoading }"
+            >
+              <div class="font-bold text-[14px] leading-[20px] pt-0.5 text-white">Funding position</div>
+              <div class="ml-auto flex">
+                {{ predictionSet.fundingPositions }}
+
+                <div v-if="collateralToken?.imgUrl">
+                  <Image
+                    :src="collateralToken.imgUrl"
+                    :title="collateralToken.name"
+                    class="rounded-full w-[18px] h-[18px] object-cover mr-1"
+                  />
+                </div>
+                <div class="text-white/80 text-[14px] leading-[20px]">
+                  {{ formatTokenAmount(predictionSet.fundingPositions, 2) }}
+                  {{ collateralToken?.symbol || '' }}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div v-else-if="loggedIn && fundingPositionsLoading">
+            <n-skeleton height="169px" width="100%" class="rounded-[8px] mt-10" />
           </div>
 
           <!-- OUTCOMES -->
@@ -319,7 +357,12 @@
               :default-value="defaultActionValue"
               :collateral-token="collateralToken"
               @action-changed="(action: TransactionType) => (selectedAction = action)"
-              @transaction-successful="poolForPositionsChanges"
+              @transaction-successful="
+                (transactionType: TransactionType) =>
+                  transactionType === TransactionType.FUND
+                    ? poolForFundingPositionsChanges()
+                    : poolForPositionsChanges()
+              "
             />
           </div>
 
@@ -351,7 +394,10 @@
       :default-value="defaultActionValue"
       :collateral-token="collateralToken"
       @action-changed="(action: TransactionType) => (selectedAction = action)"
-      @transaction-successful="poolForPositionsChanges"
+      @transaction-successful="
+        (transactionType: TransactionType) =>
+          transactionType === TransactionType.FUND ? poolForFundingPositionsChanges() : poolForPositionsChanges()
+      "
     />
   </n-drawer>
 </template>
@@ -385,8 +431,8 @@ const outcomeColors = [
 ];
 
 const REFRESH_INTERVAL = 10_000;
-const POSITIONS_POLLING_INTERVAL = 5_000;
-const POSITIONS_POLLING_TIMEOUT = 30_000;
+const POLLING_INTERVAL = 5_000;
+const POLLING_TIMEOUT = 30_000;
 
 const { params, query } = useRoute();
 const { isMd } = useScreen();
@@ -397,6 +443,8 @@ const tokensStore = useTokensStore();
 
 const loading = ref<boolean>(true);
 const positionsLoading = ref<boolean>(false);
+const fundingPositionsLoading = ref<boolean>(false);
+
 const refreshInterval = ref<NodeJS.Timeout>();
 const predictionSet = ref<PredictionSetInterface | null>();
 const selectedOutcome = ref();
@@ -529,6 +577,7 @@ function openExplorer(address: string) {
 }
 
 function poolForPositionsChanges() {
+  console.log('called: poolForPositionsChanges');
   let positionsInterval = null as any;
   positionsLoading.value = true;
 
@@ -537,14 +586,12 @@ function poolForPositionsChanges() {
       clearInterval(positionsInterval);
       positionsLoading.value = false;
     }
-  }, POSITIONS_POLLING_TIMEOUT);
+  }, POLLING_TIMEOUT);
 
   return new Promise(function (resolve) {
     positionsInterval = setInterval(async () => {
       try {
         const res = await $api.get<GeneralResponse<any>>(Endpoints.predictionSetPositions(Number(params?.id)));
-
-        console.log(res.data);
 
         const currentPositions = predictionSet.value?.positions || [];
         const newPositions = res.data || [];
@@ -552,6 +599,9 @@ function poolForPositionsChanges() {
         if (predictionSet.value) {
           predictionSet.value.positions = newPositions;
         }
+
+        console.log('currentPositions', currentPositions);
+        console.log('newPositions', newPositions);
 
         if (JSON.stringify(currentPositions) !== JSON.stringify(newPositions)) {
           clearInterval(positionsInterval);
@@ -563,7 +613,48 @@ function poolForPositionsChanges() {
         clearInterval(positionsInterval);
         positionsLoading.value = false;
       }
-    }, POSITIONS_POLLING_INTERVAL);
+    }, POLLING_INTERVAL);
+  });
+}
+
+function poolForFundingPositionsChanges() {
+  console.log('called: poolForFundingPositionsChanges');
+  let fundingPositionsInterval = null as any;
+  fundingPositionsLoading.value = true;
+
+  setTimeout(() => {
+    if (fundingPositionsInterval) {
+      clearInterval(fundingPositionsInterval);
+      fundingPositionsLoading.value = false;
+    }
+  }, POLLING_TIMEOUT);
+
+  return new Promise(function (resolve) {
+    fundingPositionsInterval = setInterval(async () => {
+      try {
+        const res = await $api.get<GeneralResponse<any>>(Endpoints.predictionSetFundingPositions(Number(params?.id)));
+
+        const currentFundingPositions = predictionSet.value?.fundingPositions || 0;
+        const newFundingPositions = res.data || 0;
+
+        if (predictionSet.value) {
+          predictionSet.value.fundingPositions = newFundingPositions;
+        }
+
+        console.log('currentFundingPositions', currentFundingPositions);
+        console.log('newFundingPositions', newFundingPositions);
+
+        if (currentFundingPositions !== newFundingPositions) {
+          clearInterval(fundingPositionsInterval);
+          fundingPositionsLoading.value = false;
+          resolve(newFundingPositions);
+        }
+      } catch (error) {
+        console.error(error);
+        clearInterval(fundingPositionsInterval);
+        fundingPositionsLoading.value = false;
+      }
+    }, POLLING_INTERVAL);
   });
 }
 </script>
