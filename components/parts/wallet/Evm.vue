@@ -34,7 +34,7 @@ const clickOnConnector = (connector, strategy) => {
     });
   } else {
     console.log('loading connector');
-    if (connector.id === 'metaMaskSDK' || connector.id === 'walletConnect') {
+    if (connector.id !== 'in-app-wallet') {
       finalSteps.value = true;
     }
     emit('loading', true);
