@@ -61,10 +61,6 @@ export function getFixed(num: number | string, places = 2, round = false, roundT
   return parseFloat(num.toFixed(places));
 }
 
-export function formatTokenAmount(num: number, decimals: number = 4) {
-  return formatNumber(+(num / 10 ** 6).toFixed(decimals));
-}
-
 export function formatCollateralAmount(
   num: bigint | number | string,
   collateralDecimals: number,

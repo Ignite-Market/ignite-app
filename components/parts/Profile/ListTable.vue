@@ -36,6 +36,8 @@ const predictionColumns = [
     sorter: 'default',
     minWidth: 150,
     render(row: UserPredictionInterface) {
+      const collateralToken = tokensStore.getToken(row.collateral_token_id);
+
       return h(resolveComponent('NuxtLink'), { to: { path: `/markets/${row.id}` } }, () => [
         h('div', { style: { display: 'flex', gap: '12px' } }, [
           row.imgUrl
@@ -57,7 +59,7 @@ const predictionColumns = [
               h(
                 'span',
                 { style: { fontSize: '14px', color: '#777', fontWeight: '400' } },
-                `${formatTokenAmount(row.outcomeTokens)} shares`
+                `${formatCollateralAmount(row.outcomeTokens, collateralToken?.decimals || 0)} shares`
               ),
             ]),
           ]),
@@ -70,7 +72,9 @@ const predictionColumns = [
     title: 'Shares',
     sorter: 'default',
     render(row: UserPredictionInterface) {
-      return formatTokenAmount(row.outcomeTokens);
+      const collateralToken = tokensStore.getToken(row.collateral_token_id);
+
+      return formatCollateralAmount(row.outcomeTokens, collateralToken?.decimals || 0);
     },
   },
   {
@@ -90,7 +94,11 @@ const predictionColumns = [
               }),
             ])
           : null,
-        h('span', {}, `${formatTokenAmount(row.boughtAmount)} ${collateralToken?.symbol || ''}`),
+        h(
+          'span',
+          {},
+          `${formatCollateralAmount(row.boughtAmount, collateralToken?.decimals || 0)} ${collateralToken?.symbol || ''}`
+        ),
       ]);
     },
   },
@@ -111,7 +119,11 @@ const predictionColumns = [
               }),
             ])
           : null,
-        h('span', {}, `${formatTokenAmount(row.soldAmount)} ${collateralToken?.symbol || ''}`),
+        h(
+          'span',
+          {},
+          `${formatCollateralAmount(row.soldAmount, collateralToken?.decimals || 0)} ${collateralToken?.symbol || ''}`
+        ),
       ]);
     },
   },
@@ -136,6 +148,7 @@ const activitiesColumns = [
     sorter: 'default',
     minWidth: 150,
     render(row: ActivityInterface) {
+      const collateralToken = tokensStore.getToken(row.collateral_token_id);
       return h(resolveComponent('NuxtLink'), { to: { path: `/markets/${row.id}` } }, () => [
         h('div', { style: { display: 'flex', gap: '12px' } }, [
           row.imgUrl
@@ -153,7 +166,7 @@ const activitiesColumns = [
               h(
                 'span',
                 { style: { fontSize: '14px', color: '#777', fontWeight: '400' } },
-                `${formatTokenAmount(row.outcomeTokens)} shares`
+                `${formatCollateralAmount(row.outcomeTokens, collateralToken?.decimals || 0)} shares`
               ),
             ]),
           ]),
@@ -186,7 +199,11 @@ const activitiesColumns = [
               }),
             ])
           : null,
-        h('span', {}, `${formatTokenAmount(row.userAmount)} ${collateralToken?.symbol || ''}`),
+        h(
+          'span',
+          {},
+          `${formatCollateralAmount(row.userAmount, collateralToken?.decimals || 0)} ${collateralToken?.symbol || ''}`
+        ),
       ]);
     },
   },
@@ -195,7 +212,9 @@ const activitiesColumns = [
     title: 'Shares',
     sorter: 'default',
     render(row: ActivityInterface) {
-      return formatTokenAmount(row.outcomeTokens);
+      const collateralToken = tokensStore.getToken(row.collateral_token_id);
+
+      return formatCollateralAmount(row.outcomeTokens, collateralToken?.decimals || 0);
     },
   },
   {

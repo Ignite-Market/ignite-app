@@ -130,6 +130,7 @@ export interface UserPredictionInterface extends Omit<PredictionSetInterface, 'o
   boughtAmount: number;
   soldAmount: number;
   outcomeTokens: number;
+  collateral_token_id: number;
 }
 export interface UserPredictionsResponse extends GeneralItemsResponse<UserPredictionInterface> {}
 

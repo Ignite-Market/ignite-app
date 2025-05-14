@@ -26,6 +26,13 @@
             {{ formatCollateralAmount(item.userAmount, tokensStore.getToken(item.collateral_token_id).decimals) }}
             {{ tokensStore.getToken(item.collateral_token_id).symbol }}
           </span>
+          <a
+            :href="`${getExplorer()}/tx/${item.txHash}`"
+            target="_blank"
+            class="underline inline-block align-middle ml-1 pb-0.5"
+          >
+            <NuxtIcon name="icon/link" />
+          </a>
         </span>
         <span v-else>
           {{ item.type === TransactionType.FUND ? ' funded ' : ' removed funding ' }}
@@ -39,9 +46,8 @@
           <a
             :href="`${getExplorer()}/tx/${item.txHash}`"
             target="_blank"
-            class="underline inline-block align-middle ml-1"
+            class="underline inline-block align-middle ml-1 pb-0.5"
           >
-            <!-- TODO: add open icon -->
             <NuxtIcon name="icon/link" />
           </a>
         </span>

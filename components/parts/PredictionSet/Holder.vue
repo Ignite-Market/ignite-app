@@ -17,7 +17,7 @@
         </div>
       </div>
       <div>
-        {{ formatTokenAmount(item.outcomeTokens) }}
+        {{ formatCollateralAmount(item.outcomeTokens, tokensStore.getToken(item.collateral_token_id)?.decimals || 0) }}
       </div>
     </div>
   </div>
@@ -32,6 +32,7 @@ defineProps({
 
 const router = useRouter();
 const userStore = useUserStore();
+const tokensStore = useTokensStore();
 
 function openUserProfile(userId: number) {
   if (userId === userStore.user.id) {

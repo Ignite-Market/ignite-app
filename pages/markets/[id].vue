@@ -169,7 +169,7 @@
                   />
                 </div>
                 <div class="text-white/80 text-[14px] leading-[20px]">
-                  {{ formatTokenAmount(predictionSet.fundingPositions, 2) }}
+                  {{ formatCollateralAmount(predictionSet.fundingPositions, collateralToken?.decimals || 0) }}
                   {{ collateralToken?.symbol || '' }}
                 </div>
               </div>
@@ -229,7 +229,8 @@
                       </div>
 
                       <div class="text-[14px] leading-[20px] font-medium text-grey-lightest">
-                        {{ formatTokenAmount(outcome.volume, 2) }} {{ collateralToken?.symbol || '' }}
+                        {{ formatCollateralAmount(outcome.volume, collateralToken?.decimals || 0) }}
+                        {{ collateralToken?.symbol || '' }}
                       </div>
                     </div>
                   </div>
