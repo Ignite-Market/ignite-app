@@ -19,19 +19,7 @@
     :mask-closable="!loadingWallet"
     :closable="!loadingWallet"
   >
-    <div class="flex flex-col">
-<!--      <div class="flex w-full items-center justify-center mb-2">-->
-<!--        <NuxtIcon name="wallet/injected" class="text-primary text-[40px]" />-->
-<!--      </div>-->
-      <div class="flex items-center justify-center text-[14px] leading-[20px] font-bold">Connect wallet</div>
-      <div class="flex items-center justify-center text-center text-[12px] leading-[20px] mt-3">
-        To log in, simply connect your wallet to Ignitemarket.
-      </div>
-
-      <div class="flex flex-col items-center justify-center mt-5">
-        <WalletEvm :loading="loadingWallet" @loading="loadingWallet = true" />
-      </div>
-    </div>
+    <WalletEvm :loading="loadingWallet" @loading="(loading) => loadingWallet = loading" />
   </modal>
 </template>
 
