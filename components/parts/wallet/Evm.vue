@@ -17,6 +17,7 @@ const finalSteps = ref(false);
 const emit = defineEmits(['loading']);
 
 const clickOnConnector = (connector, strategy) => {
+  console.log('clickOnConnector', connector, strategy);
   if (!strategy && connector.id === 'in-app-wallet') {
     console.log('show strategy');
     showStrategies.value = true;
@@ -33,7 +34,7 @@ const clickOnConnector = (connector, strategy) => {
     });
   } else {
     console.log('loading connector');
-    if (connector.id === 'metaMaskSDK') {
+    if (connector.id === 'metaMaskSDK' || connector.id === 'walletConnect') {
       finalSteps.value = true;
     }
     emit('loading', true);
