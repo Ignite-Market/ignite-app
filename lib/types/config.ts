@@ -44,5 +44,6 @@ declare global {
     CONDITIONAL_TOKEN_CONTRACT: Address;
     ORACLE_CONTRACT: Address;
     THIRDWEB_CLIENT_KEY: string;
+    WALLETCONNECT_PROJECT_ID: string;
   }
 }
