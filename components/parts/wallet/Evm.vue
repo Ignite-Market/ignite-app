@@ -1,5 +1,35 @@
 <script lang="ts" setup>
 import { useConnect } from '@wagmi/vue';
+
+defineProps({
+  loading: { type: Boolean, default: false },
+});
+
+const showStrategies = ref(false);
+const { connect, connectors } = useConnect();
+const { strategies } = useThirdweb();
+const selectConnector = ref();
+const loadingStrategy = ref<string>();
+const loadingConnector = ref<string>();
+
+const emit = defineEmits(['loading']);
+
+const clickOnConnector = (connector, strategy) => {
+  if (!strategy && connector.id === 'in-app-wallet') {
+    showStrategies.value = true;
+    selectConnector.value = connector;
+  } else if (strategy && connector.id === 'in-app-wallet') {
+    emit('loading', true);
+    // do loading animation
+    loadingStrategy.value = strategy.id;
+    connect({ connector, strategy: strategy.id } as any);
+  } else {
+    emit('loading', true);
+    // do loading animation for connector
+    loadingConnector.value = connector.id;
+    connect({ connector });
+  }
+};
 </script>
 
 <template>
@@ -49,55 +79,3 @@ import { useConnect } from '@wagmi/vue';
     </BasicButton>
   </n-space>
 </template>
-
-<script lang="ts" setup>
-defineProps({
-  loading: { type: Boolean, default: false },
-});
-
-const showStrategies = ref(false);
-const { connect, connectors } = useConnect();
-const { strategies } = useThirdweb();
-const selectConnector = ref();
-const loadingStrategy = ref<string>();
-const loadingConnector = ref<string>();
-
-const emit = defineEmits(['loading']);
-
-const clickOnConnector = (connector, strategy) => {
-  if (!strategy && connector.id === 'in-app-wallet') {
-    showStrategies.value = true;
-    selectConnector.value = connector;
-  } else if (strategy && connector.id === 'in-app-wallet') {
-    emit('loading', true);
-    // do loading animation
-    loadingStrategy.value = strategy.id;
-    connect({ connector, strategy: strategy.id });
-  } else {
-    emit('loading', true);
-    // do loading animation for connector
-    loadingConnector.value = connector.id;
-    connect({ connector });
-  }
-};
-
-defineProps({
-  loading: { type: Boolean, default: false },
-});
-
-const showStrategies = ref(false);
-const { connect, connectors } = useConnect();
-const { strategies } = useThirdweb();
-const selectConnector = ref();
-
-const clickOnConnector = (connector, strategy) => {
-  if (!strategy && connector.id === 'in-app-wallet') {
-    showStrategies.value = true;
-    selectConnector.value = connector;
-  } else if (strategy && connector.id === 'in-app-wallet') {
-    connect({ connector, strategy: strategy.id } as any);
-  } else {
-    connect({ connector });
-  }
-};
-</script>
