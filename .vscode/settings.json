@@ -1,4 +1,14 @@
 {
   "i18n-ally.localesPaths": ["i18n"],
-  "cSpell.words": ["Bignumberish", "FPMM", "jazzicon", "Raphson", "THIRDWEB", "viem", "vueuse", "Watchlist"]
+  "cSpell.words": [
+    "Bignumberish",
+    "FPMM",
+    "jazzicon",
+    "Raphson",
+    "THIRDWEB",
+    "viem",
+    "vueuse",
+    "wagmi",
+    "Watchlist"
+  ]
 }

@@ -1,27 +1,3 @@
-<script lang="ts" setup>
-import { useConnect } from '@wagmi/vue';
-
-defineProps({
-  loading: { type: Boolean, default: false },
-});
-
-const showStrategies = ref(false);
-const { connect, connectors } = useConnect();
-const { strategies } = useThirdweb();
-const selectConnector = ref();
-
-const clickOnConnector = (connector, strategy) => {
-  if (!strategy && connector.id === 'in-app-wallet') {
-    showStrategies.value = true;
-    selectConnector.value = connector;
-  } else if (strategy && connector.id === 'in-app-wallet') {
-    connect({ connector, strategy: strategy.id });
-  } else {
-    connect({ connector });
-  }
-};
-</script>
-
 <template>
   <n-space v-if="showStrategies" :size="22" vertical>
     <BasicButton
@@ -61,3 +37,27 @@ const clickOnConnector = (connector, strategy) => {
     </BasicButton>
   </n-space>
 </template>
+
+<script lang="ts" setup>
+import { useConnect } from '@wagmi/vue';
+
+defineProps({
+  loading: { type: Boolean, default: false },
+});
+
+const showStrategies = ref(false);
+const { connect, connectors } = useConnect();
+const { strategies } = useThirdweb();
+const selectConnector = ref();
+
+const clickOnConnector = (connector, strategy) => {
+  if (!strategy && connector.id === 'in-app-wallet') {
+    showStrategies.value = true;
+    selectConnector.value = connector;
+  } else if (strategy && connector.id === 'in-app-wallet') {
+    connect({ connector, strategy: strategy.id } as any);
+  } else {
+    connect({ connector });
+  }
+};
+</script>

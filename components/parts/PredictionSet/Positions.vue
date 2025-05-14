@@ -91,18 +91,20 @@ onMounted(() => {
       title: 'AVG',
       key: 'avgBuyPrice',
       render(row: any) {
-        return h('div', { class: 'text-white/80' }, row.avgBuyPrice.toFixed(2));
+        return h('div', { class: 'flex whitespace-nowrap text-white/80' }, [
+          h('div', { class: 'mr-1' }, row.avgBuyPrice.toFixed(2)),
+          h('span', { class: 'text-[11px] opacity-60 mt-auto font-light' }, props.collateralToken.symbol),
+        ]);
       },
     },
     {
       title: 'Value',
       key: 'returnAmount',
       render(row: any) {
-        return h(
-          'div',
-          { class: 'text-white/80' },
-          (row.returnAmount / Math.pow(10, props.collateralToken.decimals)).toFixed(2)
-        );
+        return h('div', { class: 'flex whitespace-nowrap text-white/80' }, [
+          h('div', { class: 'mr-1' }, (row.returnAmount / Math.pow(10, props.collateralToken.decimals)).toFixed(2)),
+          h('span', { class: 'text-[11px] opacity-60 mt-auto font-light' }, props.collateralToken.symbol),
+        ]);
       },
     },
     {
@@ -118,7 +120,10 @@ onMounted(() => {
         const percentageClass = `${returnPercentage >= 0 ? 'text-statusGreen font-semibold' : 'text-statusRed font-semibold'}`;
 
         return h('div', { class: 'flex whitespace-nowrap' }, [
-          h('div', { class: 'mr-1 w-[60px]' }, displayCollateral),
+          h('div', { class: 'w-[90px] text-white/80 flex whitespace-nowrap' }, [
+            h('div', { class: 'mr-1' }, displayCollateral),
+            h('span', { class: 'text-[11px] opacity-60 mt-auto font-light' }, props.collateralToken.symbol),
+          ]),
           h('span', { class: percentageClass }, displayPercentage),
         ]);
       },
