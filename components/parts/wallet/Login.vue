@@ -13,15 +13,23 @@
   </BasicButton>
 
   <!-- Modal - Wallet select -->
-  <modal v-model:show="modalWalletSelectVisible" class="w-[270px] border-none">
+  <modal
+    v-model:show="modalWalletSelectVisible"
+    class="w-[300px] border-none"
+    :mask-closable="!loadingWallet"
+    :closable="!loadingWallet"
+  >
     <div class="flex flex-col">
-      <div class="flex w-full items-center justify-center mb-2">
-        <NuxtIcon name="wallet/injected" class="text-primary text-[40px]" />
-      </div>
+<!--      <div class="flex w-full items-center justify-center mb-2">-->
+<!--        <NuxtIcon name="wallet/injected" class="text-primary text-[40px]" />-->
+<!--      </div>-->
       <div class="flex items-center justify-center text-[14px] leading-[20px] font-bold">Connect wallet</div>
+      <div class="flex items-center justify-center text-center text-[12px] leading-[20px] mt-3">
+        To log in, simply connect your wallet to Ignitemarket.
+      </div>
 
       <div class="flex flex-col items-center justify-center mt-5 mb-3">
-        <WalletEvm :loading="loadingWallet" />
+        <WalletEvm :loading="loadingWallet" @loading="loadingWallet = true" />
       </div>
     </div>
   </modal>
@@ -70,7 +78,7 @@ watch(
   address => {
     if (address && !userStore.loggedIn) {
       evmWalletLogin({});
-    } else if (address) {
+    } else if (address && !loadingWallet.value) {
       modalWalletSelectVisible.value = false;
     }
   }
@@ -87,12 +95,14 @@ function btnAction() {
 
 /** Login with EVM wallet */
 async function evmWalletLogin(data: Record<string, any>) {
+  console.log('On wallet login');
   await sleep(200);
 
   if (!address) {
     messageProvider.error('A wallet account must be connected.');
     return;
-  } else if (loadingWallet.value) {
+  } else if (loadingWallet.value && Object.keys(data).length === 0) {
+    loadingWallet.value = false;
     return;
   }
 
