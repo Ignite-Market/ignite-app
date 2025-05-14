@@ -3,6 +3,7 @@ import { useConnect } from '@wagmi/vue';
 
 defineProps({
   loading: { type: Boolean, default: false },
+  step: { type: Number, default: 1 },
 });
 
 const showStrategies = ref(false);
@@ -27,7 +28,7 @@ const clickOnConnector = (connector, strategy) => {
     emit('loading', true);
     // do loading animation
     loadingStrategy.value = strategy.id;
-    connectAsync({ connector, strategy: strategy.id }).catch(() => {
+    connectAsync({ connector, strategy: strategy.id } as any).catch(() => {
       console.log('Connection canceled or failed');
       loadingStrategy.value = undefined;
       emit('loading', false);
@@ -132,25 +133,25 @@ const clickOnConnector = (connector, strategy) => {
         <div class="flex w-full items-center justify-center mb-2">
           <NuxtIcon name="icon/book" class="text-primary text-[56px]" />
         </div>
-        <div class="flex items-center justify-center text-[14px] leading-[20px] font-bold">Last step</div>
+        <div class="flex items-center justify-center text-[14px] leading-[20px] font-bold">Connect wallet</div>
       </div>
 
       <div class="flex items-center py-4 border-b-1 border-b-grey-lighter mt-4 font-semibold px-1">
-        1. Select wallet
+        1. Connect wallet
 
         <div class="ml-auto">
-          <!--          <div class="w-[17px] h-[17px] flex justify-center items-center ml-auto">-->
-          <!--            <div class="w-[7px] h-[7px] bg-statusGreen rounded-full animate-pulse"></div>-->
-          <!--          </div>-->
-          <NuxtIcon class="text-primary text-[17px]" name="icon/complete" />
+          <div v-if="step === 1" class="w-[17px] h-[17px] flex justify-center items-center ml-auto">
+            <div class="w-[7px] h-[7px] bg-statusGreen rounded-full animate-pulse"></div>
+          </div>
+          <NuxtIcon v-else class="text-primary text-[17px]" name="icon/complete" />
         </div>
       </div>
 
       <div class="flex items-center pt-4 font-semibold px-1">
-        2. Sign this message
+        2. Sign message
 
         <div class="ml-auto">
-          <div class="w-[17px] h-[17px] flex justify-center items-center ml-auto">
+          <div v-if="step === 2" class="w-[17px] h-[17px] flex justify-center items-center ml-auto">
             <div class="w-[7px] h-[7px] bg-statusGreen rounded-full animate-pulse"></div>
           </div>
         </div>

@@ -19,7 +19,7 @@
     :mask-closable="!loadingWallet"
     :closable="!loadingWallet"
   >
-    <WalletEvm :loading="loadingWallet" @loading="(loading) => loadingWallet = loading" />
+    <WalletEvm :loading="loadingWallet" :step="step" @loading="loading => (loadingWallet = loading)" />
   </modal>
 </template>
 
@@ -46,15 +46,11 @@ useAccountEffect({
 
 const loadingWallet = ref<boolean>(false);
 const modalWalletSelectVisible = ref<boolean>(false);
+const step = ref(1); // 1 - connect wallet, 2 - sign message
 
-// TODO: Disconnect user if he doesn't sign the message!
 // TODO: handle wallet switch - user needs to sign the message again!
 
 onBeforeMount(() => {
-  // if (!isConnected.value) {
-  //   userStore.logout();
-  // }
-
   if (!userStore.loggedIn) {
     disconnect();
     resetContracts();
@@ -102,6 +98,8 @@ async function evmWalletLogin(data: Record<string, any>) {
     console.log(error);
   }
 
+  step.value = 2;
+
   try {
     const resMessage = await $api.get<WalletMessageResponse>(Endpoints.walletMessage);
     const message = resMessage.data.message;
@@ -123,6 +121,8 @@ async function evmWalletLogin(data: Record<string, any>) {
     messageProvider.error(contractError(error));
     userStore.logout();
     disconnect();
+
+    modalWalletSelectVisible.value = false;
   }
   loadingWallet.value = false;
 }
