@@ -28,12 +28,19 @@ export default defineNuxtPlugin(nuxtApp => {
         },
       }),
       coinbaseWallet({ appName: 'Ignite Market Coinbase wallet', appLogoUrl: '/favicon.png' }),
-      walletConnect({ projectId: '' }),
+      walletConnect({
+        projectId: useRuntimeConfig().public.WALLETCONNECT_PROJECT_ID,
+        qrModalOptions: {
+          themeVariables: {
+            '--wcm-z-index': '2001',
+          },
+        },
+      }),
       inAppWalletConnector({
         client,
         smartAccounts: {
           sponsorGas: true,
-          chain: thirdwebChain(useRuntimeConfig().public.ENV === AppEnv.PROD ? songbird : flareTestnet)
+          chain: thirdwebChain(useRuntimeConfig().public.ENV === AppEnv.PROD ? songbird : flareTestnet),
         },
         metadata: { name: 'Embedded Wallet' },
       }),

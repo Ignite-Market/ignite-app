@@ -28,7 +28,7 @@
         To log in, simply connect your wallet to Ignitemarket.
       </div>
 
-      <div class="flex flex-col items-center justify-center mt-5 mb-3">
+      <div class="flex flex-col items-center justify-center mt-5">
         <WalletEvm :loading="loadingWallet" @loading="loadingWallet = true" />
       </div>
     </div>

@@ -19,7 +19,7 @@
 </template>
 
 <script lang="ts" setup>
-export type BtnType = 'primary' | 'secondary' | 'gradient' | 'link' | 'error';
+export type BtnType = 'primary' | 'secondary' | 'outline' | 'gradient' | 'link' | 'error';
 export type BtnSize = 'small' | 'medium' | 'large';
 
 const props = defineProps({
@@ -56,6 +56,8 @@ const btnClass = computed(() => {
       'bg-primary hover:bg-primary-hover transition-none': props.type === 'primary' && !props.disabled,
       'bg-primary/20 text-white border-1 border-primary hover:bg-primary hover:text-white':
         props.type === 'secondary' && !props.disabled,
+      'text-white border-1 border-grey-lightest hover:bg-grey-lighter hover:text-white':
+        props.type === 'outline' && !props.disabled,
       'bg-gradientGreen bg-clip-text text-transparent': props.type === 'gradient',
       'text-center rounded-[8px]': props.type !== 'link',
       'hover:text-green  !transition-all !duration-200': props.type === 'link',
