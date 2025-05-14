@@ -158,9 +158,7 @@
               :class="{ 'animate-pulse': fundingPositionsLoading }"
             >
               <div class="font-bold text-[14px] leading-[20px] pt-0.5 text-white">Funding position</div>
-              <div class="ml-auto flex">
-                {{ predictionSet.fundingPositions }}
-
+              <div class="ml-auto flex items-center">
                 <div v-if="collateralToken?.imgUrl">
                   <Image
                     :src="collateralToken.imgUrl"
@@ -176,7 +174,7 @@
             </div>
           </div>
           <div v-else-if="loggedIn && fundingPositionsLoading">
-            <n-skeleton height="169px" width="100%" class="rounded-[8px] mt-10" />
+            <n-skeleton height="72px" width="100%" class="rounded-[8px] mt-10" />
           </div>
 
           <!-- OUTCOMES -->
