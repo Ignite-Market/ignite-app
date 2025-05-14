@@ -1,14 +1,7 @@
 <template>
   <div>
     <Header ref="headerRef" class="min-h-[86px]" />
-    <NavigationNew />
-    <!-- <n-menu
-      v-model:value="activeKey"
-      mode="horizontal"
-      :options="menuOptions"
-      @update:value="handleMenuUpdate"
-      class="tab-style"
-    /> -->
+    <Navigation />
 
     <div v-if="loading">
       <transition name="fade" appear>

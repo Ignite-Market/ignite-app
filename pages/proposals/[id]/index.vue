@@ -1,7 +1,6 @@
 <template>
   <Dashboard :loading="loading">
     <div class="px-4 max-w-[1241px] m-auto mb-16">
-      <!-- CONTENT -->
       <div class="flex flex-col-reverse md:flex-row justify-center">
         <!-- LEFT -->
         <div class="flex flex-col min-w-[250px] max-w-[736px] pt-2 relative w-full">
@@ -14,9 +13,7 @@
             <NuxtIcon name="icon/arrow-back" class="text-[24px]" />
           </Btn>
 
-          <!-- Main forum content goes here -->
           <div v-if="proposal" class="border-1 border-grey-lighter rounded-lg overflow-hidden w-full">
-            <!-- Voting sidebar -->
             <div class="flex">
               <div class="bg-grey-dark py-5 pr-0 flex flex-col items-center w-16">
                 <Btn
@@ -142,7 +139,6 @@
 
         <!-- RIGHT -->
         <div class="md:sticky top-6 self-start md:ml-8 lg:ml-24 w-full min-w-[260px] md:w-[409px]">
-          <!-- Sidebar content -->
           <div v-if="round" class="border-1 border-grey-lighter rounded-lg p-6">
             <div class="rounded-lg border-1 border-grey-lighter mb-4 flex items-center justify-center py-3 px-4">
               <div class="font-bold text-white text-[16px] leading-[24px]">Round #{{ round.id }}</div>

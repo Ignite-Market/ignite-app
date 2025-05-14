@@ -123,7 +123,11 @@
           </div>
 
           <!-- OPEN POSITIONS -->
-          <div v-if="predictionSet.positions.length && loggedIn">
+          <div
+            v-if="
+              predictionSet.positions.length && loggedIn && predictionSet.setStatus !== PredictionSetStatus.FINALIZED
+            "
+          >
             <PredictionSetPositions
               :positions="predictionSet.positions"
               :contract-address="predictionSet.chainData.contractAddress"
