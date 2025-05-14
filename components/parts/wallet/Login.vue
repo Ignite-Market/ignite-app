@@ -90,7 +90,7 @@ async function evmWalletLogin(data: Record<string, any>) {
     messageProvider.error('A wallet account must be connected.');
     return;
   } else if (loadingWallet.value && Object.keys(data).length === 0) {
-    loadingWallet.value = false;
+    // loadingWallet.value = false;
     return;
   }
 
