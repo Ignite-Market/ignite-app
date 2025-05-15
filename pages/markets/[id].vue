@@ -276,9 +276,10 @@
           <!-- RULES -->
           <div class="border-1 border-grey-lighter rounded-lg mt-10 flex-col p-6 text-wrap break-words">
             <div class="font-bold text-[14px] leading-[20px] mb-4 text-white">Rules</div>
-            <div class="font-medium text-[14px] leading-[20px] mb-4 text-white/80">
-              {{ predictionSet.outcomeResolutionDef }}
-            </div>
+            <div
+              class="font-medium text-[14px] leading-[20px] mb-4 text-white/80"
+              v-html="formatRules(predictionSet.outcomeResolutionDef)"
+            ></div>
           </div>
 
           <!-- CONTRACTS -->
@@ -655,5 +656,26 @@ function poolForFundingPositionsChanges() {
       }
     }, POLLING_INTERVAL);
   });
+}
+
+function formatRules(text: string): string {
+  if (!text) return '';
+
+  // First escape any HTML to prevent XSS
+  const escaped = text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+
+  // Convert URLs to clickable links
+  const withLinks = escaped.replace(
+    /(https?:\/\/[^\s]+)/g,
+    '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-primary-light hover:underline">$1</a>'
+  );
+
+  // Convert newlines to <br> tags
+  return withLinks.replace(/\n/g, '<br>');
 }
 </script>
