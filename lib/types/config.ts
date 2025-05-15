@@ -45,5 +45,6 @@ declare global {
     ORACLE_CONTRACT: Address;
     THIRDWEB_CLIENT_KEY: string;
     WALLETCONNECT_PROJECT_ID: string;
+    PROSOPO_CAPTCHA_SITEKEY: string;
   }
 }

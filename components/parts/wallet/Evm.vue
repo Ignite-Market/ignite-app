@@ -1,9 +1,10 @@
 <script lang="ts" setup>
 import { useConnect } from '@wagmi/vue';
+import { ProcaptchaComponent } from "@prosopo/vue-procaptcha-wrapper";
 
 defineProps({
   loading: { type: Boolean, default: false },
-  step: { type: Number, default: 1 },
+  step: { type: Number, default: 0 },
 });
 
 const showStrategies = ref(false);
@@ -15,7 +16,9 @@ const loadingConnector = ref<string>();
 
 const finalSteps = ref(false);
 
-const emit = defineEmits(['loading']);
+const emit = defineEmits(['loading', 'step']);
+
+const siteKey = useRuntimeConfig().public.PROSOPO_CAPTCHA_SITEKEY as string;
 
 const clickOnConnector = (connector, strategy) => {
   console.log('clickOnConnector', connector, strategy);
@@ -51,6 +54,10 @@ const clickOnConnector = (connector, strategy) => {
     });
   }
 };
+
+const callbacks = (token: string) => {
+  emit('step');
+};
 </script>
 
 <template>
@@ -74,11 +81,13 @@ const clickOnConnector = (connector, strategy) => {
         </div>
         {{ !!showStrategies ? 'Log in with account' : 'Connect wallet' }}
       </div>
-      <div class="flex items-center justify-center text-center text-[12px] leading-[20px] mt-3">
+      <div class="flex items-center justify-center text-center text-[12px] leading-[20px] my-3">
         {{
           !!showStrategies ? 'Select account you want to use' : 'To log in, simply connect your wallet to Ignitemarket.'
         }}
       </div>
+
+      <ProcaptchaComponent :siteKey="siteKey" :callback="callbacks" class="mt-4" />
 
       <div class="flex flex-col items-center justify-center mt-5">
         <n-space v-if="showStrategies" :size="8" vertical class="w-full">
@@ -114,7 +123,7 @@ const clickOnConnector = (connector, strategy) => {
             }"
             type="outline"
             size="large"
-            :disabled="loading || !!loadingConnector"
+            :disabled="loading || !!loadingConnector || step < 1"
             @click="clickOnConnector(connector, null)"
           >
             <span class="flex flex-1 justify-start gap-2 items-center">
@@ -128,6 +137,7 @@ const clickOnConnector = (connector, strategy) => {
         </n-space>
       </div>
     </div>
+
     <div v-if="finalSteps">
       <div class="flex flex-col mt-4">
         <div class="flex w-full items-center justify-center mb-2">
