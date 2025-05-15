@@ -19,7 +19,7 @@
     :mask-closable="!loadingWallet"
     :closable="!loadingWallet"
   >
-    <WalletEvm :loading="loadingWallet" :step="step" @loading="loading => (loadingWallet = loading)" />
+    <WalletEvm :loading="loadingWallet" :step="step" @step="step = step + 1" @loading="loading => (loadingWallet = loading)" />
   </modal>
 </template>
 
@@ -46,7 +46,7 @@ useAccountEffect({
 
 const loadingWallet = ref<boolean>(false);
 const modalWalletSelectVisible = ref<boolean>(false);
-const step = ref(1); // 1 - connect wallet, 2 - sign message
+const step = ref(0); // 0 - captcha, 1 - connect wallet, 2 - sign message
 
 // TODO: handle wallet switch - user needs to sign the message again!
 
