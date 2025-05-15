@@ -87,10 +87,9 @@ const callbacks = (token: string) => {
         }}
       </div>
 
-      <ProcaptchaComponent :siteKey="siteKey" :callback="callbacks" class="mt-4" />
 
-      <div class="flex flex-col items-center justify-center mt-5">
-        <n-space v-if="showStrategies" :size="8" vertical class="w-full">
+      <div class="flex flex-col items-center justify-center">
+        <n-space v-if="showStrategies" :size="8" vertical class="w-full mt-4">
           <BasicButton
             v-for="(strategy, key) in strategies"
             :key="key"
@@ -114,6 +113,8 @@ const callbacks = (token: string) => {
         </n-space>
 
         <n-space v-else :size="8" vertical class="w-full">
+          <ProcaptchaComponent :siteKey="siteKey" :callback="callbacks" theme="dark" />
+
           <BasicButton
             v-for="(connector, key) in connectors"
             :key="key"
