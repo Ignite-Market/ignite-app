@@ -83,6 +83,11 @@
                 <template #suffix>%</template>
               </n-input-number>
             </div>
+            <div class="text-[12px] text-grey-lightest mt-3 leading-[16px]">
+              Slippage tolerance is the maximum price change you<br />
+              are willing to accept. Higher percentages may help<br />
+              transactions succeed during high market volatility.
+            </div>
           </div>
         </n-popover>
       </div>

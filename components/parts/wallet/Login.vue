@@ -19,7 +19,12 @@
     :mask-closable="!loadingWallet"
     :closable="!loadingWallet"
   >
-    <WalletEvm :loading="loadingWallet" :step="step" @step="step = step + 1" @loading="loading => (loadingWallet = loading)" />
+    <WalletEvm
+      :loading="loadingWallet"
+      :step="step"
+      @step="step = step + 1"
+      @loading="loading => (loadingWallet = loading)"
+    />
   </modal>
 </template>
 
