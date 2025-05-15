@@ -46,8 +46,6 @@
 </template>
 
 <script lang="ts" setup>
-import { useTemplateRef } from 'vue';
-
 const props = defineProps({
   fullHeight: { type: Boolean, default: true },
   loading: { type: Boolean, default: false },

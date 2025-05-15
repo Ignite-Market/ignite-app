@@ -48,7 +48,6 @@
 
 <script lang="ts" setup>
 import type { DataTableColumns, DataTableInst, DataTableSortState } from 'naive-ui';
-import type { PropType } from 'vue';
 import type { PaginationConfig, TableFilters } from '~/lib/types/config';
 import { PAGINATION_LIMIT } from '~/lib/values/general.values';
 import { colors } from '~/tailwind.config';

@@ -25,7 +25,6 @@
 </template>
 
 <script lang="ts" setup>
-import { h, resolveComponent } from 'vue';
 import { useAccount } from '@wagmi/vue';
 import { truncateWallet } from '~/lib/misc/strings';
 

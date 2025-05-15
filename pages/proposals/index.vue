@@ -401,7 +401,6 @@
 
 <script lang="ts" setup>
 import { formatDistanceToNow } from 'date-fns';
-import { h } from 'vue';
 import {
   ProposalVoteType,
   type Proposal,
