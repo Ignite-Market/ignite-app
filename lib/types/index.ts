@@ -15,7 +15,7 @@ export enum SqlModelStatus {
 }
 
 export enum ProfileTabs {
-  PREDICTIONS = 'Predictions',
+  PREDICTIONS = 'Positions',
   ACTIVITY = 'Activity',
 }
 

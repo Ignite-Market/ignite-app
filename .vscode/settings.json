@@ -10,5 +10,6 @@
     "vueuse",
     "wagmi",
     "Watchlist"
-  ]
+  ],
+  "i18n-ally.keystyle": "nested"
 }

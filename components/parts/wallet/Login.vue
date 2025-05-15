@@ -31,24 +31,19 @@ import { truncateWallet } from '~/lib/misc/strings';
 import BasicButton from '~/components/general/BasicButton.vue';
 
 const { resetContracts, ensureCorrectNetwork } = useContracts();
+const { disconnect } = useDisconnect();
 const { $wagmiConfig } = useNuxtApp();
-
+const { address } = useAccount();
 const messageProvider = useMessage();
 const userStore = useUserStore();
-
-/** Evm wallet - wagmi */
-const { disconnect } = useDisconnect();
-const { address } = useAccount();
-
-useAccountEffect({
-  onConnect: data => evmWalletLogin(data),
-});
 
 const loadingWallet = ref<boolean>(false);
 const modalWalletSelectVisible = ref<boolean>(false);
 const step = ref(0); // 0 - captcha, 1 - connect wallet, 2 - sign message
 
-// TODO: handle wallet switch - user needs to sign the message again!
+useAccountEffect({
+  onConnect: data => evmWalletLogin(data),
+});
 
 onBeforeMount(() => {
   if (!userStore.loggedIn) {
@@ -79,7 +74,6 @@ function btnAction() {
 
 /** Login with EVM wallet */
 async function evmWalletLogin(data: Record<string, any>) {
-  console.log('On wallet login');
   await sleep(200);
 
   if (!address) {
