@@ -20,6 +20,7 @@ declare global {
     userRoles: number[];
     wallet: string | null;
     token?: any;
+    referralId: string | null;
     captchaJwt?: any;
     createTime?: string;
   }

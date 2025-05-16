@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { useConnect } from '@wagmi/vue';
-import { ProcaptchaComponent } from "@prosopo/vue-procaptcha-wrapper";
+import { ProcaptchaComponent } from '@prosopo/vue-procaptcha-wrapper';
 
 defineProps({
   loading: { type: Boolean, default: false },
@@ -87,7 +87,6 @@ const callbacks = (token: string) => {
         }}
       </div>
 
-
       <div class="flex flex-col items-center justify-center">
         <n-space v-if="showStrategies" :size="8" vertical class="w-full mt-4">
           <BasicButton
@@ -113,7 +112,7 @@ const callbacks = (token: string) => {
         </n-space>
 
         <n-space v-else :size="8" vertical class="w-full">
-          <ProcaptchaComponent :siteKey="siteKey" :callback="callbacks" theme="dark" />
+          <ProcaptchaComponent :site-key="siteKey" :callback="callbacks" theme="dark" />
 
           <BasicButton
             v-for="(connector, key) in connectors"

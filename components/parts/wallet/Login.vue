@@ -105,11 +105,19 @@ async function evmWalletLogin(data: Record<string, any>) {
     const timestamp = resMessage.data.timestamp;
     const signature = await signMessage($wagmiConfig as Config, { message });
 
-    const res = await $api.post<WalletLoginResponse>(Endpoints.walletLogin, {
+    const body = {
       address: data?.address || address.value,
       signature,
       timestamp,
-    });
+      referralId: undefined,
+    };
+
+    if (localStorage.getItem('referralCode')) {
+      body.referralId = localStorage.getItem('referralCode');
+      localStorage.removeItem('referralCode');
+    }
+
+    const res = await $api.post<WalletLoginResponse>(Endpoints.walletLogin, body);
 
     userStore.saveUser(res.data);
 
