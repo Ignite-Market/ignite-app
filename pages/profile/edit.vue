@@ -1,16 +1,18 @@
 <template>
   <Dashboard :loading="userStore.loadingProfile">
-    <slot>
-      <FormWrapper class="mt-8" :title="'Account information'">
-        <FormUserProfile />
-      </FormWrapper>
+    <FormWrapper class="mt-8" :title="'Account information'">
+      <FormUserProfile />
+    </FormWrapper>
 
-      <!-- 
-      <FormWrapper :title="'Email'">
-        <n-h5>{{ $t('profile.email.changeRequest') }}</n-h5>
-        <FormUserEmail />
-      </FormWrapper> -->
-    </slot>
+    <FormWrapper v-if="userStore.user?.email" class="mt-8" :title="'Confirm email address'">
+      <FormUserConfirm />
+    </FormWrapper>
+
+    <!--
+    <FormWrapper :title="'Email'">
+      <n-h5>{{ $t('profile.email.changeRequest') }}</n-h5>
+      <FormUserEmail />
+    </FormWrapper> -->
   </Dashboard>
 </template>
 
@@ -18,7 +20,9 @@
 // const { t } = useI18n();
 const userStore = useUserStore();
 
-onMounted(async () => {});
+onMounted(async () => {
+  // await userStore.getUserData();
+});
 
 /** Modal Change password */
 const showModalChangePassword = ref(false);

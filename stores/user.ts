@@ -53,8 +53,10 @@ export const useUserStore = defineStore('user', {
      * API calls
      */
     initUser() {
+      console.log('init user')
       if (this.jwt) {
         this.setUserToken(this.jwt);
+        this.user = this.getUserData();
         this.promises.profile = this.getUserData();
       }
     },
@@ -74,6 +76,7 @@ export const useUserStore = defineStore('user', {
         return res;
       } catch (error) {
         /** On error - logout */
+        console.error(error)
         this.logout();
 
         setTimeout(() => {

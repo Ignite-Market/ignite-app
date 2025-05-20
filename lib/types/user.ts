@@ -11,6 +11,7 @@ declare global {
   interface UserInterface {
     id: number;
     email: string;
+    emailStatus: number;
     walletAddress: string | null;
     username: string;
     phone?: string | null;

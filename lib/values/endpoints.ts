@@ -6,6 +6,8 @@ const Endpoints = {
   walletLogin: '/users/wallet-login',
   userUpdate: '/users/update-profile',
 
+  emailVerification: '/users/email-verification',
+
   /** User predictions */
   userPredictions: (id: number) => `/users/${id}/predictions`,
 

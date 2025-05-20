@@ -54,7 +54,7 @@ const rules: FormRules = {
 
 onMounted(async () => {
   await sleep(200);
-  await Promise.all(Object.values(userStore.promises));
+  // await Promise.all(Object.values(userStore.promises));
 
   if (!formData.value.email) {
     formData.value.email = userStore.user.email;
