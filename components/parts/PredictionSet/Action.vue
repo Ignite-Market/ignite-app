@@ -380,6 +380,8 @@
     </div>
   </Modal>
 
+  <div id="thirdwebpay" class="flex justify-center"></div>
+
   <!-- TRANSACTION TWO STEP MODAL -->
   <n-modal
     v-model:show="showTransactionModal"
@@ -456,6 +458,7 @@ import ConfettiExplosion from 'vue-confetti-explosion';
 import type { OutcomeInterface } from '~/lib/types/prediction-set';
 import { PredictionSetStatus, TransactionType } from '~/lib/types/prediction-set';
 import { colors } from '~/tailwind.config';
+import { startThirdwebPayment } from '~/lib/misc/thirdwebpay/build/thirdwebpay';
 
 enum TransactionStep {
   ALLOWANCE = 1,
@@ -743,10 +746,54 @@ async function updateSellAmount() {
   potentialReturn.value = (Number(result) / Math.pow(10, props.collateralToken.decimals)).toString();
 }
 
+async function startThirdweb(qty: number) {
+  const buyData = {
+    id: 0,
+    price: 1 * qty,
+  };
+  const config = useRuntimeConfig();
+
+  // if (buyData) {
+  //   lastPrice = buyData?.price;
+
+  try {
+    await new Promise((resolve, reject) => {
+      setTimeout(() => {
+        try {
+          startThirdwebPayment('#thirdwebpay', {
+            clientId: config.public.THIRDWEB_CLIENT_KEY,
+            amountInUsdc: buyData.price.toString(),
+            purchaseData: { purchaseId: buyData.id },
+            onSuccess: (info: any) => {
+              // https://portal.thirdweb.com/references/typescript/v5/PayUIOptions
+              console.log(info);
+            },
+          });
+        } catch (e) {
+          reject(e);
+        }
+
+        setTimeout(resolve, 100);
+      }, 250);
+    });
+
+    return true;
+  } catch (e) {
+    console.error(e);
+  }
+  // }
+}
+
 /**
  * Fund market.
  */
 async function fund() {
+  if (props.collateralToken.balance === 0n) {
+    message.error('You need to have some collateral to fund the market.');
+    await startThirdweb(1);
+    return;
+  }
+
   if (!amount.value) {
     return;
   }
