@@ -59,7 +59,3 @@ Thumbs.db
 stats.html
 dist
 *.orig
-
-# thirdwebpay
-lib/misc/thirdwebpay/build
-lib/misc/thirdwebpay/node_modules
