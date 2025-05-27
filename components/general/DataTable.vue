@@ -1,12 +1,12 @@
 <template>
   <div class="flex-bc mb-4 gap-2 flex-wrap">
-    <h4>{{ title }}</h4>
+    <!-- <h4>{{ title }}</h4> -->
     <div class="flex gap-4 flex-wrap">
-<!--      <FormInputSearch-->
-<!--        v-if="filters?.search"-->
-<!--        v-model:value="filters.search.value"-->
-<!--        class="min-w-32 w-full xs:w-[12vw] max-w-xs"-->
-<!--      />-->
+      <!--      <FormInputSearch-->
+      <!--        v-if="filters?.search"-->
+      <!--        v-model:value="filters.search.value"-->
+      <!--        class="min-w-32 w-full xs:w-[12vw] max-w-xs"-->
+      <!--      />-->
       <TableFilters v-if="filters" :filters="filters" :loading="loading" />
     </div>
   </div>
@@ -51,6 +51,8 @@ import type { DataTableColumns, DataTableInst, DataTableSortState } from 'naive-
 import type { PaginationConfig, TableFilters } from '~/lib/types/config';
 import { PAGINATION_LIMIT } from '~/lib/values/general.values';
 import { colors } from '~/tailwind.config';
+import { createPagination, parseArguments, syncFilters } from '~/lib/utils';
+import { apiError } from '~/lib/utils/errors';
 
 const props = defineProps({
   columns: { type: Array as PropType<DataTableColumns<any>>, default: () => [] },
@@ -72,7 +74,12 @@ const filterValues = computed(
       .map(filter => filter.value) || []
 );
 const sorter = ref<DataTableSortState | null>(props.tableSorter);
-const pagination = ref<PaginationConfig>(createPagination());
+const pagination = ref<PaginationConfig>({
+  ...createPagination(),
+  prefix({ itemCount }) {
+    return `Total ${itemCount || 0}`;
+  },
+});
 const loading = ref(false);
 const items = ref([] as any[]);
 const filters = ref(props.tableFilters);

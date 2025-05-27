@@ -103,7 +103,7 @@ export interface PredictionSetOutcomeChanceInterface {
 export interface PredictionSetChanceHistoryResponse extends GeneralResponse<PredictionSetOutcomeChanceInterface> {}
 
 /**
- * Activity
+ * Activity.
  */
 export interface ActivityInterface extends Omit<PredictionSetInterface, 'outcomes'> {
   outcomeName: string;
@@ -135,7 +135,15 @@ export interface UserPredictionInterface extends Omit<PredictionSetInterface, 'o
 export interface UserPredictionsResponse extends GeneralItemsResponse<UserPredictionInterface> {}
 
 /**
- * Collateral token
+ * User funding positions.
+ */
+export interface UserFundingPositionInterface extends PredictionSetInterface {
+  fundedAmount: number;
+}
+export interface UserFundingPositionsResponse extends GeneralItemsResponse<UserFundingPositionInterface> {}
+
+/**
+ * Collateral token.
  */
 export interface CollateralTokenInterface extends GeneralInterface {
   name: string;

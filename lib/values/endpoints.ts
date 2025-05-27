@@ -1,5 +1,7 @@
 const Endpoints = {
-  /** User */
+  /**
+   * User
+   */
   me: '/users/me',
   user: (id: number) => `/users/${id}`,
   walletMessage: '/users/wallet-message',
@@ -8,15 +10,20 @@ const Endpoints = {
 
   emailVerification: '/users/email-verification',
 
-  /** User predictions */
+  /**
+   * User positions
+   */
   userPredictions: (id: number) => `/users/${id}/predictions`,
+  userFundingPositions: (id: number) => `/users/${id}/funding-positions`,
 
   // NOT USED
   changeMail: '/users/change-email',
   changeMailRequest: '/users/change-email-request',
   notification: '/notification',
 
-  /** Prediction Sets */
+  /**
+   * Prediction Sets
+   */
   predictionSets: '/prediction-sets',
   predictionSetsById: (id: number) => `/prediction-sets/${id}`,
   predictionSetChanceHistory: (id: number) => `/prediction-sets/${id}/chance-history`,
@@ -24,32 +31,47 @@ const Endpoints = {
   predictionSetHolders: `/prediction-sets/holders`,
   predictionSetPositions: (id: number) => `/prediction-sets/${id}/positions`,
   predictionSetFundingPositions: (id: number) => `/prediction-sets/${id}/funding-positions`,
-  /** Prediction set comments */
+
+  /**
+   * Prediction set comments
+   */
   comments: '/comments',
   commentById: (id: number) => `/comments/${id}`,
 
-  /** User prediction watchlist */
+  /**
+   * User prediction watchlist
+   */
   predictionSetUserWatchlist: (id: number) => `/prediction-sets/${id}/watchlist`,
 
-  /** Banners */
+  /**
+   * Banners
+   */
   banners: '/prediction-sets/banners',
 
-  /** Proposals */
+  /**
+   * Proposals
+   */
   proposals: '/proposals',
   proposalById: (id: number) => `/proposals/${id}`,
   proposalRounds: '/proposals/rounds',
   proposalRoundById: (id: number) => `/proposals/rounds/${id}`,
   voteOnProposal: (id: number) => `/proposals/${id}/vote`,
 
-  /** Rewards */
+  /**
+   * Rewards
+   */
   rewards: '/reward-points',
   rewardsMe: '/reward-points/me',
   dailyReward: '/reward-points/daily',
 
-  /** Collateral tokens */
+  /**
+   * Collateral tokens
+   */
   collateralTokens: '/collateral-tokens',
 
-  /** Leaderboards */
+  /**
+   * Leaderboards
+   */
   leaderboardVolume: '/stats/leaderboard/volume',
   leaderboardProfit: '/stats/leaderboard/profit',
 };

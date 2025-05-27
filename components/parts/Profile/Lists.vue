@@ -14,6 +14,11 @@
           <ProfileListTable :tab="ProfileTabs.PREDICTIONS" :user-id="userId" />
         </div>
       </n-tab-pane>
+      <n-tab-pane :name="ProfileTabs.FUNDING_POSITIONS" :tab="ProfileTabs.FUNDING_POSITIONS">
+        <div class="mb-3">
+          <ProfileListTable :tab="ProfileTabs.FUNDING_POSITIONS" :user-id="userId" />
+        </div>
+      </n-tab-pane>
       <n-tab-pane :name="ProfileTabs.ACTIVITY" :tab="ProfileTabs.ACTIVITY">
         <div class="mb-3">
           <ProfileListTable :tab="ProfileTabs.ACTIVITY" :user-id="userId" />

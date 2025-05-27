@@ -5,14 +5,19 @@
 </template>
 
 <script setup lang="ts">
-import { type DataTableColumns, type DataTableSortState } from 'naive-ui';
 import { formatDistanceToNow } from 'date-fns';
+import { type DataTableColumns, type DataTableSortState } from 'naive-ui';
 import { ProfileTabs } from '~/lib/types';
-import Endpoints from '~/lib/values/endpoints';
-import { TransactionType, type ActivityInterface, type UserPredictionInterface } from '~/lib/types/prediction-set';
 import type { TableFilters } from '~/lib/types/config';
-import { colors } from '~/tailwind.config';
+import {
+  TransactionType,
+  type ActivityInterface,
+  type UserFundingPositionInterface,
+  type UserPredictionInterface,
+} from '~/lib/types/prediction-set';
+import Endpoints from '~/lib/values/endpoints';
 import { useTokensStore } from '~/stores/collateral-tokens';
+import { colors } from '~/tailwind.config';
 
 const props = defineProps({
   tab: { type: String as PropType<ProfileTabs>, required: true },
@@ -32,7 +37,7 @@ const transactionType = {
 const predictionColumns = [
   {
     key: 'question',
-    title: 'Prediction',
+    title: 'Market',
     sorter: 'default',
     minWidth: 150,
     render(row: UserPredictionInterface) {
@@ -144,7 +149,7 @@ const predictionColumns = [
 const activitiesColumns = [
   {
     key: 'question',
-    title: 'Prediction',
+    title: 'Market',
     sorter: 'default',
     minWidth: 150,
     render(row: ActivityInterface) {
@@ -240,10 +245,72 @@ const activitiesColumns = [
   },
 ] as DataTableColumns<ActivityInterface>;
 
-const columns = props.tab === ProfileTabs.PREDICTIONS ? predictionColumns : activitiesColumns;
+const fundingPositionsColumns = [
+  {
+    key: 'question',
+    title: 'Market',
+    sorter: 'default',
+    minWidth: 150,
+    render(row: UserFundingPositionInterface) {
+      return h(resolveComponent('NuxtLink'), { to: { path: `/markets/${row.id}` } }, () => [
+        h('div', { style: { display: 'flex', gap: '12px' } }, [
+          row.imgUrl
+            ? h('div', { style: { width: '60px', height: '60px', flexShrink: 0 } }, [
+                h('img', {
+                  src: row.imgUrl,
+                  style: { width: '100%', height: '100%', borderRadius: '4px', objectFit: 'cover' },
+                }),
+              ])
+            : null,
+          h('div', { style: { display: 'flex', flexDirection: 'column', justifyContent: 'center' } }, [
+            h('span', { style: { fontSize: '16px', fontWeight: '500', marginBottom: '4px' } }, row.question),
+          ]),
+        ]),
+      ]);
+    },
+  },
+  {
+    key: 'fundedAmount',
+    title: 'Funded Amount',
+    sorter: 'default',
+    render(row: UserFundingPositionInterface) {
+      const collateralToken = tokensStore.getToken(row.collateral_token_id);
 
-const endpoint =
-  props.tab === ProfileTabs.PREDICTIONS ? Endpoints.userPredictions(props.userId) : Endpoints.predictionSetActivity;
+      return h('div', { style: { display: 'flex', alignItems: 'center' } }, [
+        collateralToken?.imgUrl
+          ? h('div', { style: { marginRight: '4px' } }, [
+              h('img', {
+                src: collateralToken.imgUrl,
+                title: collateralToken.name,
+                style: { width: '18px', height: '18px', borderRadius: '50%', objectFit: 'cover' },
+              }),
+            ])
+          : null,
+        h(
+          'span',
+          {},
+          `${formatCollateralAmount(row.fundedAmount, collateralToken?.decimals || 0)} ${collateralToken?.symbol || ''}`
+        ),
+      ]);
+    },
+  },
+  {
+    key: 'status',
+    title: 'Status',
+    sorter: 'default',
+    minWidth: 90,
+    render(row: UserFundingPositionInterface) {
+      return h(resolveComponent('PredictionSetStatus'), {
+        status: row.setStatus,
+        endTime: row.endTime,
+      });
+    },
+  },
+] as DataTableColumns<UserFundingPositionInterface>;
+
+const columns = getColumns();
+const endpoint = getEndpoint();
+const sorter = getSorter();
 
 const filters = {
   search: {
@@ -272,9 +339,42 @@ const filters = {
     : {}),
 } as TableFilters;
 
-const sorter = {
-  columnKey: props.tab === ProfileTabs.PREDICTIONS ? 'id' : 'transactionTime',
-  order: 'descend',
-  sorter: 'default',
-} as DataTableSortState;
+function getSorter() {
+  switch (props.tab) {
+    case ProfileTabs.PREDICTIONS:
+      return { columnKey: 'id', order: 'descend', sorter: 'default' } as DataTableSortState;
+
+    case ProfileTabs.ACTIVITY:
+      return { columnKey: 'transactionTime', order: 'descend', sorter: 'default' } as DataTableSortState;
+
+    case ProfileTabs.FUNDING_POSITIONS:
+      return { columnKey: 'id', order: 'descend', sorter: 'default' } as DataTableSortState;
+  }
+}
+
+function getColumns() {
+  switch (props.tab) {
+    case ProfileTabs.PREDICTIONS:
+      return predictionColumns;
+
+    case ProfileTabs.ACTIVITY:
+      return activitiesColumns;
+
+    case ProfileTabs.FUNDING_POSITIONS:
+      return fundingPositionsColumns;
+  }
+}
+
+function getEndpoint() {
+  switch (props.tab) {
+    case ProfileTabs.PREDICTIONS:
+      return Endpoints.userPredictions(props.userId);
+
+    case ProfileTabs.ACTIVITY:
+      return Endpoints.predictionSetActivity;
+
+    case ProfileTabs.FUNDING_POSITIONS:
+      return Endpoints.userFundingPositions(props.userId);
+  }
+}
 </script>
