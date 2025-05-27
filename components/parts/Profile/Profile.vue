@@ -1,35 +1,41 @@
 <template>
-  <div>
+  <div class="profile-container">
     <div v-if="loading" class="flex justify-center items-center h-64">
       <Spinner />
     </div>
-    <div v-else>
-      <div class="flex justify-between flex-wrap gap-4">
-        <div class="flex items-center gap-4">
-          <jazzicon
-            class="cursor-pointer rounded-[50%] w-[80px] h-[80px]"
-            :address="user?.walletAddress"
-            :diameter="80"
-          />
-          <div class="flex flex-col gap-2">
-            <div class="text-lg">{{ user?.username }}</div>
+    <div v-else class="bg-grey-dark rounded-2xl shadow-lg">
+      <div class="flex justify-between flex-wrap gap-6">
+        <div class="flex items-start gap-6">
+          <div class="relative">
+            <jazzicon
+              class="cursor-pointer rounded-full w-[108px] h-[108px] shadow-md hover:shadow-lg transition-shadow duration-200"
+              :address="user?.walletAddress"
+              :diameter="108"
+            />
+          </div>
+          <div class="flex flex-col gap-3">
+            <h1 class="text-2xl font-bold text-white">{{ user?.username }}</h1>
             <button
-              class="flex gap-1 items-center px-2 rounded-lg bg-grey-light"
+              class="w-fit inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-grey-light hover:bg-grey transition-colors duration-200 whitespace-nowrap"
               @click="copyToClipboard(user?.walletAddress || '')"
             >
-              {{ shortenAddress(user?.walletAddress || '') }}
-              <NuxtIcon class="ml-2 text-white cursor-pointer" name="icon/copy" />
+              <span class="text-sm whitespace-nowrap text-white/80">{{
+                shortenAddress(user?.walletAddress || '')
+              }}</span>
+              <NuxtIcon class="text-white/80 cursor-pointer flex-shrink-0" name="icon/copy" />
             </button>
-            <div v-if="user?.createTime" class="text-sm">
+            <div v-if="user?.createTime" class="text-sm text-white/30">
               Joined {{ new Date(user.createTime).toLocaleDateString() }}
             </div>
           </div>
         </div>
-        <div v-if="isCurrentUser">
-          <BasicButton to="/profile/edit">Edit Profile</BasicButton>
+        <div v-if="isCurrentUser" class="self-start">
+          <BasicButton to="/profile/edit" class="hover:opacity-90 transition-opacity duration-200">
+            Edit Profile
+          </BasicButton>
         </div>
       </div>
-      <div v-if="user" class="mt-4">
+      <div v-if="user" class="mt-8 border-t border-grey pt-6">
         <ProfileLists :user-id="user.id" />
       </div>
     </div>

@@ -32,7 +32,7 @@ async function confirmEmail() {
   if (token.value) {
     loading.value = true;
     try {
-      const res = await $api.patch(Endpoints.changeMail, { token: token.value });
+      const res: any = await $api.patch(Endpoints.changeMail, { token: token.value });
       success.value = true;
       userStore.saveUser(res.data);
 
