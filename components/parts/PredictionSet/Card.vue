@@ -7,7 +7,10 @@
       <div class="w-[38px] h-[38px] flex-shrink-0">
         <Image :src="predictionSet.imgUrl" class="rounded-[8px] w-full h-full object-cover" />
       </div>
-      <div class="ml-4 text-[14px] leading-[20px] font-medium">
+      <div
+        class="ml-4 text-[14px] leading-[20px] font-medium line-clamp-2 text-white/80"
+        :title="predictionSet.question"
+      >
         {{ predictionSet.question }}
       </div>
     </div>

@@ -31,13 +31,18 @@
           <div class="border-1 border-grey-lighter rounded-lg p-6 w-full">
             <n-form ref="formRef" :model="form" :rules="rules" @submit.prevent="submit">
               <n-form-item path="question" label="Market question" class="mb-3">
-                <n-input v-model:value="form.question" placeholder="Market question" size="large" />
+                <n-input v-model:value="form.question" placeholder="Market question" :maxlength="255" size="large" />
               </n-form-item>
 
               <n-form-item path="outcomes" label="Market outcomes" class="mb-3">
                 <n-dynamic-tags
                   v-model:value="form.outcomes"
                   size="large"
+                  tag-class="max-w-[400px] overflow-x-scroll"
+                  input-class="max-w-[400px] overflow-x-scroll"
+                  :input-props="{
+                    maxlength: 150,
+                  }"
                   class="rounded-lg [&_.n-tag]:border-1 [&_.n-tag]:border-grey-lighter [&_.n-tag]:rounded-[8px] [&_.n-tag]:px-4 [&_.n-tag]:py-2 [&_.n-tag]:h-[40px] [&_.n-tag]:flex [&_.n-tag]:items-center [&_.n-button]:h-[40px] [&_.n-button]:px-4 [&_.n-button]:py-2 [&_.n-button]:rounded-[8px] [&_.n-button]:!bg-transparent [&_.n-button]:hover:!bg-grey-light/10"
                 />
               </n-form-item>
@@ -48,6 +53,7 @@
                   type="textarea"
                   placeholder="Describe the market and how the outcome will be determined..."
                   :autosize="{ minRows: 5, maxRows: 10 }"
+                  :maxlength="5000"
                   size="large"
                 />
               </n-form-item>

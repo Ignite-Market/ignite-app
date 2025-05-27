@@ -83,6 +83,10 @@ function singleErrorMessage($i18n: i18nType, message: string, statusCode: number
   } else if (code >= 500) {
     return $i18n.t('error.DEFAULT_SYSTEM_ERROR');
   } else if (code >= 400) {
+    if (statusCode === 40000007) {
+      return 'Your content violates our community guidelines and cannot be posted.';
+    }
+
     return $i18n.t('error.BAD_REQUEST');
   }
   return 'Unknown error';

@@ -48,14 +48,13 @@ const props = defineProps({
   entityType: { type: Number as PropType<CommentEntityTypes>, required: true },
 });
 
+const message = useMessage();
+const { isConnected } = useAccount();
+
 const comment = ref('');
 const loading = ref(false);
 const commentLoading = ref(false);
-
 const comments = ref<any>([]);
-
-const { isConnected } = useAccount();
-
 const pagination = ref({ ...createPagination(), pageSize: 10 });
 
 onMounted(async () => {
@@ -103,8 +102,8 @@ async function addComment(parentId: number = 0) {
 
     comments.value = [res.data, ...comments.value];
     comment.value = '';
-  } catch (error) {
-    console.log(error);
+  } catch (error: any) {
+    message.error(apiError(error));
   } finally {
     commentLoading.value = false;
   }

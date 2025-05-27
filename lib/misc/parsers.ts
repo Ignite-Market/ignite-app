@@ -6,7 +6,7 @@ export function parseToInt(input: any) {
   const value = parseInt(input);
 
   if (isNaN(value) || !isFinite(value)) {
-    throw new Error(`Invalid integer number ${value}`);
+    throw new TypeError(`Invalid integer number ${value}`);
   }
   return value;
 }
