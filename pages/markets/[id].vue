@@ -382,23 +382,35 @@
       </div>
     </div>
   </Dashboard>
-  <n-drawer v-if="predictionSet && !isMd" v-model:show="actionModal" placement="bottom" default-height="410">
-    <PredictionSetAction
-      v-if="actionsEnabled(predictionSet.setStatus, predictionSet.endTime)"
-      :contract-address="predictionSet.chainData.contractAddress"
-      :outcome="selectedOutcome"
-      :action="selectedAction"
-      :status="predictionSet.setStatus"
-      :end-time="predictionSet.endTime.toString()"
-      :outcomes="predictionSet.outcomes"
-      :default-value="defaultActionValue"
-      :collateral-token="collateralToken"
-      @action-changed="(action: TransactionType) => (selectedAction = action)"
-      @transaction-successful="
-        (transactionType: TransactionType) =>
-          transactionType === TransactionType.FUND ? poolForFundingPositionsChanges() : poolForPositionsChanges()
-      "
-    />
+
+  <div
+    v-if="!isMd"
+    class="fixed bottom-0 left-0 right-0 h-6 cursor-pointer flex items-center justify-center"
+    @click="actionModal = true"
+    @touchstart="handleTouchStart"
+    @touchend="handleTouchEnd"
+  >
+    <div class="w-16 h-1 bg-grey-lighter rounded-full"></div>
+  </div>
+  <n-drawer v-if="predictionSet && !isMd" v-model:show="actionModal" placement="bottom" default-height="auto">
+    <div class="h-full w-full" @touchstart="handleTouchStart" @touchend="handleTouchEnd">
+      <PredictionSetAction
+        v-if="actionsEnabled(predictionSet.setStatus, predictionSet.endTime)"
+        :contract-address="predictionSet.chainData.contractAddress"
+        :outcome="selectedOutcome"
+        :action="selectedAction"
+        :status="predictionSet.setStatus"
+        :end-time="predictionSet.endTime.toString()"
+        :outcomes="predictionSet.outcomes"
+        :default-value="defaultActionValue"
+        :collateral-token="collateralToken"
+        @action-changed="(action: TransactionType) => (selectedAction = action)"
+        @transaction-successful="
+          (transactionType: TransactionType) =>
+            transactionType === TransactionType.FUND ? poolForFundingPositionsChanges() : poolForPositionsChanges()
+        "
+      />
+    </div>
   </n-drawer>
 </template>
 
@@ -455,6 +467,8 @@ const watchlistLoading = ref(false);
 const actionModal = ref(false);
 const defaultActionValue = ref(0);
 const collateralToken = ref<CollateralToken>();
+const touchStart = ref({ x: 0, y: 0 });
+const touchThreshold = 50; // minimum pixels to trigger swipe
 
 onMounted(async () => {
   await sleep(10);
@@ -677,5 +691,30 @@ function formatRules(text: string): string {
 
   // Convert newlines to <br> tags
   return withLinks.replace(/\n/g, '<br>');
+}
+
+function handleTouchStart(event: TouchEvent) {
+  touchStart.value = {
+    x: event.touches[0].clientX,
+    y: event.touches[0].clientY,
+  };
+}
+
+function handleTouchEnd(event: TouchEvent) {
+  const touchEnd = {
+    x: event.changedTouches[0].clientX,
+    y: event.changedTouches[0].clientY,
+  };
+
+  const deltaY = touchStart.value.y - touchEnd.y;
+
+  // If swiped up more than threshold - open drawer.
+  if (deltaY > touchThreshold) {
+    actionModal.value = true;
+  }
+  // If swiped down more than threshold - close drawer.
+  else if (deltaY < -touchThreshold) {
+    actionModal.value = false;
+  }
 }
 </script>

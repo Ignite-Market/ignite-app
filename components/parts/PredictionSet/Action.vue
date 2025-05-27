@@ -1,6 +1,7 @@
 <template>
   <n-card
     class="bg-grey border-1 !border-grey-lighter"
+    :class="isMd ? 'h-auto' : 'h-[440px]'"
     :content-class="'!py-5 !pb-5 !pt-4 !rounded-[8px]'"
     :header-class="'!py-5 !px-6 bg-grey-dark !rounded-t-[8px]'"
   >
@@ -481,6 +482,7 @@ const { refreshCollateralBalance, checkCollateralAllowance } = useCollateralToke
 const { getConditionalBalance, parseConditionalBalance, checkConditionalApprove } = useConditionalToken();
 const { ensureCorrectNetwork } = useContracts();
 const { isConnected, address } = useAccount();
+const { isMd } = useScreen();
 const message = useMessage();
 const txWait = useTxWait();
 
