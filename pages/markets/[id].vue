@@ -21,10 +21,10 @@
               {{ predictionSet.question }}
             </div>
 
-            <div class="flex mt-4 items-center">
+            <div class="flex mt-4 xs:items-center items-start gap-4 xs:flex-row flex-col">
               <Status :status="predictionSet.setStatus" :end-time="new Date(predictionSet.endTime)" />
 
-              <div class="mx-4 border-r-1 border-r-white/25 h-[14px]"></div>
+              <div class="border-r-1 border-r-white/25 h-[14px] xs:block hidden"></div>
 
               <div
                 class="text-white/80 text-[14px] leading-[20px]"
@@ -33,7 +33,7 @@
                 Ends on {{ toMonthAndYear(predictionSet.endTime) }}
               </div>
 
-              <div class="mx-4 border-r-1 border-r-white/25 h-[14px]"></div>
+              <div class="border-r-1 border-r-white/25 h-[14px] xs:block hidden"></div>
 
               <n-popover trigger="hover" raw :show-arrow="false" placement="bottom-start">
                 <template #trigger>
