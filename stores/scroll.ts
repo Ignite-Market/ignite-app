@@ -11,8 +11,5 @@ export const useScrollStore = defineStore('scroll', {
       }
       this.positions[fullPath] = position;
     },
-    getPosition(fullPath: string): number {
-      return this.positions[fullPath] || 0;
-    },
   },
 });
