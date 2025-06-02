@@ -8,7 +8,9 @@
       :render-icon="renderMenuIcon"
       :render-label="renderMenuLabel"
       :render-extra="renderMenuExtra"
+      responsive
     />
+
     <slot />
   </div>
 </template>
@@ -79,6 +81,7 @@ function renderMenuLabel(option: MenuOption) {
       () => option.label as string
     );
   }
+
   return h('span', { class: 'text' }, { default: () => option.label as string });
 }
 
@@ -126,5 +129,11 @@ function renderMenuExtra(_option: MenuOption) {
 :deep(.n-menu-item-content__icon) {
   margin-right: 2px !important;
   width: auto !important;
+}
+
+:deep(.n-menu .n-submenu:last-child .n-menu-item-content-header) {
+  font-size: 25px;
+  line-height: 1;
+  font-weight: 700;
 }
 </style>

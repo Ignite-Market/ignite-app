@@ -29,7 +29,7 @@ import type { ImageProps } from 'naive-ui';
 import type { Justify } from 'naive-ui/es/space/src/Space';
 
 defineProps({
-  image: { type: Object as PropType<ImageProps>, default: '' },
+  image: { type: Object as PropType<ImageProps>, default: () => ({}) },
   alignment: { type: String as PropType<Justify>, default: 'justify-between' },
   title: { type: String, default: '' },
   content: { type: String, default: '' },

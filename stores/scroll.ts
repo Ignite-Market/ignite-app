@@ -2,17 +2,14 @@ import { defineStore } from 'pinia';
 
 export const useScrollStore = defineStore('scroll', {
   state: () => ({
-    positions: {} as Record<string, number>,
+    positions: {} as { [fullPath: string]: number },
   }),
   actions: {
-    savePosition(route: string, position: number) {
-      this.positions[route] = position;
-    },
-    getPosition(route: string): number {
-      return this.positions[route] || 0;
-    },
-    clearPosition(route: string) {
-      delete this.positions[route];
+    savePosition(fullPath: string, position: number) {
+      if (!fullPath) {
+        return;
+      }
+      this.positions[fullPath] = position;
     },
   },
 });

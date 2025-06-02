@@ -26,7 +26,7 @@
       <div class="flex flex-auto w-full flex-col md:flex-row bg-grey-dark">
         <n-layout class="">
           <n-layout-content>
-            <n-infinite-scroll y-scrollable :style="scrollScreen" :distance="10" @load="onLoadMore">
+            <n-infinite-scroll id="ignite-scroll" y-scrollable :style="scrollScreen" :distance="10" @load="onLoadMore">
               <div class="flex flex-col gap-4 justify-between pt-6" :style="fullHeight ? heightScreen : {}">
                 <div class="flex flex-col items-center w-full">
                   <div class="xl:max-w-[1520px] w-full px-4">
