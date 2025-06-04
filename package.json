@@ -35,6 +35,7 @@
     "vue-confetti-explosion": "^1.0.2",
     "vue-cookie-accept-decline": "^6.1.0",
     "vue-echarts": "^7.0.3",
+    "vue-horizontal": "^1.0.2",
     "vue3-jazzicon": "^0.1.4"
   },
   "devDependencies": {

@@ -1,6 +1,6 @@
 <template>
   <div class="bg-grey-dark pt-4">
-    <n-menu
+    <!-- <n-menu
       v-model:value="selectedMenu"
       class="text-[14px] leading-[20px] font-medium"
       mode="horizontal"
@@ -8,24 +8,63 @@
       :render-icon="renderMenuIcon"
       :render-label="renderMenuLabel"
       :render-extra="renderMenuExtra"
-      responsive
-    />
+    /> -->
+
+    <VueHorizontal class="text-sm leading-5 font-medium border-b border-white/10">
+      <div v-for="item in menuOptions" :key="item.key" class="px-5 !min-h-[44px]">
+        <NuxtLink
+          :to="item.to || item.path"
+          :title="item.label"
+          :class="[
+            'px-0.5 border-b border-transparent grid items-center h-full',
+            '[&.router-link-active]:border-primary [&.router-link-active>.nav-icon]:text-primary',
+          ]"
+          :style="{
+            gridTemplateAreas: '\'icon content arrow\'',
+            gridTemplateColumns: 'auto 1fr auto',
+            transition: 'border-color 0.3s cubic-bezier(.4, 0, .2, 1)',
+          }"
+        >
+          <div v-if="item.iconName" class="mr-0.5 nav-icon" :style="{ gridArea: 'icon' }">
+            <NuxtIcon :name="item.iconName" class="text-base mr-0" />
+          </div>
+
+          <div :style="{ gridArea: 'content' }">
+            {{ item.label }}
+          </div>
+
+          <!-- <div :style="{ gridArea: 'arrow' }"></div> -->
+        </NuxtLink>
+      </div>
+
+      <template #btn-prev>
+        <div class="h-[44px] w-[60px] bg-gradient-to-l from-transparent to-bg to-[66%] flex items-center justify-start">
+          <NuxtIcon name="icon/arrow-down" class="text-[32px] m-0 text-white rotate-90" />
+        </div>
+      </template>
+
+      <template #btn-next>
+        <div class="h-[44px] w-[60px] bg-gradient-to-r from-transparent to-bg to-[66%] flex items-center justify-end">
+          <NuxtIcon name="icon/arrow-down" class="text-[32px] m-0 text-white -rotate-90" />
+        </div>
+      </template>
+    </VueHorizontal>
 
     <slot />
   </div>
 </template>
 
 <script lang="ts" setup>
-import type { MenuOption } from 'naive-ui';
-import type { RouteLocationNormalizedLoadedGeneric } from 'vue-router';
+import VueHorizontal from 'vue-horizontal';
 import { PredictionSetCategory } from '~/lib/types/prediction-set';
 
 const menuOptions = [
   {
     label: 'Top markets',
     key: 'index',
-    to: 'index',
+    to: '/',
     iconName: 'icon/fire',
+    path: '',
   },
 ];
 
@@ -35,105 +74,11 @@ const predictionCategories = Object.values(PredictionSetCategory).map(category =
   path: '/category/' + category.toLowerCase(),
 }));
 menuOptions.push(...(predictionCategories as any));
-
-const props = defineProps({
-  sliceName: { type: Boolean, default: false },
-});
-const route = useRoute();
-const selectedMenu = ref<string>(routeToKey(route));
-
-watch(
-  () => route,
-  route => {
-    selectedMenu.value = routeToKey(route);
-  }
-);
-
-function routeToKey(route: RouteLocationNormalizedLoadedGeneric) {
-  if (route.params && Object.keys(route.params).length !== 0) {
-    const ar = route.path.split('/');
-    return ar[ar.length - 1];
-  } else return routeNameToKey(route.name?.toString() || '');
-}
-
-function routeNameToKey(name: string) {
-  return props.sliceName ? removeIdOrSlug(name) : name;
-}
-
-function removeIdOrSlug(text: string) {
-  return text.replace(/(-id|-slug).*/g, '');
-}
-
-/**
- * Render functions
- */
-function renderMenuLabel(option: MenuOption) {
-  if ('disabled' in option && option.disabled) {
-    return h('span', { class: 'text-body font-medium' }, { default: () => option.label as string });
-  } else if ('href' in option) {
-    return h('a', { href: option.href, target: '_blank' }, () => option.label as string);
-  } else if ('path' in option) {
-    return h(resolveComponent('NuxtLink'), { to: { path: option.path } }, () => option.label as string);
-  } else if ('to' in option) {
-    return h(
-      resolveComponent('NuxtLink'),
-      { to: { name: option.to, query: option.query, params: option.params }, class: 'font-medium' },
-      () => option.label as string
-    );
-  }
-
-  return h('span', { class: 'text' }, { default: () => option.label as string });
-}
-
-function renderMenuIcon(option: MenuOption) {
-  if ('iconName' in option) {
-    return h(resolveComponent('NuxtIcon'), { name: option.iconName, class: 'text-base mr-0' }, '');
-  }
-  return null;
-}
-
-function renderMenuExtra(_option: MenuOption) {
-  return null;
-}
 </script>
 
 <style scoped>
-.n-menu.n-menu--horizontal {
-  justify-content: flex-start;
-  height: 44px;
-  border-bottom: 1px solid var(--n-divider-color);
-}
-
-:deep(.n-menu-item) {
-  height: 44px;
-  padding: 0 20px;
-}
-
-:deep(.n-menu.n-menu--horizontal .n-menu-item-content) {
-  padding: 0 2px;
-}
-
-:deep(.n-menu.n-menu--horizontal .n-menu-item-content.n-menu-item-content--selected .n-menu-item-content-header a) {
-  color: #fff;
-}
-
-:deep(.n-menu.n-menu--horizontal .n-menu-item-content.n-menu-item-content--selected) {
-  color: #fff;
-  border-bottom: 2px solid theme('colors.primary.DEFAULT') !important; /* Fix - one px is not visible */
-}
-
-:deep(.n-menu-item:hover .n-menu-item-content) {
-  color: var(--n-primary-color);
-}
-
-:deep(.n-menu-item-content__icon) {
-  margin-right: 2px !important;
-  width: auto !important;
-}
-
-:deep(.n-menu .n-submenu:last-child .n-menu-item-content-header) {
-  font-size: 25px;
-  line-height: 1;
-  font-weight: 700;
+:deep(.v-hl-btn.v-hl-btn-next),
+:deep(.v-hl-btn.v-hl-btn-prev) {
+  transform: none !important;
 }
 </style>
