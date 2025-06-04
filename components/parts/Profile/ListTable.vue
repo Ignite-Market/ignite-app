@@ -39,14 +39,14 @@ const predictionColumns = [
     key: 'question',
     title: 'Market',
     sorter: 'default',
-    minWidth: 150,
+    minWidth: 300,
     render(row: UserPredictionInterface) {
       const collateralToken = tokensStore.getToken(row.collateral_token_id);
 
       return h(resolveComponent('NuxtLink'), { to: { path: `/markets/${row.id}` } }, () => [
         h('div', { style: { display: 'flex', gap: '12px' } }, [
           row.imgUrl
-            ? h('div', { style: { width: '60px', height: '60px', flexShrink: 0 } }, [
+            ? h('div', { style: { width: '44px', height: '44px', flexShrink: 0 } }, [
                 h('img', {
                   src: row.imgUrl,
                   style: { width: '100%', height: '100%', borderRadius: '4px', objectFit: 'cover' },
@@ -54,11 +54,11 @@ const predictionColumns = [
               ])
             : null,
           h('div', { style: { display: 'flex', flexDirection: 'column', justifyContent: 'center' } }, [
-            h('span', { style: { fontSize: '16px', fontWeight: '500', marginBottom: '4px' } }, row.question),
+            h('span', { style: { fontSize: '15px', fontWeight: '500' } }, row.question),
             h('div', { style: { display: 'flex', alignItems: 'center', gap: '8px' } }, [
               h(
                 'span',
-                { style: { fontSize: '15px', fontWeight: '600', color: colors.primary.DEFAULT } },
+                { style: { fontSize: '14px', fontWeight: '600', color: colors.primary.DEFAULT } },
                 row.outcomeName
               ),
               h(
@@ -86,18 +86,25 @@ const predictionColumns = [
     key: 'boughtAmount',
     title: 'Bought Amount',
     sorter: 'default',
+    minWidth: 160,
     render(row: UserPredictionInterface) {
       const collateralToken = tokensStore.getToken(row.collateral_token_id);
 
-      return h('div', { style: { display: 'flex', alignItems: 'center' } }, [
+      return h('div', [
         collateralToken?.imgUrl
-          ? h('div', { style: { marginRight: '4px' } }, [
-              h('img', {
-                src: collateralToken.imgUrl,
-                title: collateralToken.name,
-                style: { width: '18px', height: '18px', borderRadius: '50%', objectFit: 'cover' },
-              }),
-            ])
+          ? h('img', {
+              src: collateralToken.imgUrl,
+              title: collateralToken.name,
+              style: {
+                width: '18px',
+                height: '18px',
+                borderRadius: '50%',
+                objectFit: 'cover',
+                display: 'inline-block',
+                verticalAlign: 'middle',
+                marginRight: '4px',
+              },
+            })
           : null,
         h(
           'span',
@@ -111,18 +118,25 @@ const predictionColumns = [
     key: 'soldAmount',
     title: 'Sold Amount',
     sorter: 'default',
+    minWidth: 160,
     render(row: UserPredictionInterface) {
       const collateralToken = tokensStore.getToken(row.collateral_token_id);
 
-      return h('div', { style: { display: 'flex', alignItems: 'center' } }, [
+      return h('div', [
         collateralToken?.imgUrl
-          ? h('div', { style: { marginRight: '4px' } }, [
-              h('img', {
-                src: collateralToken.imgUrl,
-                title: collateralToken.name,
-                style: { width: '18px', height: '18px', borderRadius: '50%', objectFit: 'cover' },
-              }),
-            ])
+          ? h('img', {
+              src: collateralToken.imgUrl,
+              title: collateralToken.name,
+              style: {
+                width: '18px',
+                height: '18px',
+                borderRadius: '50%',
+                objectFit: 'cover',
+                display: 'inline-block',
+                verticalAlign: 'middle',
+                marginRight: '4px',
+              },
+            })
           : null,
         h(
           'span',
@@ -151,13 +165,14 @@ const activitiesColumns = [
     key: 'question',
     title: 'Market',
     sorter: 'default',
-    minWidth: 150,
+    minWidth: 300,
     render(row: ActivityInterface) {
       const collateralToken = tokensStore.getToken(row.collateral_token_id);
+
       return h(resolveComponent('NuxtLink'), { to: { path: `/markets/${row.id}` } }, () => [
         h('div', { style: { display: 'flex', gap: '12px' } }, [
           row.imgUrl
-            ? h('div', { style: { width: '60px', height: '60px', flexShrink: 0 } }, [
+            ? h('div', { style: { width: '44px', height: '44px', flexShrink: 0 } }, [
                 h('img', {
                   src: row.imgUrl,
                   style: { width: '100%', height: '100%', borderRadius: '4px', objectFit: 'cover' },
@@ -165,9 +180,9 @@ const activitiesColumns = [
               ])
             : null,
           h('div', { style: { display: 'flex', flexDirection: 'column', justifyContent: 'center' } }, [
-            h('span', { style: { fontSize: '16px', fontWeight: '500', marginBottom: '4px' } }, row.question),
+            h('span', { style: { fontSize: '15px', fontWeight: '500' } }, row.question),
             h('div', { style: { display: 'flex', alignItems: 'center', gap: '8px' } }, [
-              h('span', { style: { fontSize: '15px', fontWeight: '600', color: '#F96B6B' } }, row.outcomeName),
+              h('span', { style: { fontSize: '14px', fontWeight: '600', color: '#F96B6B' } }, row.outcomeName),
               h(
                 'span',
                 { style: { fontSize: '14px', color: '#777', fontWeight: '400' } },
@@ -191,18 +206,25 @@ const activitiesColumns = [
     key: 'userAmount',
     title: 'Amount',
     sorter: 'default',
+    minWidth: 160,
     render(row: ActivityInterface) {
       const collateralToken = tokensStore.getToken(row.collateral_token_id);
 
       return h('div', { style: { display: 'flex', alignItems: 'center' } }, [
         collateralToken?.imgUrl
-          ? h('div', { style: { marginRight: '4px' } }, [
-              h('img', {
-                src: collateralToken.imgUrl,
-                title: collateralToken.name,
-                style: { width: '18px', height: '18px', borderRadius: '50%', objectFit: 'cover' },
-              }),
-            ])
+          ? h('img', {
+              src: collateralToken.imgUrl,
+              title: collateralToken.name,
+              style: {
+                width: '18px',
+                height: '18px',
+                borderRadius: '50%',
+                objectFit: 'cover',
+                display: 'inline-block',
+                verticalAlign: 'middle',
+                marginRight: '4px',
+              },
+            })
           : null,
         h(
           'span',
@@ -250,12 +272,12 @@ const fundingPositionsColumns = [
     key: 'question',
     title: 'Market',
     sorter: 'default',
-    minWidth: 150,
+    minWidth: 300,
     render(row: UserFundingPositionInterface) {
       return h(resolveComponent('NuxtLink'), { to: { path: `/markets/${row.id}` } }, () => [
         h('div', { style: { display: 'flex', gap: '12px' } }, [
           row.imgUrl
-            ? h('div', { style: { width: '60px', height: '60px', flexShrink: 0 } }, [
+            ? h('div', { style: { width: '44px', height: '44px', flexShrink: 0 } }, [
                 h('img', {
                   src: row.imgUrl,
                   style: { width: '100%', height: '100%', borderRadius: '4px', objectFit: 'cover' },
@@ -263,7 +285,7 @@ const fundingPositionsColumns = [
               ])
             : null,
           h('div', { style: { display: 'flex', flexDirection: 'column', justifyContent: 'center' } }, [
-            h('span', { style: { fontSize: '16px', fontWeight: '500', marginBottom: '4px' } }, row.question),
+            h('span', { style: { fontSize: '15px', fontWeight: '500', marginBottom: '4px' } }, row.question),
           ]),
         ]),
       ]);
@@ -276,15 +298,21 @@ const fundingPositionsColumns = [
     render(row: UserFundingPositionInterface) {
       const collateralToken = tokensStore.getToken(row.collateral_token_id);
 
-      return h('div', { style: { display: 'flex', alignItems: 'center' } }, [
+      return h('div', [
         collateralToken?.imgUrl
-          ? h('div', { style: { marginRight: '4px' } }, [
-              h('img', {
-                src: collateralToken.imgUrl,
-                title: collateralToken.name,
-                style: { width: '18px', height: '18px', borderRadius: '50%', objectFit: 'cover' },
-              }),
-            ])
+          ? h('img', {
+              src: collateralToken.imgUrl,
+              title: collateralToken.name,
+              style: {
+                width: '18px',
+                height: '18px',
+                borderRadius: '50%',
+                objectFit: 'cover',
+                display: 'inline-block',
+                verticalAlign: 'middle',
+                marginRight: '4px',
+              },
+            })
           : null,
         h(
           'span',

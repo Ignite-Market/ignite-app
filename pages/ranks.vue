@@ -72,11 +72,11 @@
                   {{ user.username }}
                 </div>
               </NuxtLink>
-              <div class="text-right font-medium text-sm flex items-center gap-1">
+              <div class="text-right font-medium text-sm">
                 <img
                   v-if="collateralToken"
                   :src="tokensStore.getToken(collateralToken).imgUrl"
-                  class="w-4 h-4 rounded-full object-cover"
+                  class="w-4 h-4 rounded-full object-cover inline-block align-middle mr-0.5"
                   :alt="tokensStore.getToken(collateralToken).symbol"
                 />
                 {{

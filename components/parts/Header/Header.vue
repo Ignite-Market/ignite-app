@@ -1,14 +1,14 @@
 <template>
-  <div class="flex-bc w-full bg-grey px-6 gap-2">
+  <div class="flex-bc w-full bg-grey px-6 gap-2 sm:gap-6">
     <div class="mt-2">
       <Logo class="inline-block" />
     </div>
 
-    <div>
+    <div class="lg:grow-0 grow">
       <PredictionSetSearch />
     </div>
 
-    <div>
+    <div v-if="$slots.default">
       <slot />
     </div>
 
