@@ -88,7 +88,7 @@
                     v-else-if="reward.type === RewardType.USER_REFERRAL"
                     class="w-full bg-primary hover:bg-primary-hover"
                     :disabled="!loggedIn"
-                    @click="router.push('/invite')"
+                    @click="showReferralModal = true"
                   >
                     Invite Friends
                   </BasicButton>
@@ -121,6 +121,7 @@
         </div>
       </div>
     </div>
+    <InviteModal :open-modal="showReferralModal" @close="showReferralModal = false" />
   </Dashboard>
 </template>
 

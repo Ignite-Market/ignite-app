@@ -522,6 +522,7 @@ async function getPredictionSet(silent: boolean = false) {
       id: o.id,
       name: o.name,
       color: outcomeColors?.[i],
+      latestChance: o.latestChance,
     }));
 
     if (!collateralToken.value) {
