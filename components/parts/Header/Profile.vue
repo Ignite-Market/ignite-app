@@ -11,10 +11,16 @@
     @select="handleSelect"
   >
     <div class="flex items-center bg-grey-light py-2 px-[6px] cursor-pointer rounded-lg">
-      <jazzicon class="cursor-pointer rounded-[50%] w-[40px] h-[40px]" :address="address" :diameter="40" />
+      <jazzicon
+        class="cursor-pointer rounded-[50%] size-[30px] md:size-[40px]"
+        :address="address"
+        :diameter="isMd ? 40 : 30"
+      />
+
       <div class="ml-2 font-medium text-[14px] leading-[20px] md:block hidden">
         {{ truncateWallet(address as string) }}
       </div>
+
       <NuxtIcon
         name="icon/arrow-down"
         class="ml-2 text-[24pxy] transition-all transform"
@@ -32,7 +38,7 @@ const router = useRouter();
 const { address } = useAccount();
 const userStore = useUserStore();
 const { loggedIn } = useLoggedIn();
-const { isLg } = useScreen();
+const { isLg, isMd } = useScreen();
 
 const isOpened = ref(false);
 

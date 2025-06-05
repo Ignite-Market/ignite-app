@@ -1,5 +1,6 @@
 <template>
   <NuxtLink
+    v-if="item?.id"
     :to="{ name: 'markets-id', params: { id: item.id } }"
     class="flex flex-row flex-grow p-2 gap-2 md:gap-4 sm:px-4 group items-center max-h-[64px] hover:!bg-white/5 sm:mx-2"
   >

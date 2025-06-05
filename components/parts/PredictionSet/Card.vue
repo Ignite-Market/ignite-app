@@ -1,5 +1,6 @@
 <template>
   <n-card
+    v-if="predictionSet?.id"
     class="max-w-[360px] max-h-[220px] bg-grey-light border-1 !border-grey-light hover:!border-primary"
     :content-class="'!p-3 !pb-2 !rounded-[8px]'"
   >
@@ -57,33 +58,40 @@
     </div>
 
     <!-- TODO: Add claim button. -->
-    <div class="flex flex-row mt-[10px] items-center justify-center text-[12px] leading-[16px]">
-      <Status :status="predictionSet.setStatus" :end-time="new Date(predictionSet.endTime)" />
-      <div class="ml-[10px] text-[#888888]">
-        {{ getDisplayDate(predictionSet.setStatus, predictionSet.endTime, predictionSet.resolutionTime) }}
-      </div>
-      <div class="ml-auto flex items-center justify-center">
-        <div v-if="predictionSet.setStatus === PredictionSetStatus.FUNDING">
-          <BasicButton
-            :size="'small'"
-            :btn-class="['bg-statusBlue hover:bg-statusBlue-hover']"
-            @click="openDetails(undefined, TransactionType.FUND)"
-          >
-            Fund
-          </BasicButton>
+    <div
+      class="flex flex-row mt-[10px] items-center lg:justify-center text-[12px] leading-[16px] lg:flex-nowrap flex-wrap gap-y-1 gap-x-2.5"
+    >
+      <Status :status="predictionSet.setStatus" :end-time="new Date(predictionSet.endTime)" class="shrink-0" />
+
+      <div class="w-full flex items-center justify-between">
+        <div class="text-[#888888]">
+          {{ getDisplayDate(predictionSet.setStatus, predictionSet.endTime, predictionSet.resolutionTime) }}
         </div>
-        <!-- TODO: Check for potential return. -->
-        <div v-else class="flex items-center justify-center">
-          <div v-if="collateralToken?.imgUrl">
-            <Image
-              :src="collateralToken.imgUrl"
-              :title="collateralToken.name"
-              class="rounded-full w-[16px] h-[16px] object-cover mr-1"
-            />
+
+        <div class="ml-auto flex items-center justify-center">
+          <div v-if="predictionSet.setStatus === PredictionSetStatus.FUNDING">
+            <BasicButton
+              :size="'small'"
+              :btn-class="['bg-statusBlue hover:bg-statusBlue-hover']"
+              @click="openDetails(undefined, TransactionType.FUND)"
+            >
+              Fund
+            </BasicButton>
           </div>
-          <div class="font-medium">
-            {{ formatCollateralAmount(predictionSet.volume || 0, collateralToken?.decimals || 0) }}
-            {{ collateralToken?.symbol || '' }}
+
+          <!-- TODO: Check for potential return. -->
+          <div v-else class="flex items-center justify-center -mt-1 lg:mt-0">
+            <div v-if="collateralToken?.imgUrl">
+              <Image
+                :src="collateralToken.imgUrl"
+                :title="collateralToken.name"
+                class="rounded-full w-[16px] h-[16px] object-cover mr-1"
+              />
+            </div>
+            <div class="font-medium">
+              {{ formatCollateralAmount(predictionSet.volume || 0, collateralToken?.decimals || 0) }}
+              {{ collateralToken?.symbol || '' }}
+            </div>
           </div>
         </div>
       </div>

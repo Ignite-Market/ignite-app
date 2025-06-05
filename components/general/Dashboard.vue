@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Header ref="headerRef" class="min-h-[86px]" />
+    <Header ref="headerRef" class="min-h-[60px] md:min-h-[86px]" />
     <Navigation />
 
     <div v-if="loading">
