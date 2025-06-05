@@ -168,9 +168,9 @@ const collateralToken = ref<number | null>(null);
 const options = ref<{ label: string; value: number }[]>([]);
 
 const periodMap = {
-  Day: 'ONE_DAY',
-  Week: 'ONE_WEEK',
-  Month: 'ONE_MONTH',
+  Day: '1D',
+  Week: '1W',
+  Month: '1M',
   All: 'ALL',
 };
 
