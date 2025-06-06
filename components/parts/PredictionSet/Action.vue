@@ -141,7 +141,7 @@
 
               <template #suffix>
                 <div
-                  class="w-[38px] h-[20px] rounded-[4px] flex items-center justify-center text-xs bg-none hover:bg-grey-light cursor-pointer"
+                  class="w-[38px] h-[20px] rounded-[4px] flex items-center justify-center absolute right-[34px] top-1/2 -translate-y-1/2 text-xs bg-none hover:bg-grey-light cursor-pointer"
                   @click="setMaxBuyAmount"
                 >
                   Max
@@ -232,7 +232,7 @@
 
               <template #suffix>
                 <div
-                  class="w-[38px] h-[20px] rounded-[4px] flex items-center justify-center text-xs bg-none hover:bg-grey-light cursor-pointer"
+                  class="w-[38px] h-[20px] rounded-[4px] flex items-center justify-center absolute right-[34px] top-1/2 -translate-y-1/2 text-xs bg-none hover:bg-grey-light cursor-pointer"
                   @click="setMaxSellAmount"
                 >
                   Max
