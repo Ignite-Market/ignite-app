@@ -32,7 +32,6 @@
 
 <script lang="ts" setup>
 import type { FormInst, FormRules, FormValidationError } from 'naive-ui';
-import { ruleRequired } from '~/lib/misc/validation';
 import Endpoints from '~/lib/values/endpoints';
 
 type FormUserProfile = {
@@ -60,15 +59,15 @@ const rules: FormRules = {
       type: 'email',
       message: t('validation.email'),
     },
-    // ruleRequired(t('validation.emailRequired')),
   ],
 };
 
 onMounted(async () => {
-  // await sleep(500);
-  // await Promise.all(Object.values(userStore.promises));
+  await sleep(500);
+  await Promise.all(Object.values(userStore.promises));
 
-  // formData.value.email = userStore.user.email;
+  formData.value.email = userStore.user.username;
+  formData.value.email = userStore.user.email;
   loadingForm.value = false;
 });
 
@@ -87,7 +86,7 @@ async function updateUserProfile() {
   loading.value = true;
 
   try {
-    console.log(formData.value)
+    console.log(formData.value);
     const res = await $api.put<UserProfileResponse>(Endpoints.userUpdate, formData.value);
 
     if (res.data) {
@@ -96,6 +95,9 @@ async function updateUserProfile() {
     }
   } catch (error) {
     message.error(apiError(error));
+
+    formData.value.email = userStore.user.username;
+    formData.value.email = userStore.user.email;
   }
   loading.value = false;
 }

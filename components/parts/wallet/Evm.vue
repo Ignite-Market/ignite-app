@@ -55,7 +55,7 @@ const clickOnConnector = (connector, strategy) => {
   }
 };
 
-const callbacks = (token: string) => {
+const callbacks = (_token: string) => {
   emit('step');
 };
 </script>
@@ -83,7 +83,9 @@ const callbacks = (token: string) => {
       </div>
       <div class="flex items-center justify-center text-center text-[12px] leading-[20px] my-3">
         {{
-          !!showStrategies ? 'Select account you want to use' : 'To log in, simply connect your wallet to Ignitemarket.'
+          !!showStrategies
+            ? 'Select account you want to use'
+            : 'To log in, simply connect your wallet to Ignite Market.'
         }}
       </div>
 

@@ -24,7 +24,7 @@
             <div class="font-medium leading-[20px] mb-6 text-white/80">
               <p class="mb-4 text-white/80 text-[14px]">
                 Ignite Market allows user to request for a referral link which can be shared amongst friends. For each
-                new user you will get 50 points per referral<s> + 10% of referred user's first month points</s>.
+                new user you will get 50 points per referral.
               </p>
               <p class="mb-4 text-white/80 text-[14px]">
                 To get an invite link you have to have your email address linked to your Ignite Market account.

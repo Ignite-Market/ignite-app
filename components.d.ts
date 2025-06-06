@@ -18,6 +18,7 @@ declare module 'vue' {
     NEmpty: typeof import('naive-ui')['NEmpty']
     NForm: typeof import('naive-ui')['NForm']
     NFormItem: typeof import('naive-ui')['NFormItem']
+    NH5: typeof import('naive-ui')['NH5']
     NInfiniteScroll: typeof import('naive-ui')['NInfiniteScroll']
     NInput: typeof import('naive-ui')['NInput']
     NInputNumber: typeof import('naive-ui')['NInputNumber']

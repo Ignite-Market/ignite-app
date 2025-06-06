@@ -7,12 +7,6 @@
     <FormWrapper v-if="userStore.user?.email" class="mt-8" :title="'Confirm email address'">
       <FormUserConfirm />
     </FormWrapper>
-
-    <!--
-    <FormWrapper :title="'Email'">
-      <n-h5>{{ $t('profile.email.changeRequest') }}</n-h5>
-      <FormUserEmail />
-    </FormWrapper> -->
   </Dashboard>
 </template>
 

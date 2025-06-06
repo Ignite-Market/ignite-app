@@ -87,6 +87,10 @@ function singleErrorMessage($i18n: i18nType, message: string, statusCode: number
       return 'Your content violates our community guidelines and cannot be posted.';
     }
 
+    if (statusCode === 42200026) {
+      return 'This email is already in use. Please use a different email address.';
+    }
+
     return $i18n.t('error.BAD_REQUEST');
   }
   return 'Unknown error';

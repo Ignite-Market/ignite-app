@@ -1,3 +1,26 @@
+<template>
+  <Dashboard>
+    <div class="px-4 max-w-[1241px] m-auto mb-16 mt-[120px]">
+      <div>
+        <div v-if="success" class="text-center">
+          <h4 class="mb-2">Email has been successfully verified.</h4>
+          <p>Your email has been successfully verified. Redirecting to the homepage...</p>
+        </div>
+        <div v-else class="text-center">
+          <h4 class="mb-2">Verifying email</h4>
+          <template v-if="loading">
+            <p>Please wait, while we verify your email address...</p>
+            <div class="spinner-border text-primary mt-3" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </template>
+          <p v-else>Error during email verification. Please try again.</p>
+        </div>
+      </div>
+    </div>
+  </Dashboard>
+</template>
+
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router';
 import { ref, watch } from 'vue';
@@ -51,46 +74,6 @@ async function confirmEmail() {
   }
 }
 </script>
-
-<template>
-  <Dashboard class="pt-110">
-    <div class="px-4 max-w-[1241px] m-auto mb-16">
-      <!-- HEADER -->
-      <div class="flex mb-10 justify-between flex-wrap gap-4">
-        <div class="flex flex-wrap gap-x-8 gap-y-4">
-          <div class="w-[80px] h-[80px] flex-shrink-0">
-            <Image src="https://images.ignitemarket.xyz/points.png" class="rounded-[8px] w-full h-full object-cover" />
-          </div>
-          <div class="flex flex-col">
-            <div class="text-[24px] leading-[34px] font-bold text-white mt-[5px]">Email verification</div>
-            <!--            <div class="flex mt-4 items-center">-->
-            <!--              <div class="text-white/80 text-[14px] leading-[20px]">-->
-            <!--                Earn points now to qualify for our upcoming token airdrop-->
-            <!--              </div>-->
-            <!--            </div>-->
-          </div>
-        </div>
-      </div>
-
-      <div>
-        <div v-if="success" class="text-center">
-          <h4 class="mb-2">Email has been successfully verified.</h4>
-          <p>Your email has been successfully verified. Redirecting to the homepage...</p>
-        </div>
-        <div v-else class="text-center">
-          <h4 class="mb-2">Verifying email</h4>
-          <template v-if="loading">
-            <p>Please wait, while we verify your email address...</p>
-            <div class="spinner-border text-primary mt-3" role="status">
-              <span class="visually-hidden">Loading...</span>
-            </div>
-          </template>
-          <p v-else>Error during email verification. Please try again.</p>
-        </div>
-      </div>
-    </div>
-  </Dashboard>
-</template>
 
 <style scoped lang="postcss">
 .spinner-border {
