@@ -130,6 +130,10 @@
       @apply pb-3 -mb-3;
     }
   }
+
+  .n-layout-scroll-container {
+    overflow-y: hidden;
+  }
 }
 .n-layout-sider {
   &.sider-visible > .n-scrollbar {

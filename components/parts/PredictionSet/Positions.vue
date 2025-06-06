@@ -48,20 +48,22 @@ const columns = ref<any[]>([]);
 
 watchEffect(async () => {
   const enriched = await Promise.all(
-    props.positions.map(async pos => {
-      const collateralAmount = await calcSellAmountInCollateral(
-        Number(pos.sharesAmount) / Math.pow(10, props.collateralToken.decimals),
-        pos.outcomeIndex,
-        props.contractAddress,
-        props.predictionSet.outcomes.map(o => o.positionId),
-        props.collateralToken.decimals
-      );
+    props.positions
+      .filter(pos => bigIntToNum(pos.sharesAmount, props.collateralToken.decimals) > 0)
+      .map(async pos => {
+        const collateralAmount = await calcSellAmountInCollateral(
+          Number(pos.sharesAmount) / Math.pow(10, props.collateralToken.decimals),
+          pos.outcomeIndex,
+          props.contractAddress,
+          props.predictionSet.outcomes.map(o => o.positionId),
+          props.collateralToken.decimals
+        );
 
-      return {
-        ...pos,
-        returnAmount: Number(collateralAmount),
-      };
-    })
+        return {
+          ...pos,
+          returnAmount: Number(collateralAmount),
+        };
+      })
   );
 
   processedPositions.value = enriched;

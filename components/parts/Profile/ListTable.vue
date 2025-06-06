@@ -164,7 +164,10 @@ const predictionColumns = [
     title: '',
     align: 'right',
     render(row: UserPredictionInterface) {
-      return row.setStatus === PredictionSetStatus.FINALIZED
+      return row.setStatus === PredictionSetStatus.FINALIZED &&
+        row.outcomeTokens &&
+        row.winner_outcome_id === row.outcomeId &&
+        +row.claimedAmount <= 0
         ? h(resolveComponent('BasicButton'), {
             text: 'Claim',
             to: { path: `/markets/${row.id}` },
@@ -353,7 +356,7 @@ const fundingPositionsColumns = [
     title: '',
     align: 'right',
     render(row: UserFundingPositionInterface) {
-      return row.setStatus === PredictionSetStatus.FINALIZED
+      return row.setStatus === PredictionSetStatus.FINALIZED && row.removedAmount < row.fundedAmount
         ? h(resolveComponent('BasicButton'), {
             text: 'Remove funding',
             to: { path: `/markets/${row.id}` },

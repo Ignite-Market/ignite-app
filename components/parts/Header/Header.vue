@@ -58,8 +58,18 @@
 </template>
 
 <script setup lang="ts">
+import { useAccount } from '@wagmi/vue';
+
 const { loggedIn } = useLoggedIn();
+const { address } = useAccount();
+const userStore = useUserStore();
 const router = useRouter();
+
+watch(address, () => {
+  if (userStore.loggedIn && address.value !== userStore.user.walletAddress) {
+    userStore.logout();
+  }
+});
 
 function openDocs() {
   window.open('https://docs.ignitemarket.xyz/', '_blank');
