@@ -139,6 +139,15 @@
                 </div>
               </template>
 
+              <template #suffix>
+                <div
+                  class="w-[38px] h-[20px] rounded-[4px] flex items-center justify-center text-xs bg-none hover:bg-grey-light cursor-pointer"
+                  @click="setMaxBuyAmount"
+                >
+                  Max
+                </div>
+              </template>
+
               <template #add-icon>
                 <div
                   class="min-w-[20px] min-h-[20px] rounded-[4px] flex items-center justify-center bg-none hover:bg-grey-light"
@@ -218,6 +227,15 @@
                   class="min-w-[20px] min-h-[20px] rounded-[4px] flex items-center justify-center bg-none hover:bg-grey-light"
                 >
                   <NuxtIcon class="hover:text-white text-white" name="icon/minus" />
+                </div>
+              </template>
+
+              <template #suffix>
+                <div
+                  class="w-[38px] h-[20px] rounded-[4px] flex items-center justify-center text-xs bg-none hover:bg-grey-light cursor-pointer"
+                  @click="setMaxSellAmount"
+                >
+                  Max
                 </div>
               </template>
 
@@ -476,8 +494,16 @@ const props = defineProps({
 
 const emit = defineEmits(['actionChanged', 'transactionSuccessful']);
 
-const { getMinTokensToBuy, addFunding, buy, sell, calcSellAmountInCollateral, getPricePerShare, getTotalFunding } =
-  useFixedMarketMaker();
+const {
+  getMinTokensToBuy,
+  addFunding,
+  buy,
+  sell,
+  calcSellAmountInCollateral,
+  getPricePerShare,
+  getTotalFunding,
+  calcSharesForCollateral,
+} = useFixedMarketMaker();
 const { refreshCollateralBalance, checkCollateralAllowance } = useCollateralToken();
 const { getConditionalBalance, parseConditionalBalance, checkConditionalApprove } = useConditionalToken();
 const { ensureCorrectNetwork } = useContracts();
@@ -507,6 +533,8 @@ const transactionHash = ref('');
 const buyError = ref('');
 const sellError = ref('');
 const transactionStep = ref(TransactionStep.ALLOWANCE);
+
+const sellFundLimit = ref(0);
 
 const buyValidator = (x: number) => {
   if (x > buyFundLimit.value) {
@@ -580,13 +608,25 @@ const buyFundLimit = computed(() => {
   return bigIntToNum(max, props.collateralToken.decimals || 6);
 });
 
-const sellFundLimit = computed(() => {
-  let max = (BigInt(totalFundAmount.value) * 10n) / 100n;
-  if (conditionalBalance.value < max) {
-    max = conditionalBalance.value;
+watch(
+  () => [totalFundAmount.value, conditionalBalance.value, props.outcome.outcomeIndex],
+  async () => {
+    const maxAmount = bigIntToNum((BigInt(totalFundAmount.value) * 10n) / 100n, props.collateralToken.decimals || 6);
+    let limit =
+      (await calcSharesForCollateral(
+        maxAmount,
+        props.outcome.outcomeIndex,
+        props.contractAddress,
+        props.outcomes.map(o => o.positionId),
+        props.collateralToken.decimals
+      )) || 0n;
+
+    if (conditionalBalance.value < limit) {
+      limit = conditionalBalance.value;
+    }
+    sellFundLimit.value = Number(limit) / Math.pow(10, props.collateralToken.decimals);
   }
-  return bigIntToNum(max, props.collateralToken.decimals || 6);
-});
+);
 
 onMounted(async () => {
   if (props.status === PredictionSetStatus.FUNDING) {
@@ -687,6 +727,14 @@ watch(
     }
   }
 );
+
+function setMaxBuyAmount() {
+  amount.value = buyFundLimit.value;
+}
+
+function setMaxSellAmount() {
+  amount.value = sellFundLimit.value;
+}
 
 function openExplorer(txHash: string) {
   const explorer = getExplorer();

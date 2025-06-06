@@ -11,6 +11,7 @@ import { ProfileTabs } from '~/lib/types';
 import type { TableFilters } from '~/lib/types/config';
 import {
   TransactionType,
+  PredictionSetStatus,
   type ActivityInterface,
   type UserFundingPositionInterface,
   type UserPredictionInterface,
@@ -156,6 +157,19 @@ const predictionColumns = [
         status: row.setStatus,
         endTime: row.endTime,
       });
+    },
+  },
+  {
+    key: 'action',
+    title: '',
+    align: 'right',
+    render(row: UserPredictionInterface) {
+      return row.setStatus === PredictionSetStatus.FINALIZED
+        ? h(resolveComponent('BasicButton'), {
+            text: 'Claim',
+            to: { path: `/markets/${row.id}` },
+          })
+        : null;
     },
   },
 ] as DataTableColumns<UserPredictionInterface>;
@@ -332,6 +346,19 @@ const fundingPositionsColumns = [
         status: row.setStatus,
         endTime: row.endTime,
       });
+    },
+  },
+  {
+    key: 'action',
+    title: '',
+    align: 'right',
+    render(row: UserFundingPositionInterface) {
+      return row.setStatus === PredictionSetStatus.FINALIZED
+        ? h(resolveComponent('BasicButton'), {
+            text: 'Remove funding',
+            to: { path: `/markets/${row.id}` },
+          })
+        : null;
     },
   },
 ] as DataTableColumns<UserFundingPositionInterface>;

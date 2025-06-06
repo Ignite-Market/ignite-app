@@ -34,7 +34,10 @@ const props = defineProps({
   predictionId: { type: Number, default: null, required: true },
   startTime: { type: Date, default: null },
   endTime: { type: Date, default: null },
-  outcomes: { type: Array as PropType<{ id: number; name: string; color: string }[]>, default: () => [] },
+  outcomes: {
+    type: Array as PropType<{ id: number; name: string; color: string; latestChance: number }[]>,
+    default: () => [],
+  },
 });
 use([CanvasRenderer, LineChart, TooltipComponent, GridComponent]);
 
@@ -43,6 +46,14 @@ type Options = ComposeOption<GridComponentOption | TooltipComponentOption>;
 const ranges = ['ALL', '1D', '1W', '1M'] as const;
 const loading = ref(false);
 const selectedRange = ref<(typeof ranges)[number]>('ALL');
+
+// Watch for latest chance change, triggering update.
+watch(
+  () => props.outcomes?.[0]?.latestChance,
+  () => {
+    getChanceHistory();
+  }
+);
 
 const options = ref({
   grid: {

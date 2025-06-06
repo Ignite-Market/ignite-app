@@ -280,6 +280,76 @@ export default function useFixedMarketMaker() {
     return BigInt(r.toFixed(0)) as any;
   }
 
+  /**
+   * Calculate number of shares needed to get specific amount of collateral.
+   *
+   * @param collateralAmount Desired amount of collateral to receive.
+   * @param outcomeIndex Outcome index.
+   * @param fpmmContractAddress FPMM contract address.
+   * @param positionIds Array of position IDs.
+   * @param collateralDecimals Number of decimal places of collateral token.
+   * @returns Number of shares needed to sell.
+   */
+  async function calcSharesForCollateral(
+    collateralAmount: number,
+    outcomeIndex: number,
+    fpmmContractAddress: Address,
+    positionIds: string[],
+    collateralDecimals: number
+  ) {
+    Big.DP = 90;
+
+    const ctContract = await initContract(ContractType.CONDITIONAL_TOKEN);
+    const owners = positionIds.map(() => fpmmContractAddress);
+    const ids = positionIds.map(positionId => BigInt(positionId));
+    const marketSharesAmounts = await ctContract.read.balanceOfBatch([owners, ids]);
+
+    const fpmmContract = await initContract(ContractType.FPMM, fpmmContractAddress);
+    const fee = await fpmmContract.read.fee();
+
+    const feeBN = new Big(fee.toString());
+    const userFeeDecimal = feeBN.div(parseEther('1').toString());
+
+    const marketSellingSharesAmounts = new Big(marketSharesAmounts[outcomeIndex]);
+    const marketNonSellingSharesAmounts = marketSharesAmounts
+      .filter((_: any, index: any) => index !== outcomeIndex)
+      .map((marketShares: any) => new Big(marketShares));
+    const desiredCollateral = new Big(Math.round(collateralAmount * 10 ** collateralDecimals));
+
+    const f = (a: any) => {
+      /* For three outcomes, where the `x` is the one being sold, the formula is:
+       * f(a) = ((y - R) * (z - R)) * (x + a - R) - (x * y * z)
+       * where:
+       *   `R` is r / (1 - fee)
+       *   `x`, `y`, `z` are the market maker shares for each outcome, where `x` is the market maker share being sold
+       *   `a` (the unknown) is the amount of outcome shares that need to be sold
+       *   `r` is the desired amount of collateral to receive
+       */
+
+      const R = desiredCollateral.div(new Big(1).minus(userFeeDecimal)); // Adjust for fee
+
+      // ((y - R) * (z - R))
+      const firstTerm = marketNonSellingSharesAmounts.map(h => h.minus(R)).reduce((a, b) => a.mul(b));
+
+      // (x + a - R)
+      const secondTerm = marketSellingSharesAmounts.plus(a).minus(R);
+
+      // (x * y * z)
+      const thirdTerm = marketNonSellingSharesAmounts.reduce((a, b) => a.mul(b), marketSellingSharesAmounts);
+
+      // ((y - R) * (z - R)) * (x + a - R) - (x * y * z)
+      return firstTerm.mul(secondTerm).minus(thirdTerm);
+    };
+
+    const a = newtonRaphson(f, 0, { maxIterations: 100 });
+
+    if (!a) {
+      return null;
+    }
+
+    return BigInt(a.toFixed(0));
+  }
+
   return {
     getMaxTokensToSell,
     getMinTokensToBuy,
@@ -291,5 +361,6 @@ export default function useFixedMarketMaker() {
     removeFunding,
     getTotalFunding,
     calcSellAmountInCollateral,
+    calcSharesForCollateral,
   };
 }

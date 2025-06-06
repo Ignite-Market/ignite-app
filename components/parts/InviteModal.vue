@@ -1,5 +1,5 @@
 <template>
-  <Dashboard :loading="loading">
+  <modal v-model:show="isOpen" @update:show="closeModal">
     <div class="px-4 max-w-[1241px] m-auto mb-16">
       <!-- HEADER -->
       <div class="flex mb-10 justify-between flex-wrap gap-4">
@@ -43,13 +43,30 @@
         </div>
       </div>
     </div>
-  </Dashboard>
+  </modal>
 </template>
 
 <script lang="ts" setup>
+const props = defineProps({
+  openModal: { type: Boolean, default: false },
+});
+const emit = defineEmits(['close']);
+
 const userStore = useUserStore();
 
-const loading = ref(false);
+const isOpen = ref(false);
+
+watch(
+  () => props.openModal,
+  newVal => {
+    isOpen.value = newVal;
+  }
+);
+
+function closeModal() {
+  isOpen.value = false;
+  emit('close');
+}
 
 function getReferralLink() {
   const app = useRuntimeConfig().public.url;
