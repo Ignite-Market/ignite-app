@@ -1,7 +1,8 @@
 <template>
   <div class="w-full max-w-lg">
-    <div v-if="userStore?.user?.emailStatus">
-      Successfully confirmed
+    <div v-if="userStore?.user?.emailStatus" class="flex items-center">
+      Confirmed
+      <NuxtIcon name="icon/complete" class="text-statusGreen text-[14px] ml-2" />
     </div>
     <div v-else>
       Email confirmation pending.
@@ -16,7 +17,6 @@
 <script setup lang="ts">
 import Endpoints from '~/lib/values/endpoints';
 
-const { t } = useI18n();
 const userStore = useUserStore();
 const isButtonDisabled = ref(false);
 const remainingSeconds = ref(30);
@@ -60,6 +60,4 @@ async function resendConfirmation() {
 }
 </script>
 
-<style scoped lang="postcss">
-
-</style>
+<style scoped lang="postcss"></style>
