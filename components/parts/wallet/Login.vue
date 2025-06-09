@@ -109,11 +109,11 @@ async function evmWalletLogin(data: Record<string, any>) {
       address: data?.address || address.value,
       signature,
       timestamp,
-      referralId: undefined,
+      referralId: undefined as string | undefined,
     };
 
     if (localStorage.getItem('referralCode')) {
-      body.referralId = localStorage.getItem('referralCode');
+      body.referralId = localStorage.getItem('referralCode') || undefined;
       localStorage.removeItem('referralCode');
     }
 

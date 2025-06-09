@@ -126,9 +126,11 @@ export interface UserPredictionInterface extends Omit<PredictionSetInterface, 'o
   userId: number;
   username: string;
   userWallet: string;
+  outcomeId: number;
   outcomeName: string;
   boughtAmount: number;
   soldAmount: number;
+  claimedAmount: number;
   outcomeTokens: number;
   collateral_token_id: number;
 }
@@ -139,6 +141,7 @@ export interface UserPredictionsResponse extends GeneralItemsResponse<UserPredic
  */
 export interface UserFundingPositionInterface extends PredictionSetInterface {
   fundedAmount: number;
+  removedAmount: number;
 }
 export interface UserFundingPositionsResponse extends GeneralItemsResponse<UserFundingPositionInterface> {}
 
