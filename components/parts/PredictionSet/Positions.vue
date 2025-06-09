@@ -113,9 +113,10 @@ onMounted(() => {
       title: 'Return',
       key: 'calculatedReturn',
       render(row: any) {
+        const currentCollateralAmount = row.avgBuyPrice * row.sharesAmount;
         const collateralReturn =
-          (row.returnAmount - row.collateralAmount) / Math.pow(10, props.collateralToken.decimals || 6);
-        const returnPercentage = ((row.returnAmount - row.collateralAmount) / row.collateralAmount) * 100;
+          (row.returnAmount - currentCollateralAmount) / Math.pow(10, props.collateralToken.decimals || 6);
+        const returnPercentage = ((row.returnAmount - currentCollateralAmount) / currentCollateralAmount) * 100;
 
         const displayCollateral = `${collateralReturn > 0 ? '+' : ''}` + collateralReturn.toFixed(2);
         const displayPercentage = `(${returnPercentage > 0 ? '+' : ''}${returnPercentage.toFixed(2)} %)`;
