@@ -12,14 +12,10 @@
 </template>
 
 <script lang="ts" setup>
-import { useAccount, useConnect } from '@wagmi/vue';
 import { darkTheme, enUS, dateEnUS } from 'naive-ui';
 import { themeOverrides } from './lib/config/naive-ui';
 
-const { isConnected, isConnecting, isReconnecting } = useAccount();
-const { connectors, connect } = useConnect();
 const tokensStore = useTokensStore();
-const userStore = useUserStore();
 
 const $i18n = useI18n();
 window.$i18n = $i18n as any;
@@ -27,6 +23,7 @@ window.$i18n = $i18n as any;
 const lang = computed(() => {
   return $i18n.locale.value;
 });
+
 const locale = computed(() => {
   switch ($i18n.locale.value) {
     case 'en':
@@ -49,16 +46,6 @@ useHead({
     lang,
   },
 });
-
-watch(
-  () => userStore.loggedIn,
-  _ => {
-    if (!isConnected.value && !isConnecting.value && !isReconnecting.value && connectors.length) {
-      connect({ connector: connectors[0] });
-    }
-  },
-  { immediate: true }
-);
 
 onMounted(async () => {
   await tokensStore.fetch();

@@ -72,7 +72,7 @@
                   </div>
 
                   <div class="flex items-center">
-                    <div class="font-semibold">Transactions volume:</div>
+                    <div class="font-semibold">Trading volume:</div>
                     <div v-if="collateralToken?.imgUrl">
                       <Image
                         :src="collateralToken.imgUrl"

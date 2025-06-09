@@ -22,11 +22,11 @@
 </template>
 
 <script setup lang="ts">
-import { useRoute, useRouter } from 'vue-router';
 import { ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { apiError } from '~/lib/utils/errors';
 import Endpoints from '~/lib/values/endpoints';
 import { useUserStore } from '~/stores/user';
-import { apiError } from '~/lib/utils/errors';
 
 const route = useRoute();
 const router = useRouter();
@@ -36,7 +36,6 @@ const token = ref<string | null>(null);
 const loading = ref(true);
 const success = ref(false);
 
-// Watch for route query parameters to be ready
 watch(
   () => route.query,
   query => {
@@ -50,7 +49,6 @@ watch(
   { immediate: true }
 );
 
-// Function to confirm email
 async function confirmEmail() {
   if (token.value) {
     loading.value = true;

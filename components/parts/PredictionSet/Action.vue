@@ -540,7 +540,7 @@ const buyValidator = (x: number) => {
   if (x > buyFundLimit.value) {
     // Because input is calling -1 +1 for buttons
     if (amount.value !== x - 1) {
-      buyError.value = `Amount can not exceed 10% of total funding.`;
+      buyError.value = `Amount can not exceed 10% of total liquidity.`;
     }
   } else {
     buyError.value = '';
@@ -553,7 +553,7 @@ const sellValidator = (x: number) => {
   if (x > sellFundLimit.value) {
     // Because input is calling -1 +1 for buttons
     if (amount.value !== x - 1) {
-      sellError.value = `Sell amount can not exceed 10% of total funding.`;
+      sellError.value = `Sell amount can not exceed 10% of total liquidity.`;
     }
   } else {
     sellError.value = '';
