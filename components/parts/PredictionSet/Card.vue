@@ -1,16 +1,17 @@
 <template>
   <n-card
+    v-if="predictionSet?.id"
     class="max-w-[360px] max-h-[220px] bg-grey-light border-1 !border-grey-light hover:!border-primary"
     :content-class="'!p-3 !pb-2 !rounded-[8px]'"
   >
     <div class="flex border-b border-white/10 pb-3 cursor-pointer" @click="openDetails()">
       <div class="w-[38px] h-[38px] flex-shrink-0">
-        <img
-          class="rounded-[8px] w-full h-full object-cover"
-          src="https://s3-alpha-sig.figma.com/img/a21f/779d/2c0931626f7c395eb6d83153a833f8ea?Expires=1739750400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=mGfPGCxcLctO2MjpQ9yHbPzUhvDKiJFQ0ErmAlBuiWaEk6FaSRYX9Xpyjl5IdWzZFFh78DQM07GesQA~qVlI88J7nhuOgF-CebWhNIZHKRYT1JhDhfip9VjM85Uk3W8uomvwydyj~Oef2nt8asqEqjxdPLaD7c9Ab01AfE4a8ygRqzmVf5A-IB8984h3cKlRORBngKXeRU3uMnx88UoL-5wasTjnGFZ5HpJqDzPUQTOLVzzN40A0YOeqhH~Byk0rtQTui1Yz9OKxrr~tgK7VRDJ4r5-ApHQiA3RcrhED-E7KGr14Ye34lP4zcp9aOWyG5ory399LBcZRZT8HmuRHfQ__"
-        />
+        <Image :src="predictionSet.imgUrl" class="rounded-[8px] w-full h-full object-cover" />
       </div>
-      <div class="ml-4 text-[14px] leading-[20px] font-medium">
+      <div
+        class="ml-4 text-[14px] leading-[20px] font-medium line-clamp-2 text-white/80"
+        :title="predictionSet.question"
+      >
         {{ predictionSet.question }}
       </div>
     </div>
@@ -19,28 +20,29 @@
       <div class="flex flex-col border-b border-white/10 pb-3 scroll-container h-[100px] overflow-y-scroll">
         <div class="pb-[20px]">
           <div
-            class="flex flex-row w-full mt-[10px] font-medium cursor-pointer"
             v-for="outcome of predictionSet.outcomes"
+            :key="outcome.id"
+            class="flex flex-row w-full mt-[10px] font-medium cursor-pointer"
           >
             <div>{{ outcome.name }}</div>
             <div class="flex ml-auto justify-center items-center">
-              <div class="mr-[6px]">{{ (outcome.chance * 100).toFixed(0) }}%</div>
-              <div class="flex" v-if="tradeEnabled(predictionSet.setStatus, predictionSet.endTime)">
+              <div class="mr-[6px]">{{ (outcome.latestChance * 100).toFixed(0) }}%</div>
+              <div v-if="tradeEnabled(predictionSet.setStatus, predictionSet.endTime)" class="flex">
                 <div
                   class="mr-[6px] px-1.5 border-1 bg-statusGreen/20 border-statusGreen rounded-[8px] hover:bg-statusGreen"
-                  @click="openDetails(TransactionType.BUY, 5)"
+                  @click="openDetails(outcome.id, TransactionType.BUY, 5)"
                 >
                   Buy 5
                 </div>
                 <div
                   class="mr-[6px] px-1.5 border-1 bg-statusGreen/20 border-statusGreen rounded-[8px] hover:bg-statusGreen"
-                  @click="openDetails(TransactionType.BUY, 5)"
+                  @click="openDetails(outcome.id, TransactionType.BUY, 10)"
                 >
                   Buy 10
                 </div>
                 <div
                   class="px-1.5 border-1 bg-statusRed/20 border-statusRed rounded-[8px] hover:bg-statusRed"
-                  @click="openDetails(TransactionType.SELL)"
+                  @click="openDetails(outcome.id, TransactionType.SELL)"
                 >
                   Sell
                 </div>
@@ -55,19 +57,42 @@
       ></div>
     </div>
 
-    <div class="flex flex-row mt-[10px] items-center justify-center text-[12px] leading-[16px]">
-      <Status :status="predictionSet.setStatus" :endTime="predictionSet.endTime"></Status>
-      <div class="ml-[10px] text-[#888888]">
-        {{ getDisplayDate(predictionSet.setStatus, predictionSet.endTime, predictionSet.resolutionTime) }}
-      </div>
-      <div class="ml-auto flex items-center justify-center">
-        <div v-if="predictionSet.setStatus === PredictionSetStatus.FUNDING">
-          <BasicButton :size="'small'" :btnClass="['bg-statusBlue hover:bg-statusBlue-hover']">Fund</BasicButton>
+    <!-- TODO: Add claim button. -->
+    <div
+      class="flex flex-row mt-[10px] items-center lg:justify-center text-[12px] leading-[16px] lg:flex-nowrap flex-wrap gap-y-1 gap-x-2.5"
+    >
+      <Status :status="predictionSet.setStatus" :end-time="new Date(predictionSet.endTime)" class="shrink-0" />
+
+      <div class="w-full flex items-center justify-between">
+        <div class="text-[#888888]">
+          {{ getDisplayDate(predictionSet.setStatus, predictionSet.endTime, predictionSet.resolutionTime) }}
         </div>
-        <!-- TODO: Check for potential return. -->
-        <div v-else class="flex items-center justify-center">
-          <NuxtIcon name="icon/star" class="text-primary" />
-          <div class="ml-[6px] font-medium">0.35$</div>
+
+        <div class="ml-auto flex items-center justify-center">
+          <div v-if="predictionSet.setStatus === PredictionSetStatus.FUNDING">
+            <BasicButton
+              :size="'small'"
+              :btn-class="['bg-statusBlue hover:bg-statusBlue-hover']"
+              @click="openDetails(undefined, TransactionType.FUND)"
+            >
+              Fund
+            </BasicButton>
+          </div>
+
+          <!-- TODO: Check for potential return. -->
+          <div v-else class="flex items-center justify-center -mt-1 lg:mt-0">
+            <div v-if="collateralToken?.imgUrl">
+              <Image
+                :src="collateralToken.imgUrl"
+                :title="collateralToken.name"
+                class="rounded-full w-[16px] h-[16px] object-cover mr-1"
+              />
+            </div>
+            <div class="font-medium">
+              {{ formatCollateralAmount(predictionSet.volume || 0, collateralToken?.decimals || 0) }}
+              {{ collateralToken?.symbol || '' }}
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -75,8 +100,8 @@
 </template>
 
 <script lang="ts" setup>
-import { TransactionType, PredictionSetStatus } from '~/lib/types/prediction-set';
 import Status from './Status.vue';
+import { TransactionType, PredictionSetStatus } from '~/lib/types/prediction-set';
 import BasicButton from '~/components/general/BasicButton.vue';
 
 const props = defineProps({
@@ -84,14 +109,16 @@ const props = defineProps({
 });
 
 const router = useRouter();
+const tokensStore = useTokensStore();
+const collateralToken = ref();
 
-function openDetails(transaction?: TransactionType, value?: number) {
+function openDetails(outcome?: number, transaction?: TransactionType, value?: number) {
   let query: any = null;
   if (transaction) {
     query =
       transaction === TransactionType.BUY
-        ? { transaction: TransactionType.BUY, value }
-        : { transaction: TransactionType.SELL };
+        ? { transaction: TransactionType.BUY, value, outcome }
+        : { transaction: TransactionType.SELL, outcome };
   }
 
   router.push({
@@ -100,6 +127,11 @@ function openDetails(transaction?: TransactionType, value?: number) {
     query,
   });
 }
+
+onMounted(async () => {
+  await tokensStore.ensureLoaded();
+  collateralToken.value = tokensStore.getToken(props.predictionSet.collateral_token_id);
+});
 </script>
 
 <style scoped>

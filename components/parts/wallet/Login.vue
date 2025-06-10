@@ -1,5 +1,10 @@
 <template>
-  <BasicButton class="py-[17px] px-[16px]" v-bind="$attrs" @click="btnAction()" size="large">
+  <BasicButton
+    class="sm:py-[17px] py-[14px] px-[4px] sm:px-[16px] min-w-[55px]"
+    v-bind="$attrs"
+    size="large"
+    @click="btnAction()"
+  >
     <span v-if="address">
       Disconnect
       <small>({{ truncateWallet(address) }})</small>
@@ -8,8 +13,18 @@
   </BasicButton>
 
   <!-- Modal - Wallet select -->
-  <modal v-model:show="modalWalletSelectVisible" class="w-auto" :title="$t('wallet.info')">
-    <WalletEvm :loading="loadingWallet" />
+  <modal
+    v-model:show="modalWalletSelectVisible"
+    class="w-[300px] border-none"
+    :mask-closable="!loadingWallet"
+    :closable="!loadingWallet"
+  >
+    <WalletEvm
+      :loading="loadingWallet"
+      :step="step"
+      @step="step = step + 1"
+      @loading="loading => (loadingWallet = loading)"
+    />
   </modal>
 </template>
 
@@ -20,32 +35,22 @@ import Endpoints from '~/lib/values/endpoints';
 import { truncateWallet } from '~/lib/misc/strings';
 import BasicButton from '~/components/general/BasicButton.vue';
 
-const { t } = useI18n();
-const { $wagmiConfig } = useNuxtApp();
-const { error, success } = useMessage();
-const userStore = useUserStore();
 const { resetContracts, ensureCorrectNetwork } = useContracts();
-
-/** Evm wallet - wagmi */
 const { disconnect } = useDisconnect();
-const { address, isConnected } = useAccount();
+const { $wagmiConfig } = useNuxtApp();
+const { address } = useAccount();
+const messageProvider = useMessage();
+const userStore = useUserStore();
+
+const loadingWallet = ref<boolean>(false);
+const modalWalletSelectVisible = ref<boolean>(false);
+const step = ref(0); // 0 - captcha, 1 - connect wallet, 2 - sign message
 
 useAccountEffect({
   onConnect: data => evmWalletLogin(data),
 });
 
-const loadingWallet = ref<boolean>(false);
-const modalWalletSelectVisible = ref<boolean>(false);
-
 onBeforeMount(() => {
-  // if (!isConnected.value) {
-  //   try {
-  //     assetStore.$reset();
-  //   } catch (e) {
-  //     console.error(e);
-  //   }
-  // }
-
   if (!userStore.loggedIn) {
     disconnect();
     resetContracts();
@@ -57,7 +62,7 @@ watch(
   address => {
     if (address && !userStore.loggedIn) {
       evmWalletLogin({});
-    } else if (address) {
+    } else if (address && !loadingWallet.value) {
       modalWalletSelectVisible.value = false;
     }
   }
@@ -77,14 +82,14 @@ async function evmWalletLogin(data: Record<string, any>) {
   await sleep(200);
 
   if (!address) {
-    error(t('wallet.login.walletAccountNotConnected'));
+    messageProvider.error('A wallet account must be connected.');
     return;
-  } else if (loadingWallet.value) {
+  } else if (loadingWallet.value && Object.keys(data).length === 0) {
+    // loadingWallet.value = false;
     return;
   }
 
   loadingWallet.value = true;
-
   try {
     await ensureCorrectNetwork();
   } catch (error) {
@@ -92,28 +97,39 @@ async function evmWalletLogin(data: Record<string, any>) {
     console.log(error);
   }
 
+  step.value = 2;
+
   try {
     const resMessage = await $api.get<WalletMessageResponse>(Endpoints.walletMessage);
     const message = resMessage.data.message;
     const timestamp = resMessage.data.timestamp;
     const signature = await signMessage($wagmiConfig as Config, { message });
 
-    const res = await $api.post<WalletLoginResponse>(Endpoints.walletLogin, {
+    const body = {
       address: data?.address || address.value,
       signature,
       timestamp,
-    });
+      referralId: undefined as string | undefined,
+    };
+
+    if (localStorage.getItem('referralCode')) {
+      body.referralId = localStorage.getItem('referralCode') || undefined;
+      localStorage.removeItem('referralCode');
+    }
+
+    const res = await $api.post<WalletLoginResponse>(Endpoints.walletLogin, body);
 
     userStore.saveUser(res.data);
 
-    /** Show success message */
-    success(t('wallet.login.success'));
-  } catch (e) {
-    // TODO: handle canceled signature.
+    messageProvider.success('Wallet has been successfully connected.');
+  } catch (error) {
+    console.error(error);
 
-    console.error(e);
-    error(apiError(e));
+    messageProvider.error(contractError(error));
+    userStore.logout();
     disconnect();
+
+    modalWalletSelectVisible.value = false;
   }
   loadingWallet.value = false;
 }

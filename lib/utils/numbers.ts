@@ -60,3 +60,11 @@ export function getFixed(num: number | string, places = 2, round = false, roundT
 
   return parseFloat(num.toFixed(places));
 }
+
+export function formatCollateralAmount(
+  num: bigint | number | string,
+  collateralDecimals: number,
+  decimals: number = 3
+) {
+  return formatNumber(+(Number(num) / Math.pow(10, collateralDecimals)).toFixed(decimals));
+}

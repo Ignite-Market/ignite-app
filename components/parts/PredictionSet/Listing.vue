@@ -1,66 +1,80 @@
 <template>
-  <div ref="grid" class="grid grid-cols-4 gap-4">
-    <PredictionSetCard :predictionSet="predictionSet" v-for="predictionSet in predictionSets"></PredictionSetCard>
+  <div
+    class="grid xl:grid-cols-4 lg:grid-cols-[repeat(auto-fill,minmax(270px,1fr))] grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-4 justify-items-center mb-4"
+  >
+    <template
+      v-if="!predictionStore.loading || (predictionStore.pagination.page && predictionStore.pagination.page > 1)"
+    >
+      <PredictionSetCard
+        v-for="predictionSet in predictionStore.data"
+        :key="predictionSet.id"
+        :prediction-set="predictionSet"
+      />
+    </template>
+    <template v-if="predictionStore.loading">
+      <n-skeleton
+        v-for="i in 12"
+        :key="i"
+        height="100%"
+        width="100%"
+        class="rounded-[8px] max-w-[360px] max-h-[220px] min-h-[200px]"
+      />
+    </template>
   </div>
+  <div v-if="!predictionStore.loading && !predictionStore.data?.length" class="text-center mt-8">No results found</div>
 </template>
 
 <script lang="ts" setup>
-import { useInfiniteScroll } from '@vueuse/core';
-import Endpoints from '~/lib/values/endpoints';
-
 const props = defineProps({
-  category: { type: String, default: '' },
+  category: { type: String, default: null },
+  watchlist: { type: Boolean, default: false },
 });
 
 const message = useMessage();
 
-const grid = ref();
-const predictionSets = ref(<any[]>[]);
-const loading = ref(false);
+const predictionStore = usePredictionStore();
 const page = ref(1);
 const limit = ref(20);
 const total = ref(0);
 
 onMounted(async () => {
+  predictionStore.category = props.category;
   await getPredictionSets();
 });
 
-const {} = useInfiniteScroll(
-  grid,
-  async () => {
-    if (!loading.value) {
-      await getPredictionSets();
-    }
-  },
-  {
-    distance: 10,
-    canLoadMore: () => {
-      return !!total.value && total.value > predictionSets.value.length;
-    },
-  }
-);
+function canLoadMore() {
+  return !!total.value && total.value > predictionStore.data.length;
+}
 
-async function getPredictionSets() {
-  loading.value = true;
-  try {
-    const res = await $api.get<any>(Endpoints.predictionSets, {
-      category: props.category,
-      orderBy: 'id',
-      limit: limit.value,
-      desc: 'true',
-      page: page.value,
-    });
-
-    if (res.data) {
-      predictionSets.value.push(...(res.data.items as any[]));
-    }
-
-    page.value += 1;
-    total.value = res?.data?.total || 0;
-  } catch (error) {
-    message.error(apiError(error));
-  } finally {
-    loading.value = false;
+async function onInfiniteLoad() {
+  if (canLoadMore() && !predictionStore.loading) {
+    await getPredictionSets(true);
   }
 }
+
+async function getPredictionSets(force = false) {
+  try {
+    predictionStore.pagination.page = page.value;
+    predictionStore.pagination.pageSize = limit.value;
+
+    await predictionStore.fetch(
+      {
+        category: props.category || undefined,
+        orderBy: 'id',
+        limit: limit.value,
+        desc: 'true',
+        page: page.value,
+        watchlist: props.watchlist,
+      },
+      force
+    );
+
+    page.value += 1;
+    total.value = predictionStore.pagination.itemCount || 0;
+  } catch (error) {
+    message.error(apiError(error));
+  }
+}
+
+defineExpose({ onInfiniteLoad });
 </script>

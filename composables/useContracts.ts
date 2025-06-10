@@ -1,41 +1,25 @@
-import { useChainId, useChains, useClient, useConnectorClient, useSwitchChain } from '@wagmi/vue';
-import type { Address, Client, Transport, Chain, Account } from 'viem';
+import { useChainId, useChains, useConnectorClient, useSwitchChain } from '@wagmi/vue';
+import type { Account, Address, Chain, Client, Transport } from 'viem';
 import { createPublicClient, getContract, http } from 'viem';
-import { Chains } from '~/lib/types/asset';
 import { ContractType, getContractAbi } from '~/lib/config/contracts';
 
 const contracts = reactive<{ [key: string]: any }>({});
 const readContracts = reactive<{ [key: string]: any }>({});
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const publicClients = reactive<Record<number, Client<Transport, Chain | undefined, Account | undefined>>>({});
 
 export default function useContracts() {
+  const { switchChain } = useSwitchChain();
+  const { data: walletClient, refetch } = useConnectorClient();
   const config = useRuntimeConfig();
   const chainId = useChainId();
   const chains = useChains();
-  const { switchChain } = useSwitchChain();
-
-  const publicClient = useClient();
-  const { data: walletClient, refetch } = useConnectorClient();
 
   const activeChain = computed(() => chains.value.find(chain => chain.id === chainId.value)) || chains[0];
-
-  function initPublicClients() {
-    chains.value.forEach(chain => {
-      if (!(chain.id in publicClients)) {
-        publicClients[chain.id] = createPublicClient({
-          chain,
-          transport: http(),
-        });
-      }
-    });
-  }
-
-  function getPublicClient(id: number) {
-    if (!(id in publicClients)) {
-      initPublicClients();
-    }
-    return publicClients[id];
-  }
+  const publicClient = createPublicClient({
+    chain: activeChain.value,
+    transport: http(),
+  });
 
   /**
    *
@@ -44,8 +28,8 @@ export default function useContracts() {
    * @param contractAddress
    * @returns
    */
-  async function getReadContract(contractType: ContractType, chainId: number, contractAddress?: Address) {
-    if (contractType === ContractType.FPMM && !contractAddress) {
+  function initReadContract(contractType: ContractType, contractAddress?: Address) {
+    if ((contractType === ContractType.FPMM || contractType === ContractType.COLLATERAL_TOKEN) && !contractAddress) {
       throw new Error('FPMM contract address must be provided!');
     }
 
@@ -58,7 +42,7 @@ export default function useContracts() {
       readContracts[address] = getContract({
         address,
         abi: getContractAbi(contractType),
-        client: getPublicClient(chainId),
+        client: publicClient,
       });
     }
 
@@ -72,7 +56,7 @@ export default function useContracts() {
    * @returns
    */
   async function initContract(contractType: ContractType, contractAddress?: Address) {
-    if (contractType === ContractType.FPMM && !contractAddress) {
+    if ((contractType === ContractType.FPMM || contractType === ContractType.COLLATERAL_TOKEN) && !contractAddress) {
       throw new Error('FPMM contract address must be provided!');
     }
 
@@ -96,7 +80,7 @@ export default function useContracts() {
         abi: getContractAbi(contractType),
         client: {
           wallet: walletClient.value,
-          public: publicClient.value,
+          public: publicClient,
         },
       });
     }
@@ -135,9 +119,6 @@ export default function useContracts() {
     switch (type) {
       case ContractType.CONDITIONAL_TOKEN:
         return config.public.CONDITIONAL_TOKEN_CONTRACT as Address;
-
-      case ContractType.COLLATERAL_TOKEN:
-        return config.public.COLLATERAL_TOKEN_CONTRACT as Address;
     }
 
     return undefined;
@@ -149,8 +130,7 @@ export default function useContracts() {
     initContract,
     ensureCorrectNetwork,
     getContractAddress,
-    getPublicClient,
-    getReadContract,
+    initReadContract,
     resetContracts,
   };
 }

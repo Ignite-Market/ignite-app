@@ -50,7 +50,7 @@ export function copyToClipboard(text: string) {
       if (window.$i18n?.te('dashboard.clipboard.copied')) {
         window.$message.success(window.$i18n.t('dashboard.clipboard.copied'));
       } else {
-        window.$message.success('Text has been copied to clipboard');
+        window.$message.success('Text has been copied to clipboard.');
       }
     },
     () => {
@@ -72,7 +72,7 @@ export function copyToClipboardWithResponseTexts(text: string, successMsg?: stri
       if (successMsg) {
         window.$message.success(successMsg);
       } else {
-        window.$message.success('Text has been copied to clipboard');
+        window.$message.success('Text has been copied to clipboard.');
       }
     },
     () => {

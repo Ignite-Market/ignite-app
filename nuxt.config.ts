@@ -108,7 +108,7 @@ export default defineNuxtConfig({
         {
           'http-equiv': 'Content-Security-Policy',
           content:
-            "default-src *; font-src 'self' data:; img-src * data:; script-src 'self' 'unsafe-inline' 'unsafe-eval' *; style-src 'self' 'unsafe-inline' *",
+            "default-src *; font-src 'self' data: fonts.gstatic.com; img-src * data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' *; style-src 'self' 'unsafe-inline' *",
         },
       ],
 

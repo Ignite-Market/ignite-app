@@ -3,12 +3,10 @@ import { type Address, zeroHash } from 'viem';
 import { ContractType } from '~/lib/config/contracts';
 
 export default function useConditionalToken() {
-  const { getTokenStore } = useCollateralToken();
   const { initContract } = useContracts();
-  const { address } = useAccount();
+  const { address, isConnected } = useAccount();
   const txWait = useTxWait();
   const message = useMessage();
-  const config = useRuntimeConfig();
 
   /**
    * Checks if conditional tokens are approved for all on given FPMM contract, and approves them if they are not.
@@ -17,8 +15,11 @@ export default function useConditionalToken() {
    * @returns Boolean.
    */
   async function checkConditionalApprove(fpmmContractAddress: Address): Promise<boolean> {
-    const contract = await initContract(ContractType.CONDITIONAL_TOKEN);
+    if (!isConnected.value) {
+      return false;
+    }
 
+    const contract = await initContract(ContractType.CONDITIONAL_TOKEN);
     try {
       const isApproved = await contract.read.isApprovedForAll([address.value, fpmmContractAddress]);
       if (!isApproved) {
@@ -42,8 +43,11 @@ export default function useConditionalToken() {
    * @returns Conditional tokens balance.
    */
   async function getConditionalBalance(outcomePositionId: string) {
-    const contract = await initContract(ContractType.CONDITIONAL_TOKEN);
+    if (!isConnected.value) {
+      return BigInt(0);
+    }
 
+    const contract = await initContract(ContractType.CONDITIONAL_TOKEN);
     return await contract.read.balanceOf([address.value, outcomePositionId]);
   }
 
@@ -51,13 +55,13 @@ export default function useConditionalToken() {
    * Parses conditional token balance with the decimals of collateral token.
    *
    * @param balance Conditional tokens balance.
+   * @param collateralDecimals Number of decimal places of collateral token.
    * @returns Parsed balance.
    */
-  function parseConditionalBalance(balance: bigint) {
-    const tokenStore = getTokenStore();
-    const parsedBalance = Number(balance) / Math.pow(10, tokenStore.decimals);
+  function parseConditionalBalance(balance: bigint, collateralDecimals: number) {
+    const parsedBalance = Number(balance) / Math.pow(10, collateralDecimals);
 
-    return parsedBalance.toFixed(tokenStore.decimals);
+    return parsedBalance.toFixed(collateralDecimals);
   }
 
   /**
@@ -65,9 +69,13 @@ export default function useConditionalToken() {
    *
    * @param conditionId Condition ID.
    * @param winningIndex Winning index.
+   * @param collateralAddress Collateral token address.
    * @returns Redeem positions transaction.
    */
-  async function claim(conditionId: string, winningIndex: number) {
+  async function claim(conditionId: string, winningIndex: number, collateralAddress: Address) {
+    if (!isConnected.value) {
+      return;
+    }
     const contract = await initContract(ContractType.CONDITIONAL_TOKEN);
 
     // Bit representation of the winning index.
@@ -77,12 +85,7 @@ export default function useConditionalToken() {
     // - The number 3 (binary 011) represents a token that covers outcomes 0 and 1.
     const indexSet = 1 << winningIndex;
 
-    return await contract.write.redeemPositions([
-      config.public.COLLATERAL_TOKEN_CONTRACT,
-      zeroHash,
-      conditionId,
-      [indexSet],
-    ]);
+    return await contract.write.redeemPositions([collateralAddress, zeroHash, conditionId, [indexSet]]);
   }
 
   return {

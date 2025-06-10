@@ -16,6 +16,7 @@
     },
     "general": "Something went wrong, please try again later.",
     "404": "Page not found",
+    "DEFAULT_SYSTEM_ERROR": "Something went wrong, please try again later.",
     "BAD_REQUEST": "There is a problem with this request. Please come back later when we fixed that problem.",
     "INVALID_PATH": "Invalid path",
     "INVALID_QUERY_PARAMETERS": "Invalid query parameters",

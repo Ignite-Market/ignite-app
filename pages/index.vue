@@ -1,13 +1,13 @@
 <template>
-  <Dashboard>
-    <PredictionSetListing :category="'top'"></PredictionSetListing>
+  <Dashboard @load-more="loadMore">
+    <BannerListing />
+    <PredictionSetListing ref="predictionSetListing" />
   </Dashboard>
 </template>
 
 <script lang="ts" setup>
-const userStore = useUserStore();
-
-onMounted(() => {});
-
-async function getMarkets() {}
+const predictionSetListing = ref(null as any);
+const loadMore = async () => {
+  await predictionSetListing.value?.onInfiniteLoad();
+};
 </script>

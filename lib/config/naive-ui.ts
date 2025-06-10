@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import type { GlobalThemeOverrides, MessageProviderProps } from 'naive-ui';
 import { colors } from '~/tailwind.config';
 
@@ -9,7 +10,7 @@ const messageOverrides: MessageThemeOverrides = {};
  */
 export const themeOverrides: GlobalThemeOverrides = {
   common: {
-    bodyColor: colors.bg.DEFAULT,
+    bodyColor: colors.grey.DEFAULT,
     primaryColor: colors.primary.DEFAULT,
     primaryColorHover: colors.primary.light,
     primaryColorPressed: colors.primary.light,
@@ -18,11 +19,11 @@ export const themeOverrides: GlobalThemeOverrides = {
     textColorBase: colors.white,
   },
   DataTable: {
-    tdColor: colors.bg.box,
-    thColor: colors.bg.box,
+    tdColor: colors.grey.dark,
+    thColor: colors.grey.dark,
     borderColor: colors.transparent,
     borderRadius: '8px',
-    tdColorHover: colors.bg.light,
+    tdColorHover: colors.grey.light,
   },
   DatePicker: {
     iconColor: colors.grey.dark,
@@ -42,6 +43,9 @@ export const themeOverrides: GlobalThemeOverrides = {
     colorActiveError: colors.bg.DEFAULT,
     colorActiveWarning: colors.bg.DEFAULT,
     colorDisabled: colors.primary.dark,
+  },
+  AutoComplete: {
+    peers: { InternalSelectMenu: { color: colors.grey.light } },
   },
   Input: {
     border: `1px solid ${colors.grey.light}`,
@@ -69,7 +73,7 @@ export const themeOverrides: GlobalThemeOverrides = {
     heightLarge: '48px',
     iconColor: colors.black,
     iconColorHover: colors.black,
-    loadingColor: colors.grey.DEFAULT,
+    loadingColor: colors.white,
     placeholderColor: colors.grey.lightest,
     suffixTextColor: colors.white,
     textColor: colors.white,
@@ -104,12 +108,14 @@ export const themeOverrides: GlobalThemeOverrides = {
     buttonColor: colors.grey.light,
     buttonColorHover: colors.grey.lighter,
     buttonColorPressed: colors.grey.lighter,
-    buttonIconColor: colors.grey.DEFAULT,
+    buttonIconColor: colors.primary.DEFAULT,
+    buttonIconColorHover: colors.primary.DEFAULT,
+    buttonIconColorPressed: colors.primary.DEFAULT,
     itemTextColor: colors.white,
     itemTextColorActive: colors.white,
     itemTextColorHover: colors.white,
     itemTextColorPressed: colors.white,
-    itemTextColorDisabled: colors.grey.light,
+    itemTextColorDisabled: colors.primary.dark,
   },
   Radio: {
     buttonHeightSmall: '26px',
@@ -147,14 +153,11 @@ export const themeOverrides: GlobalThemeOverrides = {
         clearColor: colors.grey.DEFAULT,
         clearColorHover: colors.grey.DEFAULT,
         clearColorPressed: colors.grey.DEFAULT,
-        color: colors.bg.DEFAULT,
+        color: colors.grey.light,
         colorActive: colors.bg.DEFAULT,
         colorActiveError: colors.bg.DEFAULT,
         colorActiveWarning: colors.bg.DEFAULT,
         colorDisabled: colors.primary.dark,
-        boxShadowActive: '0px 4px 4px 0px #00000040',
-        boxShadowFocus: '0px 4px 4px 0px #00000040',
-        boxShadowHover: '0px 4px 4px 0px #00000040',
         fontSizeMedium: '14px',
         fontWeight: 'medium',
         heightTiny: '28px',
@@ -162,16 +165,16 @@ export const themeOverrides: GlobalThemeOverrides = {
         heightMedium: '38px',
         heightLarge: '48px',
         loadingColor: colors.grey.DEFAULT,
-        placeholderColor: colors.grey.DEFAULT,
+        placeholderColor: colors.grey.lightest,
         paddingSingle: '0 20px',
         textColor: colors.white,
         textColorDisabled: colors.grey.lighter,
       },
       InternalSelectMenu: {
-        color: colors.bg.light,
+        color: colors.grey.light,
         optionColorActive: colors.bg.DEFAULT,
         optionColorActivePending: colors.bg.DEFAULT,
-        optionColorPending: colors.bg.DEFAULT,
+        optionColorPending: colors.grey.lighter,
         optionCheckColor: colors.bg.DEFAULT,
         optionTextColor: colors.white,
         optionTextColorPressed: colors.white,

@@ -2,87 +2,240 @@
   <div class="border-1 border-grey-lighter bg-grey-light rounded-lg p-8 flex flex-col justify-center items-center">
     <div class="font-normal text-[16px] leading-[24px] text-white/80">Outcome winner</div>
     <div class="w-[64px] h-[64px] flex-shrink-0 mt-5">
-      <img
-        class="rounded-[48px] w-full h-full object-cover"
-        src="https://s3-alpha-sig.figma.com/img/99a4/f1e2/82e026f7f9103144567086cf6cd6a662?Expires=1739750400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=X~LM1-8x2K~GS-WxTXco4sGom-IufMECvaatFC8NWpNF36plKwoS2GWG-ONIx4DYF0FaaiLk0avNaWu593gzQWGan2SISOHnwzD1OFljZForFAebXzMFFkLPw7zRXOAj6C5F38rvn7hCASSLNtnaupzkJlwyocPQzzHBx35iULp9DGfuV2jChQvZIhCeqRbqdheJu~r16qKI9TslaML0SAuaZOsPe-GxfdNTl81pghUkpVxyktSzkaaoqLEoJ0pOtVDu-HaUIw9rvcWDsb0JGP~Ed6AJyWjneQteo3W4tu0G4APnxed3bNpX55mp4tM~AdnH0vVNVTNCxjeWL4vBTg__"
-      />
+      <Image :src="outcome.imgUrl" class="rounded-[48px] w-full h-full object-cover" />
     </div>
 
     <div class="font-bold text-[16px] leading-[24px] mt-2">{{ outcome.name }}</div>
-    <div class="w-[70%] border-b-1 border-grey-lighter pt-5"></div>
+    <div v-if="canClaim" class="w-[70%] border-b-1 border-grey-lighter pt-5"></div>
 
-    <div v-if="canClaim" class="flex items-center justify-center mt-5">
-      <NuxtIcon name="icon/star" class="text-primary text-[17px]" />
-      <div class="ml-[4px] text-[14px] leading-[20px] font-medium mr-5 text-white/60">0.35$</div>
-      <BasicButton :loading="loading" @click="claimWinnings" size="small" class="py-[6px] px-[10px]">Claim</BasicButton>
-    </div>
+    <div class="flex flex-col">
+      <div v-if="canClaim" class="flex items-center justify-center mt-5">
+        <NuxtIcon name="icon/points" class="text-primary text-[17px]" />
+        <div class="ml-[4px] text-[14px] leading-[20px] font-medium mr-5 text-white/60">
+          {{ formatCollateralAmount(claimBalance, collateralToken.decimals, 2) }} {{ collateralToken.symbol }}
+        </div>
+        <BasicButton :loading="loading" size="small" class="py-[6px] px-[10px]" @click="claimWinnings">
+          Claim
+        </BasicButton>
+      </div>
 
-    <div v-if="canWithdrawFunding" class="flex items-center justify-center mt-5">
-      <BasicButton
-        :loading="loading"
-        @click="withdrawFunding"
-        :class="['bg-statusBlue hover:bg-statusBlue-hover']"
-        class="py-[6px] px-[10px]"
-        size="small"
-      >
-        Withdraw Funding
-      </BasicButton>
+      <!-- TODO: we should probably show the funding value? -->
+      <div v-if="canWithdrawFunding" class="flex items-center justify-center mt-5 w-full">
+        <BasicButton
+          :loading="loading"
+          :class="['bg-statusBlue hover:bg-statusBlue-hover']"
+          class="py-[6px] px-[10px] w-full"
+          size="small"
+          @click="withdrawFunding"
+        >
+          Withdraw Funding
+        </BasicButton>
+      </div>
     </div>
   </div>
+
+  <!-- CONFIRM TRANSACTION MODAL -->
+  <n-modal
+    v-model:show="showTransactionModal"
+    preset="card"
+    class="w-[400px] border-none"
+    :mask-closable="false"
+    :close-on-esc="false"
+    :closable="false"
+  >
+    <div v-if="selectedAction === SelectedAction.WITHDRAW_FUNDING" class="flex flex-col mt-4">
+      <div class="flex w-full items-center justify-center mb-2">
+        <NuxtIcon name="icon/coins" class="text-primary text-[56px]" />
+      </div>
+      <div class="flex items-center justify-center text-[14px] leading-[20px] font-bold">Withdraw funding</div>
+    </div>
+
+    <div v-else class="flex flex-col mt-4">
+      <div class="flex w-full items-center justify-center mb-4">
+        <div class="w-[56px] h-[56px] flex-shrink-0">
+          <Image :src="outcome.imgUrl" class="rounded-[78px] w-full h-full object-cover" />
+        </div>
+      </div>
+      <div class="flex items-center justify-center text-[14px] leading-[20px]">
+        Claim winnings for outcome&nbsp;
+        <span class="font-extrabold"> {{ outcome.name }} </span>:
+      </div>
+      <span class="flex items-center justify-center text-[14px] leading-[20px] font-bold text-statusGreen mt-3">
+        {{ formatCollateralAmount(claimBalance, collateralToken.decimals, 2) }} {{ collateralToken.symbol }}
+      </span>
+    </div>
+
+    <div class="flex items-center py-4 pb-0 mt-4 font-semibold px-1 border-t-1 border-t-grey-lighter">
+      Confirm transaction
+
+      <div class="ml-auto">
+        <div class="w-[17px] h-[17px] flex justify-center items-center ml-auto">
+          <div class="w-[7px] h-[7px] bg-statusGreen rounded-full animate-pulse"></div>
+        </div>
+      </div>
+    </div>
+  </n-modal>
+
+  <!-- TRANSACTION SUCCESS MODAL -->
+  <Modal v-model:show="showSuccessModal" class="w-[320px] border-none">
+    <div class="flex flex-col items-center">
+      <ConfettiExplosion
+        :stage-width="1000"
+        :stage-height="1500"
+        :duration="3000"
+        :force="0.3"
+        :particle-count="100"
+        :colors="[
+          colors.primary.DEFAULT,
+          colors.primary.bright,
+          colors.primary.dark,
+          colors.primary.light,
+          colors.primary.hover,
+        ]"
+      />
+
+      <div class="flex w-full items-center justify-center mb-2">
+        <NuxtIcon name="icon/check" class="text-primary text-[40px]" />
+      </div>
+      <div class="flex items-center justify-center text-[14px] leading-[20px] font-bold">Congratulations!</div>
+
+      <div v-if="selectedAction === SelectedAction.CLAIM" class="flex flex-col items-center justify-center mt-5">
+        <div class="text-center">You have claimed your reward of:</div>
+        <span class="flex items-center justify-center text-[14px] leading-[20px] font-bold text-statusGreen mt-3">
+          {{ obtainedAmount }} {{ collateralToken.symbol }}
+        </span>
+      </div>
+
+      <div v-else class="flex flex-col items-center justify-center mt-5">
+        <div class="text-center">You have removed your funding and obtained a reward of:</div>
+        <span class="flex items-center justify-center text-[14px] leading-[20px] font-bold text-statusGreen my-3">
+          {{ obtainedFeeReward }} {{ collateralToken.symbol }}
+        </span>
+        <div class="text-center">You can now also claim your remaining funding of:</div>
+        <span class="flex items-center justify-center text-[14px] leading-[20px] font-bold text-statusGreen my-3">
+          {{ obtainedAmount }} {{ collateralToken.symbol }}
+        </span>
+      </div>
+
+      <BasicButton class="w-full font-bold mt-5" type="primary" :size="'large'" @click="showSuccessModal = false">
+        Close
+      </BasicButton>
+
+      <BasicButton
+        v-if="transactionHash"
+        class="w-full font-bold mt-3"
+        type="secondary"
+        :size="'medium'"
+        @click="openExplorer(transactionHash)"
+      >
+        Transaction
+      </BasicButton>
+    </div>
+  </Modal>
 </template>
 
 <script lang="ts" setup>
+import { useAccount } from '@wagmi/vue';
 import type { Address } from 'viem';
+import ConfettiExplosion from 'vue-confetti-explosion';
 import type { OutcomeInterface } from '~/lib/types/prediction-set';
+import { colors } from '~/tailwind.config';
+
+enum SelectedAction {
+  CLAIM = 1,
+  WITHDRAW_FUNDING = 2,
+}
 
 const { getConditionalBalance, claim } = useConditionalToken();
 const { getFundingBalance, removeFunding } = useFixedMarketMaker();
 const { ensureCorrectNetwork } = useContracts();
+const { address } = useAccount();
+const { loggedIn } = useLoggedIn();
 const message = useMessage();
 const txWait = useTxWait();
 
 const props = defineProps({
   contractAddress: { type: String as PropType<Address>, default: null, required: true },
   conditionId: { type: String, default: null, required: true },
-  outcome: { type: Object as PropType<OutcomeInterface>, default: {}, required: true },
+  outcome: { type: Object as PropType<OutcomeInterface>, default: () => {}, required: true },
+  collateralToken: { type: Object as PropType<CollateralToken>, default: () => {}, required: true },
 });
-
-const canClaim = ref(false);
-const canWithdrawFunding = ref(false);
 
 const claimBalance = ref(BigInt(0));
 const fundingBalance = ref(BigInt(0));
 
+const showTransactionModal = ref(false);
+const showSuccessModal = ref(false);
+const selectedAction = ref();
 const loading = ref(false);
+
+const obtainedAmount = ref();
+const obtainedFeeReward = ref();
+const transactionHash = ref('');
 
 onMounted(async () => {
   await updateClaimBalance();
   await updateFundingBalance();
 });
 
+watch(
+  () => loggedIn.value,
+  async _ => {
+    await updateClaimBalance();
+    await updateFundingBalance();
+  },
+  { immediate: true }
+);
+
+const canClaim = computed(() => {
+  return claimBalance.value > BigInt(0);
+});
+
+const canWithdrawFunding = computed(() => {
+  return fundingBalance.value > BigInt(0);
+});
+
 async function updateClaimBalance() {
   claimBalance.value = await getConditionalBalance(props.outcome.positionId);
-  canClaim.value = claimBalance.value > BigInt(0);
 }
 
 async function updateFundingBalance() {
   fundingBalance.value = await getFundingBalance(props.contractAddress);
-  canWithdrawFunding.value = fundingBalance.value > BigInt(0);
 }
 
+/**
+ * Claim winnings.
+ */
 async function claimWinnings() {
+  obtainedAmount.value = '';
+
   await updateClaimBalance();
 
   if (!claimBalance.value || !canClaim.value) {
     return;
   }
 
+  selectedAction.value = SelectedAction.CLAIM;
+  showTransactionModal.value = true;
   loading.value = true;
   try {
     await ensureCorrectNetwork();
 
-    txWait.hash.value = await claim(props.conditionId, props.outcome.outcomeIndex);
+    txWait.hash.value = await claim(props.conditionId, props.outcome.outcomeIndex, props.collateralToken.address);
     const receipt = await txWait.wait();
+
+    if (receipt.status === 'success') {
+      const parsed = parseTransfersERC20(receipt);
+      if (parsed.length) {
+        const event = parsed.find((e: any) => e.to === address.value);
+        obtainedAmount.value = formatCollateralAmount(event.amount, props.collateralToken.decimals, 2);
+      }
+
+      showSuccessModal.value = true;
+      transactionHash.value = receipt?.data?.transactionHash || '';
+    } else if (receipt.status === 'error') {
+      message.error(contractError(receipt.error));
+    }
 
     await updateClaimBalance();
   } catch (error) {
@@ -90,29 +243,71 @@ async function claimWinnings() {
     message.error(contractError(error));
   } finally {
     loading.value = false;
+    showTransactionModal.value = false;
   }
 }
 
+/**
+ * Withdraw funding.
+ */
 async function withdrawFunding() {
+  obtainedFeeReward.value = '';
+  obtainedAmount.value = '';
+
   await updateFundingBalance();
 
   if (!fundingBalance.value || !canWithdrawFunding.value) {
     return;
   }
 
+  selectedAction.value = SelectedAction.WITHDRAW_FUNDING;
+  showTransactionModal.value = true;
   loading.value = true;
   try {
     await ensureCorrectNetwork();
 
     txWait.hash.value = await removeFunding(props.contractAddress, fundingBalance.value);
-    await txWait.wait();
+    const receipt = await txWait.wait();
+
+    if (receipt.status === 'success') {
+      const parsed = parseTransfersERC20(receipt);
+      if (parsed.length) {
+        const event = parsed.find((e: any) => e.to === address.value);
+        if (event) {
+          obtainedFeeReward.value = formatCollateralAmount(event.amount, props.collateralToken.decimals, 2);
+        }
+      }
+
+      const parsedBatchTransfer = parseBatchTransfer1155(receipt);
+      if (parsedBatchTransfer.length) {
+        const event = parsedBatchTransfer.find((e: any) => e.to === address.value);
+        if (event) {
+          const index = event?.ids?.findIndex((id: string) => id === props.outcome.positionId) || 0;
+          const amount = event.values[index] || 0;
+          obtainedAmount.value = formatCollateralAmount(amount, props.collateralToken.decimals, 2);
+        }
+      }
+
+      showSuccessModal.value = true;
+      transactionHash.value = receipt?.data?.transactionHash || '';
+    } else if (receipt.status === 'error') {
+      message.error(contractError(receipt.error));
+    }
 
     await updateFundingBalance();
+    await updateClaimBalance();
   } catch (error) {
     console.error(error);
     message.error(contractError(error));
   } finally {
     loading.value = false;
+    showTransactionModal.value = false;
   }
+}
+
+function openExplorer(txHash: string) {
+  const explorer = getExplorer();
+
+  window.open(`${explorer}/tx/${txHash}`, '_blank');
 }
 </script>
