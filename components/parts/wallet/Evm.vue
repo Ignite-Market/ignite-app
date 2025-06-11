@@ -31,8 +31,8 @@ const clickOnConnector = (connector, strategy) => {
     emit('loading', true);
     // do loading animation
     loadingStrategy.value = strategy.id;
-    connectAsync({ connector, strategy: strategy.id } as any).catch(() => {
-      console.log('Connection canceled or failed');
+    connectAsync({ connector, strategy: strategy.id } as any).catch(e => {
+      console.log('Connection canceled or failed', e);
       loadingStrategy.value = undefined;
       emit('loading', false);
     });
@@ -44,8 +44,8 @@ const clickOnConnector = (connector, strategy) => {
     emit('loading', true);
     // do loading animation for connector
     loadingConnector.value = connector.id;
-    connectAsync({ connector }).catch(() => {
-      console.log('Connection canceled or failed');
+    connectAsync({ connector }).catch(e => {
+      console.log('Connection canceled or failed', e);
       loadingStrategy.value = undefined;
       loadingConnector.value = undefined;
       selectConnector.value = undefined;
