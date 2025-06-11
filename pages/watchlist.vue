@@ -5,10 +5,12 @@
 </template>
 
 <script lang="ts" setup>
-const { loggedIn } = useLoggedIn();
+useLoggedIn(onInit);
 const router = useRouter();
 
-onMounted(() => {
-  if (!loggedIn.value) router.replace('/');
-});
+function onInit(loggedIn: boolean) {
+  if (!loggedIn) {
+    router.replace('/');
+  }
+}
 </script>

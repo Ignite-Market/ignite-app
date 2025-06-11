@@ -52,18 +52,23 @@ const props = defineProps({
 const message = useMessage();
 const router = useRouter();
 const { user: authUser } = useUserStore();
-const { loggedIn } = useLoggedIn();
 
 const isCurrentUser = computed(() => user.value?.id === authUser.id);
 
-const loading = ref(false);
+const loading = ref(true);
 const user = ref<UserInterface | null>(null);
 
-onMounted(() => {
-  setTimeout(async () => {
+const { loggedIn, isInitializing } = useLoggedIn(onInit);
+
+onMounted(async () => {
+  if (!isInitializing.value) {
     await getUserProfile();
-  }, 200);
+  }
 });
+
+async function onInit() {
+  await getUserProfile();
+}
 
 async function getUserProfile() {
   loading.value = true;
@@ -72,6 +77,7 @@ async function getUserProfile() {
       if (!loggedIn.value) {
         message.error('Not logged in!');
         router.push('/');
+        return;
       }
       const res = await $api.get<UserProfileResponse>(Endpoints.me);
       user.value = res.data;
