@@ -106,7 +106,7 @@ export const useUserStore = defineStore('user', {
   },
   persist: {
     key: WebStorageKeys.USER_STORE,
-    storage: sessionStorage,
+    storage: localStorage,
     pick: ['jwt', 'notifications', 'user'],
   },
 });
