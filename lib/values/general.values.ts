@@ -21,8 +21,8 @@ export enum PageSize {
 }
 
 export const WebStorageKeys = {
-  USER_STORE: 'len_user_store',
-  TX_STORE: 'len_tx_store',
+  USER_STORE: 'ignite_market_user_store',
+  TX_STORE: 'ignite_market_tx_store',
 };
 export const LS_KEYS = {
   APP_VERSION: 'ignite_market_app_version',

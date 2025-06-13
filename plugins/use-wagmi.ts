@@ -46,7 +46,7 @@ export default defineNuxtPlugin(nuxtApp => {
       }),
     ],
     multiInjectedProviderDiscovery: false,
-    storage: createStorage({ storage: window.sessionStorage }),
+    storage: createStorage({ storage: window.localStorage }),
     transports,
   });
 
