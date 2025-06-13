@@ -13,6 +13,10 @@
     </div>
 
     <div class="flex">
+      <div v-if="loggedIn" class="mr-2 lg:mr-4 flex items-center">
+        <Points compact />
+      </div>
+
       <div class="hidden lg:flex">
         <div
           class="group flex flex-col items-center justify-center border-1 border-white border-opacity-[24%] rounded-lg w-[70px] h-auto mr-2 hover:bg-grey-dark cursor-pointer"
