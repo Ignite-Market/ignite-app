@@ -387,8 +387,6 @@ async function vote(voteType: ProposalVoteType) {
       voteType,
     });
 
-    // TODO: Refresh proposal.
-
     await getProposal(true);
   } catch (error) {
     message.error(apiError(error));

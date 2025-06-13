@@ -1,12 +1,10 @@
 import { useChainId, useChains, useConnectorClient, useSwitchChain } from '@wagmi/vue';
-import type { Account, Address, Chain, Client, Transport } from 'viem';
+import type { Address } from 'viem';
 import { createPublicClient, getContract, http } from 'viem';
 import { ContractType, getContractAbi } from '~/lib/config/contracts';
 
 const contracts = reactive<{ [key: string]: any }>({});
 const readContracts = reactive<{ [key: string]: any }>({});
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const publicClients = reactive<Record<number, Client<Transport, Chain | undefined, Account | undefined>>>({});
 
 export default function useContracts() {
   const { switchChain } = useSwitchChain();
@@ -22,11 +20,11 @@ export default function useContracts() {
   });
 
   /**
+   * Initialize a read contract.
    *
-   * @param contractType
-   * @param chainId
-   * @param contractAddress
-   * @returns
+   * @param contractType The type of contract to initialize.
+   * @param contractAddress The address of the contract to initialize.
+   * @returns The read contract.
    */
   function initReadContract(contractType: ContractType, contractAddress?: Address) {
     if ((contractType === ContractType.FPMM || contractType === ContractType.COLLATERAL_TOKEN) && !contractAddress) {
@@ -50,10 +48,11 @@ export default function useContracts() {
   }
 
   /**
+   * Initialize a write contract.
    *
-   * @param contractType
-   * @param contractAddress
-   * @returns
+   * @param contractType The type of contract to initialize.
+   * @param contractAddress The address of the contract to initialize.
+   * @returns The write contract.
    */
   async function initContract(contractType: ContractType, contractAddress?: Address) {
     if ((contractType === ContractType.FPMM || contractType === ContractType.COLLATERAL_TOKEN) && !contractAddress) {
@@ -89,8 +88,9 @@ export default function useContracts() {
   }
 
   /**
+   * Ensure the correct network is selected.
    *
-   * @param retry
+   * @param retry The number of times to retry.
    */
   async function ensureCorrectNetwork(retry: number = 0) {
     const desiredChainId = chains.value[0].id;
@@ -109,12 +109,21 @@ export default function useContracts() {
     }
   }
 
+  /**
+   * Reset the contracts.
+   */
   function resetContracts() {
     Object.keys(contracts).forEach(key => {
       delete contracts[key];
     });
   }
 
+  /**
+   * Get the contract address.
+   *
+   * @param type The type of contract.
+   * @returns The contract address.
+   */
   function getContractAddress(type: ContractType): Address | undefined {
     switch (type) {
       case ContractType.CONDITIONAL_TOKEN:

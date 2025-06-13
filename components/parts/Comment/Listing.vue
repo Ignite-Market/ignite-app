@@ -85,7 +85,6 @@ async function getComments(page: number = 1) {
 }
 
 // TODO: Hide replies, infinite scrolling.
-
 async function addComment(parentId: number = 0) {
   if (!comment.value) {
     return;

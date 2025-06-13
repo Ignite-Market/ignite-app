@@ -194,12 +194,24 @@ export default function useFixedMarketMaker() {
    * Returns total funding for selected market.
    *
    * @param fpmmContractAddress FPMM contract address.
-   * @param shareAmount Amount of shares to return.
+   * @returns Total funding.
    */
   async function getTotalFunding(fpmmContractAddress: Address) {
     const contract = await initReadContract(ContractType.FPMM, fpmmContractAddress);
 
     return await contract.read.fundingAmountTotal();
+  }
+
+  /**
+   * Returns current liquidity for selected market.
+   *
+   * @param fpmmContractAddress FPMM contract address.
+   * @returns Current liquidity.
+   */
+  async function getCurrentLiquidity(fpmmContractAddress: Address) {
+    const contract = await initReadContract(ContractType.FPMM, fpmmContractAddress);
+
+    return await contract.read.currentLiquidity();
   }
 
   /**
@@ -351,15 +363,16 @@ export default function useFixedMarketMaker() {
   }
 
   return {
+    getCurrentLiquidity,
+    getFundingBalance,
     getMaxTokensToSell,
     getMinTokensToBuy,
+    getPricePerShare,
+    getTotalFunding,
     addFunding,
     buy,
     sell,
-    getPricePerShare,
-    getFundingBalance,
     removeFunding,
-    getTotalFunding,
     calcSellAmountInCollateral,
     calcSharesForCollateral,
   };
