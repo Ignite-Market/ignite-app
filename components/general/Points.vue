@@ -43,18 +43,20 @@ const items = computed(() => [
 </script>
 
 <template>
-  <n-popover v-if="compact" :trigger="isLg ? 'hover' : 'click'" :show-arrow="false" placement="bottom">
+  <n-popover v-if="compact" raw :trigger="isLg ? 'hover' : 'click'" :show-arrow="false" placement="bottom">
     <template #trigger>
-      <div class="flex items-center gap-1.5 border border-grey-lighter rounded-lg px-3 py-2">
-        <span class="xs:block hidden text-sm font-semibold">
+      <div
+        class="flex justify-center items-center gap-1.5 border border-transparent bg-grey-dark rounded-lg px-3 xs:min-w-[80px] py-2 h-full"
+      >
+        <span class="xs:block hidden text-base font-semibold">
           {{ shortenLargeNumber(userStore.points.totalPoints) }}
         </span>
 
-        <NuxtIcon name="icon/points" class="text-primary text-[20px]" />
+        <NuxtIcon name="icon/points" class="text-primary text-[24px]" />
       </div>
     </template>
 
-    <div class="flex flex-col gap-2">
+    <div class="flex flex-col gap-2 bg-grey-dark border-1 !border-grey-lighter px-4 pt-2 pb-4 rounded-lg">
       <div v-for="item in items" :key="item.label" class="flex items-center justify-between gap-4">
         <span class="whitespace-nowrap">{{ item.label }}</span>
 

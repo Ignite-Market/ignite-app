@@ -20,6 +20,7 @@ function UserPointsFactory() {
 export const useUserStore = defineStore('user', {
   state: () => ({
     jwt: '',
+    initialized: false, // user has been reloaded once already this session
     loadingProfile: false,
     notifications: {
       loading: false,
@@ -70,10 +71,12 @@ export const useUserStore = defineStore('user', {
      * API calls
      */
     initUser() {
-      if (this.jwt) {
+      if (this.jwt && !this.initialized) {
         this.setUserToken(this.jwt);
         // this.user = this.getUserData();
         this.promises.profile = this.getUserData();
+        this.getUserPoints();
+        this.initialized = true;
       }
     },
 
