@@ -12,20 +12,30 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@fvictorio/newton-raphson-method": "^1.0.5",
     "@gtm-support/vue-gtm": "^3.1.0",
     "@openzeppelin/merkle-tree": "^1.0.7",
     "@pinia/nuxt": "^0.9.0",
+    "@prosopo/vue-procaptcha-wrapper": "^1.0.0",
     "@tanstack/vue-query": "^5.61.5",
-    "@wagmi/vue": "^0.0.67",
+    "@thirdweb-dev/wagmi-adapter": "^0.2.68",
+    "@wagmi/vue": "^0.1.18",
+    "big.js": "^6.2.2",
     "buffer": "^6.0.3",
     "date-fns": "^4.1.0",
+    "echarts": "^5.6.0",
     "nuxt": "^3.13.0",
     "nuxt-icons": "^3.2.1",
     "pinia": "^2.2.7",
     "pinia-plugin-persistedstate": "^4.2.0",
+    "swiper": "^11.2.5",
+    "thirdweb": "^5.96.8",
     "v-lazy-image": "^2.1.1",
-    "viem": "^2.21.52",
+    "viem": "^2.28.4",
+    "vue-confetti-explosion": "^1.0.2",
     "vue-cookie-accept-decline": "^6.1.0",
+    "vue-echarts": "^7.0.3",
+    "vue-horizontal": "^1.0.2",
     "vue3-jazzicon": "^0.1.4"
   },
   "devDependencies": {
@@ -44,11 +54,13 @@
     "eslint-plugin-prettier": "^5.2.1",
     "naive-ui": "^2.40.2",
     "nuxtjs-naive-ui": "^1.0.2",
+    "postcss": "^8.5.3",
+    "postcss-loader": "^8.1.1",
     "prettier": "^3.4.1",
     "typescript": "^5.7.2",
     "unplugin-auto-import": "^0.18.6",
     "unplugin-vue-components": "^0.27.5",
-    "vue": "latest",
+    "vue": "^3.5.13",
     "vue-router": "latest"
   }
 }

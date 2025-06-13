@@ -11,7 +11,7 @@ export default function useTxWait() {
   const hash = ref<Address | undefined>(undefined);
   const chainId = useChainId();
 
-  const { data, refetch } = useWaitForTransactionReceipt({
+  const { refetch } = useWaitForTransactionReceipt({
     chainId: chainId.value,
     confirmations: 3,
     hash,

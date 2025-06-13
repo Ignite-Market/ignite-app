@@ -14,11 +14,17 @@ export interface TransactionInterface {
   };
 }
 
+interface Provider {
+  getTransaction: (hash: string) => Promise<any>;
+  getTransactionReceipt: (hash: string) => Promise<any>;
+  once: (hash: string, callback: (ev: any) => void) => void;
+}
+
 export const useTxStore = defineStore('tx', {
   state: () => ({
     transactions: {} as { [k: string]: TransactionInterface },
     pending: [] as string[], // hashes
-    usedProvider: null,
+    usedProvider: null as { provider: Provider } | null,
   }),
 
   getters: {
@@ -30,8 +36,8 @@ export const useTxStore = defineStore('tx', {
       return state.pending && state.pending.length;
     },
 
-    pendingTransactions(state) {
-      const pendingTxs = [];
+    pendingTransactions(state): TransactionInterface[] {
+      const pendingTxs: TransactionInterface[] = [];
       for (const pending of state.pending) {
         if (pending in state.transactions) {
           pendingTxs.push(state.transactions[pending]);
@@ -81,6 +87,10 @@ export const useTxStore = defineStore('tx', {
      */
     async check(hash: string) {
       if (!hash || !(hash in this.transactions) || !this.transactions[hash]) {
+        return false;
+      }
+
+      if (!this.usedProvider) {
         return false;
       }
 
@@ -157,5 +167,5 @@ export const useTxStore = defineStore('tx', {
     key: WebStorageKeys.TX_STORE,
     storage: localStorage,
     paths: ['transactions'],
-  },
+  } as any,
 });

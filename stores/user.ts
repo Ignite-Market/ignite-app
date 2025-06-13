@@ -14,32 +14,7 @@ export const useUserStore = defineStore('user', {
     promises: {
       profile: null as any,
     },
-    collateralToken: {
-      balance: BigInt(0),
-      parsedBalance: '0.0',
-      decimals: 0,
-      symbol: '',
-      loaded: false,
-      loading: false,
-    },
 
-    token: {
-      base: {
-        allowance: BigInt(0),
-        balance: BigInt(0),
-        symbol: '',
-      },
-      bsc: {
-        allowance: BigInt(0),
-        balance: BigInt(0),
-        symbol: '',
-      },
-      moonbeam: {
-        allowance: BigInt(0),
-        balance: BigInt(0),
-        symbol: '',
-      },
-    },
     user: {} as UserInterface,
   }),
   getters: {
@@ -77,9 +52,10 @@ export const useUserStore = defineStore('user', {
     /**
      * API calls
      */
-    async initUser() {
+    initUser() {
       if (this.jwt) {
         this.setUserToken(this.jwt);
+        // this.user = this.getUserData();
         this.promises.profile = this.getUserData();
       }
     },
@@ -99,6 +75,7 @@ export const useUserStore = defineStore('user', {
         return res;
       } catch (error) {
         /** On error - logout */
+        console.error(error);
         this.logout();
 
         setTimeout(() => {

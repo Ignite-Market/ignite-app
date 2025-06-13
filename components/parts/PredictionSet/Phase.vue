@@ -6,14 +6,17 @@
         name="icon/funding"
         :class="{ '!text-grey-lightest': Phase.FUNDING < activePhase }"
       />
-      <div :class="{ '!text-grey-lightest': Phase.FUNDING < activePhase }">
+      <div
+        :class="{ '!text-grey-lightest': Phase.FUNDING < activePhase }"
+        :title="dateTimeToDateAndTime(predictionSet.createTime)"
+      >
         Funding on {{ toMonthAndYear(predictionSet.createTime) }}
       </div>
 
       <NuxtIcon v-if="Phase.FUNDING < activePhase" class="text-primary text-[17px] ml-auto" name="icon/complete" />
 
       <div v-if="Phase.FUNDING === activePhase" class="w-[17px] h-[17px] flex justify-center items-center ml-auto">
-        <div class="w-[7px] h-[7px] bg-statusGreen rounded-full"></div>
+        <div class="w-[7px] h-[7px] bg-statusGreen rounded-full animate-pulse"></div>
       </div>
     </div>
 
@@ -23,14 +26,17 @@
         class="text-white text-[17px] mr-[17px]"
         name="icon/calendar"
       />
-      <div :class="{ '!text-grey-lightest': Phase.STARTED < activePhase }">
+      <div
+        :class="{ '!text-grey-lightest': Phase.STARTED < activePhase }"
+        :title="dateTimeToDateAndTime(predictionSet.startTime)"
+      >
         Started on {{ toMonthAndYear(predictionSet.startTime) }}
       </div>
 
       <NuxtIcon v-if="Phase.STARTED < activePhase" class="text-primary text-[17px] ml-auto" name="icon/complete" />
 
       <div v-if="Phase.STARTED === activePhase" class="w-[17px] h-[17px] flex justify-center items-center ml-auto">
-        <div class="w-[7px] h-[7px] bg-statusGreen rounded-full"></div>
+        <div class="w-[7px] h-[7px] bg-statusGreen rounded-full animate-pulse"></div>
       </div>
     </div>
 
@@ -40,7 +46,10 @@
         class="text-white text-[17px] mr-[17px]"
         name="icon/flag"
       />
-      <div :class="{ '!text-grey-lightest': Phase.ENDS < activePhase }">
+      <div
+        :class="{ '!text-grey-lightest': Phase.ENDS < activePhase }"
+        :title="dateTimeToDateAndTime(predictionSet.endTime)"
+      >
         Ends on {{ toMonthAndYear(predictionSet.endTime) }}
       </div>
 
@@ -49,10 +58,12 @@
 
     <div class="flex items-center pt-4">
       <NuxtIcon class="text-white text-[17px] mr-[17px]" name="icon/trophy" />
-      <div>Results on {{ toMonthAndYear(predictionSet.resolutionTime) }}</div>
+      <div :title="dateTimeToDateAndTime(predictionSet.resolutionTime)">
+        Results on {{ toMonthAndYear(predictionSet.resolutionTime) }}
+      </div>
 
       <div v-if="Phase.RESULTS === activePhase" class="w-[17px] h-[17px] flex justify-center items-center ml-auto">
-        <div class="w-[7px] h-[7px] bg-statusGreen rounded-full"></div>
+        <div class="w-[7px] h-[7px] bg-statusGreen rounded-full animate-pulse"></div>
       </div>
     </div>
   </div>
@@ -69,7 +80,7 @@ enum Phase {
 }
 
 const props = defineProps({
-  predictionSet: { type: Object as PropType<PredictionSetInterface>, default: {}, required: true },
+  predictionSet: { type: Object as PropType<PredictionSetInterface>, default: () => {}, required: true },
 });
 
 const activePhase = computed(() => {
@@ -87,9 +98,7 @@ const activePhase = computed(() => {
   return Phase.RESULTS;
 });
 
-onMounted(() => {
-  console.log('active: ', activePhase.value);
-});
+onMounted(() => {});
 
 watch(
   () => activePhase.value,

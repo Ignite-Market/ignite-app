@@ -1,57 +1,30 @@
 <template>
-  <div class="relative flex flex-col justify-center align-middle min-h-screen h-full">
-    <div class="container relative max-w-lg py-16 sm:px-8 md:px-12 lg:px-16 card">
-      <div>
-        <!-- customize 404 message from template section -->
-        <h4>{{ $t('error.404') }}</h4>
+  <div class="relative flex flex-col justify-center items-center min-h-screen h-full bg-grey-dark px-4">
+    <div class="w-full max-w-[500px]">
+      <div class="rounded-xl border-1 border-grey-lighter p-[1px]">
+        <div class="card p-6 md:p-8 lg:p-12 !bg-grey-dark">
+          <div class="flex flex-col items-center text-center bg-grey-dark">
+            <NuxtIcon name="logo/IgniteMarketSm" class="icon-auto mb-8" filled />
 
-        <!-- Redirect to home page -->
-        <button @click="handleError">
-          {{ $t('general.goHome') }}
-        </button>
+            <h2 class="text-[24px] leading-[34px] font-bold text-white mb-4">Page not found</h2>
+
+            <p class="text-white/80 text-[16px] leading-[22px] mb-8">
+              Hmm, looks like you've wandered into uncharted territory. Let's get you back on track!
+            </p>
+
+            <BasicButton type="primary" size="medium" class="w-full max-w-[200px]" @click="handleError">
+              Go home
+            </BasicButton>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-// const userStore = useUserStore();
-// const { isLg } = useScreen();
-const messageRef = ref<HTMLDivElement>();
-const mainContentRef = ref<HTMLDivElement>();
-const showMobileSidebar = ref<boolean>(false);
+import BasicButton from '~/components/general/BasicButton.vue';
 
-/**
- * Show/hide sidebar on mobile
-
-const { lengthX, lengthY } = useSwipe(mainContentRef, {
-  onSwipeEnd() {
-    if (
-      !isLg.value &&
-      Math.abs(lengthX.value) > 150 &&
-      Math.abs(lengthX.value) > Math.abs(lengthY.value)
-    ) {
-      toggleSidebar(lengthX.value < 0);
-    }
-  },
-}); */
-
-/** Hide sidebar if user flip device in mobile view 
-watch(
-  () => isLg.value,
-  isLg => {
-    toggleSidebar(isLg);
-  }
-);*/
-
-function toggleSidebar(show?: boolean) {
-  if (show === undefined) {
-    showMobileSidebar.value = !showMobileSidebar.value;
-  } else {
-    showMobileSidebar.value = show;
-  }
-}
-
-// clear error and redirect to home page
-const handleError = () => clearError({ redirect: false ? '/dashboard' : '/login' });
+// Clear error and redirect to home page.
+const handleError = () => clearError({ redirect: '/' });
 </script>

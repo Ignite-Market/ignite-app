@@ -10,7 +10,7 @@ export enum AppEnv {
 
 export type TableFilter = {
   options?: SelectOption[];
-  show: boolean;
+  show?: boolean;
   value: string | number | null;
 };
 
@@ -41,11 +41,10 @@ declare global {
     VERSION: string;
     url: string;
     apiUrl: string;
-
-    CHAIN_ID: number;
-    COLLATERAL_TOKEN_CONTRACT: Address;
     CONDITIONAL_TOKEN_CONTRACT: Address;
-    FPMM_FACTORY_CONTRACT: Address;
     ORACLE_CONTRACT: Address;
+    THIRDWEB_CLIENT_KEY: string;
+    WALLETCONNECT_PROJECT_ID: string;
+    PROSOPO_CAPTCHA_SITEKEY: string;
   }
 }

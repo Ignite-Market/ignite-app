@@ -96,7 +96,7 @@ export function dateTimeToDate(dateTime: string): string {
  * @param dateTime
  * @returns
  */
-export function dateTimeToDateAndTime(dateTime: string): string {
+export function dateTimeToDateAndTime(dateTime: string | Date): string {
   if (!dateTime) return '';
 
   const date = new Date(dateTime);

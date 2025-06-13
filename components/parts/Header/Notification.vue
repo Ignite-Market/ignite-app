@@ -22,6 +22,6 @@
 import { dateTimeToDate } from '~/lib/utils/dates';
 
 defineProps({
-  notification: { type: Object as PropType<NotificationInterface>, default: {} },
+  notification: { type: Object as PropType<NotificationInterface>, default: () => {} },
 });
 </script>

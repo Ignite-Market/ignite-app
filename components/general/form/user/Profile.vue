@@ -1,9 +1,9 @@
 <template>
   <n-form ref="formRef" class="w-full max-w-lg" :model="formData" :rules="rules" @submit.prevent="handleSubmit">
     <!--  Username -->
-    <n-form-item path="name" :label="'Username'" :label-props="{ for: 'username' }">
+    <n-form-item path="username" :label="'Username'" :label-props="{ for: 'username' }">
       <n-input
-        v-model:value="formData.name"
+        v-model:value="formData.username"
         :input-props="{ id: 'username' }"
         :placeholder="'Username'"
         :loading="loadingForm"
@@ -32,11 +32,10 @@
 
 <script lang="ts" setup>
 import type { FormInst, FormRules, FormValidationError } from 'naive-ui';
-import { ruleRequired } from '~/lib/misc/validation';
 import Endpoints from '~/lib/values/endpoints';
 
 type FormUserProfile = {
-  name: string;
+  username: string;
   email: string;
 };
 
@@ -49,18 +48,17 @@ const loadingForm = ref<boolean>(true);
 const formRef = ref<FormInst | null>(null);
 
 const formData = ref<FormUserProfile>({
-  name: userStore.name,
-  email: userStore.email,
+  username: userStore.user.username,
+  email: userStore.user.email,
 });
 
 const rules: FormRules = {
-  name: [],
+  username: [],
   email: [
     {
       type: 'email',
       message: t('validation.email'),
     },
-    ruleRequired(t('validation.emailRequired')),
   ],
 };
 
@@ -68,7 +66,8 @@ onMounted(async () => {
   await sleep(500);
   await Promise.all(Object.values(userStore.promises));
 
-  formData.value.email = userStore.email;
+  formData.value.email = userStore.user.username;
+  formData.value.email = userStore.user.email;
   loadingForm.value = false;
 });
 
@@ -87,7 +86,8 @@ async function updateUserProfile() {
   loading.value = true;
 
   try {
-    const res = await $api.patch<UserProfileResponse>(Endpoints.me, formData.value);
+    console.log(formData.value);
+    const res = await $api.put<UserProfileResponse>(Endpoints.userUpdate, formData.value);
 
     if (res.data) {
       userStore.saveUser(res.data);
@@ -95,6 +95,9 @@ async function updateUserProfile() {
     }
   } catch (error) {
     message.error(apiError(error));
+
+    formData.value.email = userStore.user.username;
+    formData.value.email = userStore.user.email;
   }
   loading.value = false;
 }

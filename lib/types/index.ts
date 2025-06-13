@@ -1,8 +1,6 @@
 import type { MessageApiInjection } from 'naive-ui/es/message/src/MessageProvider';
 import type { ExportedGlobalComposer, Composer } from 'vue-i18n';
-import type { NuxtI18nRoutingCustomProperties } from '@nuxtjs/i18n/dist/runtime/types.d.ts';
 import type { LocaleObject } from '@nuxtjs/i18n';
-import type { OfferStatus } from './offer';
 import type { Address } from 'viem';
 import type { DataTableSortState } from 'naive-ui';
 
@@ -14,6 +12,12 @@ export enum SqlModelStatus {
   BLOCKED = 7,
   ARCHIVED = 8,
   DELETED = 9,
+}
+
+export enum ProfileTabs {
+  PREDICTIONS = 'Positions',
+  ACTIVITY = 'Activity',
+  FUNDING_POSITIONS = 'Funding Positions',
 }
 
 declare global {
@@ -28,7 +32,7 @@ declare global {
     value: string | number;
   };
 
-  type i18nType = ExportedGlobalComposer & Composer & NuxtI18nRoutingCustomProperties<LocaleObject[]>;
+  type i18nType = ExportedGlobalComposer & Composer<LocaleObject[]>;
 
   /**
    * Window
@@ -85,7 +89,7 @@ declare global {
     orderBy?: string;
     order?: string;
     loader?: boolean;
-    status?: SqlModelStatus | OfferStatus;
+    status?: SqlModelStatus;
     sorter?: DataTableSortState;
   } & Record<string, Parameter | undefined | any>;
 }

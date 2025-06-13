@@ -1,39 +1,79 @@
-import type { Address } from 'viem';
-
 const Endpoints = {
-  /** User */
+  /**
+   * User
+   */
   me: '/users/me',
+  user: (id: number) => `/users/${id}`,
   walletMessage: '/users/wallet-message',
   walletLogin: '/users/wallet-login',
+  userUpdate: '/users/update-profile',
+
+  emailVerification: '/users/email-verification',
+
+  /**
+   * User positions
+   */
+  userPredictions: (id: number) => `/users/${id}/predictions`,
+  userFundingPositions: (id: number) => `/users/${id}/funding-positions`,
 
   // NOT USED
   changeMail: '/users/change-email',
   changeMailRequest: '/users/change-email-request',
   notification: '/notification',
 
-  /** Asset */
-  asset: (id: string | number) => `/assets/${id}`,
-  assetsByWallet: (address: string | Address) => `/assets/wallet/${address}`,
-  assetsByWallet2: (address: string | Address) => `/assets/wallet/2/${address}`,
-  assetByTokenId: (chainId: number, contractAddr: string, tokenId: number) =>
-    `/assets/chains/${chainId}/contracts/${contractAddr}/tokens/${tokenId}`,
-
-  /** Loan */
-  loans: (id?: string | number) => (id ? `/loans/${id}` : '/loans'),
-  loanBorrower: (address: string | number) => `/loans/borrower/${address}`,
-
-  /** Offer */
-  offers: (id?: string | number) => (id ? `/offers/${id}` : '/offers'),
-  batchOffer: (id?: string | number) => (id ? `/batch-offers/${id}` : '/batch-offers'),
-  offerRequests: (id?: string | number) => (id ? `/offer-requests/${id}` : '/offer-requests'),
-
-  /** Transaction */
-  transactions: (txHash?: string) => (txHash ? `/transactions/${txHash}` : '/transactions'),
-  transactionLoan: (loanHash: string) => `/transaction/loan/${loanHash}`,
-
-  /** Prediction Sets */
+  /**
+   * Prediction Sets
+   */
   predictionSets: '/prediction-sets',
   predictionSetsById: (id: number) => `/prediction-sets/${id}`,
+  predictionSetChanceHistory: (id: number) => `/prediction-sets/${id}/chance-history`,
+  predictionSetActivity: `/prediction-sets/activity`,
+  predictionSetHolders: `/prediction-sets/holders`,
+  predictionSetPositions: (id: number) => `/prediction-sets/${id}/positions`,
+  predictionSetFundingPositions: (id: number) => `/prediction-sets/${id}/funding-positions`,
+
+  /**
+   * Prediction set comments
+   */
+  comments: '/comments',
+  commentById: (id: number) => `/comments/${id}`,
+
+  /**
+   * User prediction watchlist
+   */
+  predictionSetUserWatchlist: (id: number) => `/prediction-sets/${id}/watchlist`,
+
+  /**
+   * Banners
+   */
+  banners: '/prediction-sets/banners',
+
+  /**
+   * Proposals
+   */
+  proposals: '/proposals',
+  proposalById: (id: number) => `/proposals/${id}`,
+  proposalRounds: '/proposals/rounds',
+  proposalRoundById: (id: number) => `/proposals/rounds/${id}`,
+  voteOnProposal: (id: number) => `/proposals/${id}/vote`,
+
+  /**
+   * Rewards
+   */
+  rewards: '/reward-points',
+  rewardsMe: '/reward-points/me',
+  dailyReward: '/reward-points/daily',
+
+  /**
+   * Collateral tokens
+   */
+  collateralTokens: '/collateral-tokens',
+
+  /**
+   * Leaderboards
+   */
+  leaderboardVolume: '/stats/leaderboard/volume',
+  leaderboardProfit: '/stats/leaderboard/profit',
 };
 
 export default Endpoints;

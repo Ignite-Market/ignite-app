@@ -63,7 +63,7 @@ function renderMenuIcon(option: MenuOption) {
   return null;
 }
 
-function renderMenuExtra(option: MenuOption) {
+function renderMenuExtra(_option: MenuOption) {
   return null;
 }
 </script>

@@ -11,7 +11,7 @@
   }
 
   .card {
-    @apply relative bg-bg-box rounded-lg px-4 py-2 text-white;
+    @apply relative bg-grey-light rounded-lg px-4 py-2 text-white;
   }
 
   /** scrollbar */

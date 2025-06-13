@@ -13,7 +13,7 @@ const meta = {
   description:
     'Ignite Market is a decentralized prediction market platform, designed to enable users to trade on the outcomes of real-world events.',
   url: appConfig.url,
-  image: `${appConfig.url}/og.jpg`,
+  image: `${appConfig.url}/og.png`,
   twitter: '@ignitemarket',
 };
 
@@ -108,7 +108,7 @@ export default defineNuxtConfig({
         {
           'http-equiv': 'Content-Security-Policy',
           content:
-            "default-src *; font-src 'self' data:; img-src * data:; script-src 'self' 'unsafe-inline' 'unsafe-eval' *; style-src 'self' 'unsafe-inline' *",
+            "default-src *; font-src 'self' data: fonts.gstatic.com; img-src * data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' *; style-src 'self' 'unsafe-inline' *",
         },
       ],
 

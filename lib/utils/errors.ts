@@ -40,6 +40,8 @@ function contractErrorMsg(e: any) {
     return 'Transaction expired.';
   } else if (errorData.includes('Caller is not the owner of the token')) {
     return 'Wallet is not the owner of the chest.';
+  } else if (errorData.includes('amount can be up to 10% of fundingAmountTotal')) {
+    return 'Entered amount exceeds maximum';
   } else {
     return 'Blockchain error. Please retry or contact support if the issue persists.';
   }
@@ -81,6 +83,14 @@ function singleErrorMessage($i18n: i18nType, message: string, statusCode: number
   } else if (code >= 500) {
     return $i18n.t('error.DEFAULT_SYSTEM_ERROR');
   } else if (code >= 400) {
+    if (statusCode === 40000007) {
+      return 'Your content violates our community guidelines and cannot be posted.';
+    }
+
+    if (statusCode === 42200026) {
+      return 'This email is already in use. Please use a different email address.';
+    }
+
     return $i18n.t('error.BAD_REQUEST');
   }
   return 'Unknown error';
