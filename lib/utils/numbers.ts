@@ -68,3 +68,21 @@ export function formatCollateralAmount(
 ) {
   return formatNumber(+(Number(num) / Math.pow(10, collateralDecimals)).toFixed(decimals));
 }
+
+export function shortenLargeNumber(value: number | string, decimals = 2) {
+  if (typeof value === 'string') {
+    value = +value;
+  }
+
+  if (isNaN(value)) {
+    return value;
+  }
+
+  if (value > 1000000) {
+    return `${getFixed(value / 1000000, 3, false, true)}M`;
+  } else if (value > 10000) {
+    return `${getFixed(value / 1000, 2, false, true)}K`;
+  }
+
+  return `${getFixed(value, decimals)}`;
+}

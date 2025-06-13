@@ -3,6 +3,20 @@ import { defineStore } from 'pinia';
 import Endpoints from '~/lib/values/endpoints';
 import { PARAMS_ALL_ITEMS, WebStorageKeys } from '~/lib/values/general.values';
 
+function UserPointsFactory() {
+  return {
+    totalPoints: 0,
+    buyingSharesPoints: 0,
+    sellingSharesPoints: 0,
+    marketWinnerPoints: 0,
+    proposalWinnerPoints: 0,
+    proposalVotePoints: 0,
+    dailyLoginPoints: 0,
+    referralPoints: 0,
+    referralCount: 0,
+  };
+}
+
 export const useUserStore = defineStore('user', {
   state: () => ({
     jwt: '',
@@ -16,6 +30,9 @@ export const useUserStore = defineStore('user', {
     },
 
     user: {} as UserInterface,
+
+    points: UserPointsFactory(),
+    pointsLoading: false,
   }),
   getters: {
     loggedIn(state) {
@@ -101,6 +118,28 @@ export const useUserStore = defineStore('user', {
         window.$message.error(apiError(error));
       } finally {
         this.notifications.loading = false;
+      }
+    },
+
+    async getUserPoints() {
+      if (!this.loggedIn) {
+        this.pointsLoading = false;
+        return;
+      }
+
+      if (this.pointsLoading) {
+        return;
+      }
+
+      this.pointsLoading = true;
+
+      try {
+        const res = await $api.get<GeneralResponse<ReturnType<typeof UserPointsFactory>>>(Endpoints.rewardsMe);
+        this.points = res.data;
+      } catch (error) {
+        window.$message.error(apiError(error));
+      } finally {
+        this.pointsLoading = false;
       }
     },
   },

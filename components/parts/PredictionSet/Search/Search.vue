@@ -6,7 +6,7 @@
     show-empty
     placeholder="Search markets"
     size="large"
-    class="md:min-w-[30vw]"
+    class="md:min-w-[200px] xl:min-w-[30vw]"
     :render-option="renderOption"
   >
     <template #prefix>
