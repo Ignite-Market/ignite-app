@@ -7,10 +7,10 @@ const { isLg } = useScreen();
 const userStore = useUserStore();
 
 const items = computed(() => [
-  {
-    label: 'Total Points',
-    value: userStore.points.totalPoints,
-  },
+  // {
+  //   label: 'Total Points',
+  //   value: userStore.points.totalPoints,
+  // },
   {
     label: 'Buying Shares',
     value: userStore.points.buyingSharesPoints,

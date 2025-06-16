@@ -501,7 +501,6 @@ const {
   sell,
   calcSellAmountInCollateral,
   getPricePerShare,
-  getTotalFunding,
   getCurrentLiquidity,
   calcSharesForCollateral,
 } = useFixedMarketMaker();
