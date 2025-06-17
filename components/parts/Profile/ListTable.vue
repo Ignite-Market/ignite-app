@@ -33,6 +33,7 @@ const transactionType = {
   [TransactionType.FUND]: { label: 'Fund', color: '#5272FF' },
   [TransactionType.REMOVE_FUND]: { label: 'Remove fund', color: '#5272FF' },
   [TransactionType.CLAIM]: { label: 'Claim winnings', color: '#D88ADC' },
+  [TransactionType.FUND_EXCESS]: { label: 'Fund excess', color: '#5272FF' },
 };
 
 const predictionColumns = [
