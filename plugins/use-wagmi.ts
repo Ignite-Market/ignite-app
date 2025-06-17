@@ -8,8 +8,8 @@ import { defineChain as thirdwebChain } from 'thirdweb';
 import { AppEnv } from '~/lib/types/config';
 
 export default defineNuxtPlugin(nuxtApp => {
-  const chains: readonly [Chain, ...Chain[]] =
-    useRuntimeConfig().public.ENV === AppEnv.PROD ? [songbird] : [flareTestnet];
+  const config = useRuntimeConfig();
+  const chains: readonly [Chain, ...Chain[]] = config.public.ENV === AppEnv.PROD ? [songbird] : [flareTestnet];
   const { client } = useThirdweb();
 
   const transports = chains.reduce((acc, chain) => {
@@ -29,7 +29,7 @@ export default defineNuxtPlugin(nuxtApp => {
       }),
       coinbaseWallet({ appName: 'Ignite Market Coinbase wallet', appLogoUrl: '/favicon.png' }),
       walletConnect({
-        projectId: useRuntimeConfig().public.WALLETCONNECT_PROJECT_ID,
+        projectId: config.public.WALLETCONNECT_PROJECT_ID,
         qrModalOptions: {
           themeVariables: {
             '--wcm-z-index': '2001',
@@ -38,9 +38,9 @@ export default defineNuxtPlugin(nuxtApp => {
       }),
       inAppWalletConnector({
         client,
-        smartAccounts: {
+        smartAccount: {
           sponsorGas: true,
-          chain: thirdwebChain(useRuntimeConfig().public.ENV === AppEnv.PROD ? songbird : flareTestnet),
+          chain: thirdwebChain((config.public.ENV === AppEnv.PROD ? songbird : flareTestnet) as any),
         },
         metadata: { name: 'Embedded Wallet' },
       }),

@@ -1,4 +1,12 @@
 import { createThirdwebClient, type ThirdwebClient } from 'thirdweb';
+import { createWallet } from 'thirdweb/wallets';
+
+// @url https://portal.thirdweb.com/typescript/v5/supported-wallets
+const ExternalWalletsIdMap = {
+  metaMaskSDK: 'io.metamask',
+  coinbaseWalletSDK: 'com.coinbase.wallet',
+  walletConnect: 'walletConnect',
+} as const;
 
 /**
  * Creates and returns a thirdweb client.
@@ -21,8 +29,21 @@ export default function useThirdweb() {
     { id: 'twitch', name: 'Twitch' },
   ];
 
+  async function connectExternalWallet(id: keyof typeof ExternalWalletsIdMap) {
+    if (!['metaMaskSDK', 'coinbaseWalletSDK', 'walletConnect'].includes(id)) {
+      return;
+    }
+
+    const wallet = createWallet(ExternalWalletsIdMap[id]);
+
+    const account = await wallet.connect({ client });
+
+    return account;
+  }
+
   return {
     client,
     strategies,
+    connectExternalWallet,
   };
 }
