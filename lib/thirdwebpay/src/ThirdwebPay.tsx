@@ -1,6 +1,21 @@
-import { getDefaultToken, PayEmbed, ThirdwebProvider, type PayUIOptions } from 'thirdweb/react';
+import {
+  getDefaultToken,
+  PayEmbed,
+  ThirdwebProvider,
+  useActiveAccount,
+  useConnect,
+  type PayUIOptions,
+} from 'thirdweb/react';
 import { createThirdwebClient, type ThirdwebClient } from 'thirdweb';
 import { base, baseSepolia } from 'thirdweb/chains';
+import { createWallet } from 'thirdweb/wallets';
+import { useEffect, useState } from 'react';
+
+const ExternalWalletsIdMap = {
+  metaMaskSDK: 'io.metamask',
+  coinbaseWalletSDK: 'com.coinbase.wallet',
+  walletConnect: 'walletConnect',
+} as const;
 
 export type PayParams = {
   amountInUsdc: string;
@@ -8,6 +23,7 @@ export type PayParams = {
   paymentReceiverAddress?: string;
   testMode?: boolean;
   purchaseData?: object;
+  connectorId?: keyof typeof ExternalWalletsIdMap;
 
   // https://portal.thirdweb.com/references/typescript/v5/PayUIOptions
   onSuccess?: PayUIOptions['onPurchaseSuccess'];
@@ -18,7 +34,18 @@ export type Params = {
 } & PayParams;
 
 export default function ThirdwebPay({ clientId, ...params }: Params) {
-  const client = createThirdwebClient({ clientId });
+  const [client, setClient] = useState<ThirdwebClient>();
+
+  useEffect(() => {
+    if (!client && clientId) {
+      const c = createThirdwebClient({ clientId });
+      setClient(c);
+    }
+  }, [clientId, client]);
+
+  if (!client) {
+    return <></>;
+  }
 
   return (
     <ThirdwebProvider>
@@ -29,6 +56,7 @@ export default function ThirdwebPay({ clientId, ...params }: Params) {
 
 function Embed({
   client,
+  connectorId,
   amountInUsdc,
   // tokenAddress = '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913', // Base USDC
   paymentReceiverAddress = '0x5f2B7077a7e5B4fdD97cBb56D9aD02a4f326896d', // OUR account
@@ -36,7 +64,32 @@ function Embed({
   purchaseData = {},
   onSuccess,
 }: { client: ThirdwebClient } & PayParams) {
+  const { connect } = useConnect();
+  const activeAccount = useActiveAccount();
+
   const chain = testMode ? baseSepolia : base;
+
+  useEffect(() => {
+    /**
+     * Initialize wallet if external wallet is provided
+     */
+    if (
+      !activeAccount &&
+      !!connectorId &&
+      !!client &&
+      ['metaMaskSDK', 'coinbaseWalletSDK', 'walletConnect'].includes(connectorId)
+    ) {
+      connect(async () => {
+        const wallet = createWallet(ExternalWalletsIdMap[connectorId]);
+        await wallet.connect({ client });
+        return wallet;
+      });
+    }
+  }, [client, connectorId, activeAccount, connect]);
+
+  if (!activeAccount) {
+    return <></>;
+  }
 
   return (
     <>

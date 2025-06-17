@@ -50,8 +50,6 @@ function btnAction() {
 
 /** Login with EVM wallet */
 async function evmWalletLogin(data: Record<string, any>) {
-  console.log('evmWalletLogin', data, connector.value);
-
   await sleep(200);
 
   if (!address) {
@@ -135,6 +133,6 @@ async function evmWalletLogin(data: Record<string, any>) {
     :mask-closable="!loadingWallet"
     :closable="!loadingWallet"
   >
-    <WalletEvm :loading="loadingWallet" :step="step" @step="step = $event" @loading="loadingWallet = $event" />
+    <WalletConnectors :loading="loadingWallet" :step="step" @step="step = $event" @loading="loadingWallet = $event" />
   </modal>
 </template>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 // import { useAccount } from '@wagmi/vue';
+import { useAccount } from '@wagmi/vue';
 import { startThirdwebPayment } from '~/lib/thirdwebpay/dist/thirdwebpay';
 
 defineProps<{
@@ -7,6 +8,7 @@ defineProps<{
 }>();
 
 const config = useRuntimeConfig();
+const { connector } = useAccount();
 
 async function startThirdweb() {
   try {
@@ -16,6 +18,7 @@ async function startThirdweb() {
           clientId: config.public.THIRDWEB_CLIENT_KEY,
           amountInUsdc: '0.01',
           purchaseData: { purchaseId: 1 },
+          connectorId: connector.value?.id,
           onSuccess: (info: any) => {
             console.log(info);
           },
