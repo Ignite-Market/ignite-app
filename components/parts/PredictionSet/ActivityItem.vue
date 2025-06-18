@@ -34,6 +34,14 @@
             <NuxtIcon name="icon/link" />
           </a>
         </span>
+        <span v-else-if="item.type === TransactionType.FUND_EXCESS">
+          received
+          <span class="text-primary">
+            {{ formatCollateralAmount(item.outcomeTokens, tokensStore.getToken(item.collateral_token_id).decimals) }}
+            <span class="font-bold">{{ item.outcomeName }}</span>
+          </span>
+          from funding
+        </span>
         <span v-else>
           {{ item.type === TransactionType.FUND ? ' funded ' : ' removed funding ' }}
           <span v-if="item.type === TransactionType.FUND">
