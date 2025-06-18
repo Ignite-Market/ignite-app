@@ -22,7 +22,7 @@ export type PayParams = {
   // tokenAddress?: string;
   paymentReceiverAddress?: string;
   testMode?: boolean;
-  purchaseData?: object;
+  purchaseData?: Record<string, unknown>;
   connectorId?: keyof typeof ExternalWalletsIdMap;
 
   // https://portal.thirdweb.com/references/typescript/v5/PayUIOptions
@@ -87,7 +87,7 @@ function Embed({
     }
   }, [client, connectorId, activeAccount, connect]);
 
-  if (!activeAccount) {
+  if (!activeAccount && !testMode) {
     return <></>;
   }
 
