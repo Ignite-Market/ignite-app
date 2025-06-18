@@ -1,32 +1,35 @@
 <script setup lang="ts">
-// import { useAccount } from '@wagmi/vue';
 import { useAccount } from '@wagmi/vue';
 import { startThirdwebPayment } from '~/lib/thirdwebpay/dist/thirdwebpay';
 
-defineProps<{
+const props = defineProps<{
+  amount?: number;
   loading: boolean;
 }>();
 
 const config = useRuntimeConfig();
-const { connector } = useAccount();
+const { connector, isConnected } = useAccount();
+const isOpen = ref(false);
 
-async function startThirdweb() {
+function startThirdweb() {
+  if (!props.amount) return;
+
   try {
-    await new Promise(resolve => {
-      setTimeout(() => {
-        startThirdwebPayment('#thirdwebpay', {
-          clientId: config.public.THIRDWEB_CLIENT_KEY,
-          amountInUsdc: '0.01',
-          purchaseData: { purchaseId: 1 },
-          connectorId: connector.value?.id,
-          onSuccess: (info: any) => {
-            console.log(info);
-          },
-        });
-      }, 250);
+    isOpen.value = true;
 
-      setTimeout(resolve, 100);
-    });
+    setTimeout(() => {
+      if (!props.amount) return;
+
+      startThirdwebPayment('#thirdwebpay', {
+        clientId: config.public.THIRDWEB_CLIENT_KEY,
+        amountInUsdc: props.amount.toString(),
+        purchaseData: { purchaseId: 1 },
+        connectorId: connector.value?.id,
+        onSuccess: (info: any) => {
+          console.log(info);
+        },
+      });
+    }, 50);
   } catch (e) {
     console.error(e);
   }
@@ -35,22 +38,25 @@ async function startThirdweb() {
 
 <template>
   <div>
-    <!-- <BasicButton
+    <BasicButton
       class="w-full"
       :btn-class="['!font-bold']"
       :size="'large'"
       :disabled="!isConnected"
       type="secondary"
       :loading="loading"
-      @click="getQuote('0.01')"
+      @click="startThirdweb"
     >
-      Thirdweb Pay
+      Other Payment Options
     </BasicButton>
 
-    <br /> -->
-
-    <div id="thirdwebpay"></div>
-
-    <BasicButton @click="startThirdweb">Start Thirdweb</BasicButton>
+    <Modal
+      v-model:show="isOpen"
+      display-directive="show"
+      class="!max-w-[362px] !bg-[#131418] [&>.n-card-header]:z-1"
+      @update:show="isOpen = $event"
+    >
+      <div id="thirdwebpay" class="[&>div]:mx-auto [&>div]:!border-none" :style="{ margin: '-57px -24px -20px' }"></div>
+    </Modal>
   </div>
 </template>
