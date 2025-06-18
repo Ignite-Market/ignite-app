@@ -111,7 +111,7 @@
         <span class="flex items-center justify-center text-[14px] leading-[20px] font-bold text-statusGreen my-3">
           {{ obtainedFeeReward }} {{ collateralToken.symbol }}
         </span>
-        <div class="text-center">You can now also claim your remaining funding of:</div>
+        <div class="text-center">You can now also claim your remaining reward of:</div>
         <span class="flex items-center justify-center text-[14px] leading-[20px] font-bold text-statusGreen my-3">
           {{ obtainedAmount }} {{ collateralToken.symbol }}
         </span>
