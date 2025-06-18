@@ -30,6 +30,7 @@ export enum TransactionType {
   FUND = 3,
   REMOVE_FUND = 4,
   CLAIM = 5,
+  FUND_EXCESS = 6,
 }
 
 /**
