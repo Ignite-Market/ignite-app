@@ -140,6 +140,7 @@ import type { Address } from 'viem';
 import ConfettiExplosion from 'vue-confetti-explosion';
 import type { OutcomeInterface } from '~/lib/types/prediction-set';
 import { colors } from '~/tailwind.config';
+import Endpoints from '~/lib/values/endpoints';
 
 enum SelectedAction {
   CLAIM = 1,
@@ -159,6 +160,7 @@ const props = defineProps({
   conditionId: { type: String, default: null, required: true },
   outcome: { type: Object as PropType<OutcomeInterface>, default: () => {}, required: true },
   collateralToken: { type: Object as PropType<CollateralToken>, default: () => {}, required: true },
+  predictionSetId: { type: Number, default: null, required: true },
 });
 
 const claimBalance = ref(BigInt(0));
@@ -293,7 +295,7 @@ async function withdrawFunding() {
     } else if (receipt.status === 'error') {
       message.error(contractError(receipt.error));
     }
-
+    await $api.post(Endpoints.predictionSetRemovedFunding(props.predictionSetId));
     await updateFundingBalance();
     await updateClaimBalance();
   } catch (error) {
