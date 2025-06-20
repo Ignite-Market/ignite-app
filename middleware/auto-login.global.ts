@@ -21,6 +21,7 @@ export default defineNuxtRouteMiddleware(to => {
   if (userStore.jwt) {
     // Store already init'ed
     $api.setToken(userStore.jwt);
+    userStore.initUser();
     return;
   }
 

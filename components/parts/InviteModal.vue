@@ -40,6 +40,30 @@
               <BasicButton :to="'/profile/edit'"> Go to your profile </BasicButton>
             </div>
           </div>
+
+          <div class="border-1 border-grey-lighter rounded-lg p-6 mt-6">
+            <div class="font-bold text-[18px] leading-[24px] mb-4 text-white">Referrals claimed</div>
+
+            <div class="flex flex-wrap gap-2">
+              <div
+                class="flex flex-col justify-center items-center gap-1 border border-grey-lighter rounded-lg p-1 min-w-[100px]"
+              >
+                <span class="text-white text-2xl font-bold">{{ userStore.points.referralCount }}</span>
+                <span class="text-white/80 text-xs">CLAIMED</span>
+              </div>
+
+              <div
+                class="flex flex-col justify-center items-center gap-1 border border-grey-lighter rounded-lg px-3 py-2 min-w-[100px]"
+              >
+                <span class="text-white text-2xl font-bold flex items-center gap-1.5">
+                  {{ userStore.points.referralPoints }}
+                  <NuxtIcon name="icon/points" class="text-primary text-[20px]" />
+                </span>
+
+                <span class="text-white/80 text-xs">POINTS</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -501,7 +501,7 @@ const {
   sell,
   calcSellAmountInCollateral,
   getPricePerShare,
-  getTotalFunding,
+  getCurrentLiquidity,
   calcSharesForCollateral,
 } = useFixedMarketMaker();
 const { refreshCollateralBalance, checkCollateralAllowance } = useCollateralToken();
@@ -521,7 +521,7 @@ const returnAmount = ref<string>('0.0');
 const potentialReturn = ref<string>('0.0');
 const conditionalBalance = ref(BigInt(0));
 const pricePerShare = ref(0.0);
-const totalFundAmount = ref(BigInt(0));
+const currentLiquidity = ref(BigInt(0));
 
 const givenAmount = ref();
 const obtainedAmount = ref();
@@ -601,7 +601,7 @@ const enoughCollateralBalance = computed(() => {
 });
 
 const buyFundLimit = computed(() => {
-  let max = (BigInt(totalFundAmount.value) * 10n) / 100n;
+  let max = (BigInt(currentLiquidity.value) * 10n) / 100n;
   if (props.collateralToken.balance < max) {
     max = props.collateralToken.balance;
   }
@@ -609,9 +609,9 @@ const buyFundLimit = computed(() => {
 });
 
 watch(
-  () => [totalFundAmount.value, conditionalBalance.value, props.outcome.outcomeIndex],
+  () => [currentLiquidity.value, conditionalBalance.value, props.outcome.outcomeIndex],
   async () => {
-    const maxAmount = bigIntToNum((BigInt(totalFundAmount.value) * 10n) / 100n, props.collateralToken.decimals || 6);
+    const maxAmount = bigIntToNum((BigInt(currentLiquidity.value) * 10n) / 100n, props.collateralToken.decimals || 6);
     let limit =
       (await calcSharesForCollateral(
         maxAmount,
@@ -636,7 +636,7 @@ onMounted(async () => {
   }
 
   await refreshCollateralBalance(props.collateralToken.id);
-  totalFundAmount.value = await getTotalFunding(props.contractAddress);
+  currentLiquidity.value = await getCurrentLiquidity(props.contractAddress);
 });
 
 watchEffect(async () => {
@@ -754,7 +754,7 @@ async function refreshBalances() {
       props.outcome.outcomeIndex,
       props.collateralToken.decimals
     );
-    totalFundAmount.value = await getTotalFunding(props.contractAddress);
+    currentLiquidity.value = await getCurrentLiquidity(props.contractAddress);
   } catch (error) {
     console.log(error);
   }
