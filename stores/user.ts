@@ -6,6 +6,7 @@ import { PARAMS_ALL_ITEMS, WebStorageKeys } from '~/lib/values/general.values';
 function UserPointsFactory() {
   return {
     totalPoints: 0,
+    marketFundingPoints: 0,
     buyingSharesPoints: 0,
     sellingSharesPoints: 0,
     marketWinnerPoints: 0,

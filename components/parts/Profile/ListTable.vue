@@ -26,6 +26,7 @@ const props = defineProps({
 });
 
 const tokensStore = useTokensStore();
+const userStore = useUserStore();
 
 const transactionType = {
   [TransactionType.BUY]: { label: 'Buy', color: '#5DCE46' },
@@ -168,7 +169,8 @@ const predictionColumns = [
       return row.setStatus === PredictionSetStatus.FINALIZED &&
         row.outcomeTokens &&
         row.winner_outcome_id === row.outcomeId &&
-        +row.claimedAmount <= 0
+        +row.claimedAmount <= 0 &&
+        userStore.user.id === props.userId
         ? h(resolveComponent('BasicButton'), {
             text: 'Claim',
             to: { path: `/markets/${row.id}` },
@@ -357,7 +359,9 @@ const fundingPositionsColumns = [
     title: '',
     align: 'right',
     render(row: UserFundingPositionInterface) {
-      return row.setStatus === PredictionSetStatus.FINALIZED && row.remainingShares > 0
+      return row.setStatus === PredictionSetStatus.FINALIZED &&
+        row.remainingShares > 0 &&
+        userStore.user.id === props.userId
         ? h(resolveComponent('BasicButton'), {
             text: 'Withdraw Funding',
             to: { path: `/markets/${row.id}` },
