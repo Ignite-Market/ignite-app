@@ -357,7 +357,7 @@ const fundingPositionsColumns = [
     title: '',
     align: 'right',
     render(row: UserFundingPositionInterface) {
-      return row.setStatus === PredictionSetStatus.FINALIZED && row.removedAmount < row.fundedAmount
+      return row.setStatus === PredictionSetStatus.FINALIZED && row.remainingShares > 0
         ? h(resolveComponent('BasicButton'), {
             text: 'Withdraw Funding',
             to: { path: `/markets/${row.id}` },
