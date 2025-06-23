@@ -148,7 +148,7 @@
           <div
             v-if="
               predictionSet.fundingPositions &&
-              predictionSet.fundingPositions > 0 &&
+              predictionSet.fundingPositions !== '0' &&
               loggedIn &&
               predictionSet.setStatus !== PredictionSetStatus.FINALIZED
             "
@@ -616,9 +616,6 @@ function poolForPositionsChanges() {
           predictionSet.value.positions = newPositions;
         }
 
-        console.log('currentPositions', currentPositions);
-        console.log('newPositions', newPositions);
-
         if (JSON.stringify(currentPositions) !== JSON.stringify(newPositions)) {
           clearInterval(positionsInterval);
           positionsLoading.value = false;
@@ -634,8 +631,6 @@ function poolForPositionsChanges() {
 }
 
 function poolForFundingPositionsChanges() {
-  console.log('called: poolForFundingPositionsChanges');
-
   // Positions will also change.
   if (predictionSet.value?.setStatus === PredictionSetStatus.ACTIVE) {
     poolForPositionsChanges();
