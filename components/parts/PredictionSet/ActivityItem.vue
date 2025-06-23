@@ -31,7 +31,7 @@
             target="_blank"
             class="underline inline-block align-middle ml-1 pb-0.5"
           >
-            <NuxtIcon name="icon/link" />
+            <NuxtIcon name="icon/external-link" />
           </a>
         </span>
         <span v-else-if="item.type === TransactionType.FUND_EXCESS">
@@ -41,6 +41,20 @@
             <span class="font-bold">{{ item.outcomeName }}</span>
           </span>
           from funding
+        </span>
+        <span v-else-if="item.type === TransactionType.CLAIM">
+          claimed
+          <span class="font-bold">
+            {{ formatCollateralAmount(item.userAmount, tokensStore.getToken(item.collateral_token_id).decimals) }}
+            {{ tokensStore.getToken(item.collateral_token_id).symbol }}
+          </span>
+          <a
+            :href="`${getExplorer()}/tx/${item.txHash}`"
+            target="_blank"
+            class="underline inline-block align-middle ml-1 pb-0.5"
+          >
+            <NuxtIcon name="icon/external-link" />
+          </a>
         </span>
         <span v-else>
           {{ item.type === TransactionType.FUND ? ' funded ' : ' removed funding ' }}
@@ -56,7 +70,7 @@
             target="_blank"
             class="underline inline-block align-middle ml-1 pb-0.5"
           >
-            <NuxtIcon name="icon/link" />
+            <NuxtIcon name="icon/external-link" />
           </a>
         </span>
       </div>
