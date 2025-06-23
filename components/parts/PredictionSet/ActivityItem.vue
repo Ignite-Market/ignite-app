@@ -29,7 +29,7 @@
           <a
             :href="`${getExplorer()}/tx/${item.txHash}`"
             target="_blank"
-            class="underline inline-block align-middle ml-1 pb-0.5"
+            class="underline inline-block align-middle ml-1 pb-1 hover:text-primary-bright"
           >
             <NuxtIcon name="icon/external-link" />
           </a>
@@ -51,13 +51,13 @@
           <a
             :href="`${getExplorer()}/tx/${item.txHash}`"
             target="_blank"
-            class="underline inline-block align-middle ml-1 pb-0.5"
+            class="underline inline-block align-middle ml-1 pb-1 hover:text-primary-bright"
           >
             <NuxtIcon name="icon/external-link" />
           </a>
         </span>
         <span v-else>
-          {{ item.type === TransactionType.FUND ? ' funded ' : ' removed funding ' }}
+          {{ item.type === TransactionType.FUND ? ' funded ' : ' removed funding' }}
           <span v-if="item.type === TransactionType.FUND">
             for
             <span class="font-bold">
@@ -68,7 +68,7 @@
           <a
             :href="`${getExplorer()}/tx/${item.txHash}`"
             target="_blank"
-            class="underline inline-block align-middle ml-1 pb-0.5"
+            class="underline inline-block align-middle ml-1 pb-1 hover:text-primary-bright"
           >
             <NuxtIcon name="icon/external-link" />
           </a>
