@@ -377,6 +377,7 @@
             :contract-address="predictionSet.chainData.contractAddress"
             :condition-id="predictionSet.chainData.conditionId"
             :collateral-token="collateralToken"
+            :prediction-set-id="predictionSet.id"
           />
         </div>
       </div>
