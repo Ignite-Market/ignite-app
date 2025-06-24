@@ -142,7 +142,7 @@ export interface UserPredictionsResponse extends GeneralItemsResponse<UserPredic
  */
 export interface UserFundingPositionInterface extends PredictionSetInterface {
   fundedAmount: number;
-  removedAmount: number;
+  remainingShares: number;
 }
 export interface UserFundingPositionsResponse extends GeneralItemsResponse<UserFundingPositionInterface> {}
 
