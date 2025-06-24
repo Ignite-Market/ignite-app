@@ -12,7 +12,7 @@ const items = computed(() => [
   //   value: userStore.points.totalPoints,
   // },
   {
-    label: 'Funding Market',
+    label: 'Market Funding',
     value: userStore.points.marketFundingPoints,
   },
   {
