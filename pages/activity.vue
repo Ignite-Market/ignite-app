@@ -49,7 +49,25 @@
                   {{ activity.outcomeName }}
                 </span>
 
-                <div class="flex gap-1 items-center justify-center text-white/80 text-sm">
+                <div
+                  v-if="activity.type === TransactionType.REMOVE_FUND"
+                  class="flex gap-1 items-center justify-center text-white/80 text-sm"
+                >
+                  and received
+                  <Image
+                    :src="tokensStore.getToken(activity.collateral_token_id).imgUrl"
+                    :title="tokensStore.getToken(activity.collateral_token_id).name"
+                    class="rounded-full w-[15px] h-[15px] object-cover"
+                  />
+                  {{
+                    formatCollateralAmount(
+                      activity.userAmount,
+                      tokensStore.getToken(activity.collateral_token_id).decimals
+                    )
+                  }}
+                  {{ tokensStore.getToken(activity.collateral_token_id).symbol }}
+                </div>
+                <div v-else class="flex gap-1 items-center justify-center text-white/80 text-sm">
                   <span class="mr-1">for</span>
                   <Image
                     :src="tokensStore.getToken(activity.collateral_token_id).imgUrl"

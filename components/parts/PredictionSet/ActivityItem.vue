@@ -65,6 +65,13 @@
               {{ tokensStore.getToken(item.collateral_token_id).symbol }}
             </span>
           </span>
+          <span v-else-if="item.type === TransactionType.REMOVE_FUND">
+            and received
+            <span class="font-bold">
+              {{ formatCollateralAmount(item.userAmount, tokensStore.getToken(item.collateral_token_id).decimals) }}
+              {{ tokensStore.getToken(item.collateral_token_id).symbol }}
+            </span>
+          </span>
           <a
             :href="`${getExplorer()}/tx/${item.txHash}`"
             target="_blank"
