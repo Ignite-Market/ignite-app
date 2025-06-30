@@ -172,6 +172,8 @@
             Buy
           </BasicButton>
 
+          <PredictionSetFiatBuy :amount="amount" :loading="loading" class="mt-2" />
+
           <div class="text-[16px] leading-[24px] text-grey-lightest font-normal mt-6">
             <div class="flex items-center justify-center">
               <div>Avg price</div>

@@ -26,12 +26,13 @@ export default defineNuxtConfig({
     transpile: process.env.NODE_ENV === AppEnv.PROD ? ['naive-ui', '@juggle/resize-observer'] : [''],
   },
   components: ['~/components', '~/components/general/', '~/components/parts/'],
-  devtools: { enabled: true },
+  devtools: { enabled: false },
   experimental: {
     payloadExtraction: false,
     viewTransition: true,
     renderJsonPayloads: true,
   },
+  ignore: ['**/thirdwebpay/**', '**/node_modules/**', '**/.git/**', '**/dist/**'],
   imports: {
     dirs: ['composables/', 'stores/', 'lib/utils'],
   },
