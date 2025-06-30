@@ -9,6 +9,7 @@
     "local": "cross-env ENV=local nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
+    "preinstall": "npm i --prefix lib/thirdwebpay && npm run build --prefix lib/thirdwebpay",
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
