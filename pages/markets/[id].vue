@@ -48,7 +48,7 @@
                     <div class="text-white/80 text-[14px] leading-[20px]">
                       {{
                         formatCollateralAmount(
-                          (predictionSet.fundingVolume || 0) + (predictionSet.transactionsVolume || 0),
+                          BigInt(predictionSet.fundingVolume || 0) + BigInt(predictionSet.transactionsVolume || 0),
                           collateralToken?.decimals || 0
                         )
                       }}
@@ -148,7 +148,7 @@
           <div
             v-if="
               predictionSet.fundingPositions &&
-              predictionSet.fundingPositions > 0 &&
+              predictionSet.fundingPositions !== '0' &&
               loggedIn &&
               predictionSet.setStatus !== PredictionSetStatus.FINALIZED
             "
@@ -377,6 +377,7 @@
             :contract-address="predictionSet.chainData.contractAddress"
             :condition-id="predictionSet.chainData.conditionId"
             :collateral-token="collateralToken"
+            :prediction-set-id="predictionSet.id"
           />
         </div>
       </div>
@@ -603,20 +604,17 @@ function poolForPositionsChanges() {
     }
   }, POLLING_TIMEOUT);
 
+  const currentPositions = predictionSet.value?.positions || [];
   return new Promise(function (resolve) {
     positionsInterval = setInterval(async () => {
       try {
         const res = await $api.get<GeneralResponse<any>>(Endpoints.predictionSetPositions(Number(params?.id)));
 
-        const currentPositions = predictionSet.value?.positions || [];
         const newPositions = res.data || [];
 
         if (predictionSet.value) {
           predictionSet.value.positions = newPositions;
         }
-
-        console.log('currentPositions', currentPositions);
-        console.log('newPositions', newPositions);
 
         if (JSON.stringify(currentPositions) !== JSON.stringify(newPositions)) {
           clearInterval(positionsInterval);
@@ -633,7 +631,11 @@ function poolForPositionsChanges() {
 }
 
 function poolForFundingPositionsChanges() {
-  console.log('called: poolForFundingPositionsChanges');
+  // Positions will also change.
+  if (predictionSet.value?.setStatus === PredictionSetStatus.ACTIVE) {
+    poolForPositionsChanges();
+  }
+
   let fundingPositionsInterval = null as any;
   fundingPositionsLoading.value = true;
 
@@ -644,12 +646,13 @@ function poolForFundingPositionsChanges() {
     }
   }, POLLING_TIMEOUT);
 
+  const currentFundingPositions = predictionSet.value?.fundingPositions || 0;
+
   return new Promise(function (resolve) {
     fundingPositionsInterval = setInterval(async () => {
       try {
         const res = await $api.get<GeneralResponse<any>>(Endpoints.predictionSetFundingPositions(Number(params?.id)));
 
-        const currentFundingPositions = predictionSet.value?.fundingPositions || 0;
         const newFundingPositions = res.data || 0;
 
         if (predictionSet.value) {

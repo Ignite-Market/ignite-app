@@ -75,6 +75,15 @@ watch(address, () => {
   }
 });
 
+watch(
+  () => loggedIn.value,
+  _ => {
+    if (loggedIn.value) {
+      userStore.getUserPoints();
+    }
+  }
+);
+
 function openDocs() {
   window.open('https://docs.ignitemarket.xyz/', '_blank');
 }

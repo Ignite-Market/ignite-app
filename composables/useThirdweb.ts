@@ -10,6 +10,8 @@ const ExternalWalletsIdMap = {
 
 /**
  * Creates and returns a thirdweb client.
+ *
+ * @returns The thirdweb client.
  */
 export default function useThirdweb() {
   const config = useRuntimeConfig();

@@ -5,8 +5,7 @@ import Endpoints from '~/lib/values/endpoints';
 
 export const usePredictionStore = defineStore('prediction', {
   state: () => ({
-    active: {} as PredictionSetInterface,
-    items: {} as { [category: string]: PredictionSetInterface[] },
+    items: {} as { [category: string]: { items: PredictionSetInterface[]; ttl: number } },
     category: null as string | null,
     loading: false,
     pagination: createPagination(),
@@ -28,7 +27,10 @@ export const usePredictionStore = defineStore('prediction', {
   }),
   getters: {
     data(state) {
-      return state.items[state.category ?? 'all'];
+      return state.items[state.category ?? 'all']?.items;
+    },
+    ttl(state) {
+      return state.items[state.category ?? 'all']?.ttl;
     },
   },
   actions: {
@@ -51,18 +53,28 @@ export const usePredictionStore = defineStore('prediction', {
         args.sorter = this.sorter;
       }
 
-      if (this.data?.length && !force) {
-        return this.data;
+      if (this.data?.length && !force && this.ttl) {
+        // If is not expired, return existing data
+        if (this.ttl > new Date().getTime()) {
+          return this.data;
+        }
       }
+
       this.loading = true;
 
       try {
         const res = await $api.get<PredictionSetsResponse>(Endpoints.predictionSets, parseArguments(args));
         this.loading = false;
 
+        // Set ttl to 1 minute
+        const ttl = new Date().getTime() + 1000 * 60;
+
         !args?.page || args.page === 1
-          ? (this.items[this.category ?? 'all'] = res.data.items)
-          : this.items[this.category ?? 'all'].push(...(res.data.items as any[]));
+          ? (this.items[this.category ?? 'all'] = { items: res.data.items, ttl })
+          : (this.items[this.category ?? 'all'] = {
+              items: [...this.items[this.category ?? 'all'].items, ...res.data.items],
+              ttl,
+            });
 
         this.pagination.itemCount = res.data.total;
 
@@ -74,9 +86,9 @@ export const usePredictionStore = defineStore('prediction', {
           this.pagination.pageSize = args.limit;
         }
 
-        return this.items[this.category ?? 'all'];
+        return this.items[this.category ?? 'all']?.items;
       } catch (error) {
-        this.items[this.category ?? 'all'] = [];
+        this.items[this.category ?? 'all'] = { items: [], ttl: 0 };
         this.loading = false;
         this.pagination.itemCount = 0;
         window.$message.error(apiError(error));

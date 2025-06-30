@@ -25,6 +25,8 @@
 </template>
 
 <script lang="ts" setup>
+import { PAGINATION_LIMIT } from '../../../lib/values/general.values';
+
 const props = defineProps({
   category: { type: String, default: null },
   watchlist: { type: Boolean, default: false },
@@ -34,7 +36,7 @@ const message = useMessage();
 
 const predictionStore = usePredictionStore();
 const page = ref(1);
-const limit = ref(20);
+const limit = ref(PAGINATION_LIMIT);
 const total = ref(0);
 
 onMounted(async () => {

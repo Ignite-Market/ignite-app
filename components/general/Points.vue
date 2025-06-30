@@ -7,9 +7,13 @@ const { isLg } = useScreen();
 const userStore = useUserStore();
 
 const items = computed(() => [
+  // {
+  //   label: 'Total Points',
+  //   value: userStore.points.totalPoints,
+  // },
   {
-    label: 'Total Points',
-    value: userStore.points.totalPoints,
+    label: 'Market Funding',
+    value: userStore.points.marketFundingPoints,
   },
   {
     label: 'Buying Shares',
@@ -56,7 +60,7 @@ const items = computed(() => [
       </div>
     </template>
 
-    <div class="flex flex-col gap-2 bg-grey-dark border-1 !border-grey-lighter px-4 pt-2 pb-4 rounded-lg">
+    <div class="flex flex-col gap-2 bg-grey-dark border-1 !border-grey-lighter px-4 pt-2 pb-3 rounded-lg">
       <div v-for="item in items" :key="item.label" class="flex items-center justify-between gap-4">
         <span class="whitespace-nowrap">{{ item.label }}</span>
 

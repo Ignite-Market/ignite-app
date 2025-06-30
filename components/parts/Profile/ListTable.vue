@@ -26,6 +26,7 @@ const props = defineProps({
 });
 
 const tokensStore = useTokensStore();
+const userStore = useUserStore();
 
 const transactionType = {
   [TransactionType.BUY]: { label: 'Buy', color: '#5DCE46' },
@@ -33,6 +34,7 @@ const transactionType = {
   [TransactionType.FUND]: { label: 'Fund', color: '#5272FF' },
   [TransactionType.REMOVE_FUND]: { label: 'Remove fund', color: '#5272FF' },
   [TransactionType.CLAIM]: { label: 'Claim winnings', color: '#D88ADC' },
+  [TransactionType.FUND_EXCESS]: { label: 'Fund excess', color: '#5272FF' },
 };
 
 const predictionColumns = [
@@ -167,7 +169,8 @@ const predictionColumns = [
       return row.setStatus === PredictionSetStatus.FINALIZED &&
         row.outcomeTokens &&
         row.winner_outcome_id === row.outcomeId &&
-        +row.claimedAmount <= 0
+        +row.claimedAmount <= 0 &&
+        userStore.user.id === props.userId
         ? h(resolveComponent('BasicButton'), {
             text: 'Claim',
             to: { path: `/markets/${row.id}` },
@@ -356,10 +359,13 @@ const fundingPositionsColumns = [
     title: '',
     align: 'right',
     render(row: UserFundingPositionInterface) {
-      return row.setStatus === PredictionSetStatus.FINALIZED && row.removedAmount < row.fundedAmount
+      return row.setStatus === PredictionSetStatus.FINALIZED &&
+        row.remainingShares > 0 &&
+        userStore.user.id === props.userId
         ? h(resolveComponent('BasicButton'), {
-            text: 'Remove funding',
+            text: 'Withdraw Funding',
             to: { path: `/markets/${row.id}` },
+            class: ['bg-statusBlue hover:bg-statusBlue-hover'],
           })
         : null;
     },
