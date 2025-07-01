@@ -33,6 +33,7 @@ export interface Proposal extends GeneralInterface {
   user_id: number;
   question: string;
   generalResolutionDef: string;
+  tags: string[];
   outcomes: string[];
   totalVotes: number;
   totalComments: number;
