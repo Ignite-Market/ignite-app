@@ -8,6 +8,9 @@
       borderRadius: '8px',
       color: colors.grey.light,
     }"
+    :style="{
+      maxWidth: '60vw',
+    }"
   >
     <template #trigger>
       <n-button

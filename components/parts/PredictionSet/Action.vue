@@ -15,10 +15,10 @@
       </div>
       <div v-else class="bg-grey-light rounded-[8px] p-3 flex flex-row items-center justify-center">
         <div class="w-[30px] h-[30px] flex-shrink-0">
-          <Image :src="outcome.imgUrl" class="rounded-[48px] w-full h-full object-cover" />
+          <Image :src="outcome?.imgUrl" class="rounded-[48px] w-full h-full object-cover" />
         </div>
-        <div class="ml-2 text-[12px] leading-[16px] font-bold">{{ outcome.name }}</div>
-        <div class="text-[12px] leading-[16px] font-bold ml-auto">{{ (outcome.latestChance * 100).toFixed(0) }} %</div>
+        <div class="ml-2 text-[12px] leading-[16px] font-bold">{{ outcome?.name }}</div>
+        <div class="text-[12px] leading-[16px] font-bold ml-auto">{{ (outcome?.latestChance * 100).toFixed(0) }} %</div>
 
         <div
           class="min-w-[20px] min-h-[20px] rounded-[4px] flex items-center justify-center bg-none hover:bg-grey-dark ml-[10px] cursor-pointer"
@@ -624,8 +624,12 @@ const buyFundLimit = computed(() => {
 });
 
 watch(
-  () => [currentLiquidity.value, conditionalBalance.value, props.outcome.outcomeIndex],
+  () => [currentLiquidity.value, conditionalBalance.value, props?.outcome?.outcomeIndex],
   async () => {
+    if (!props?.outcome?.outcomeIndex) {
+      return;
+    }
+
     const maxAmount = bigIntToNum((BigInt(currentLiquidity.value) * 10n) / 100n, props.collateralToken.decimals || 6);
     let limit =
       (await calcSharesForCollateral(
@@ -655,7 +659,7 @@ onMounted(async () => {
 });
 
 watchEffect(async () => {
-  if (props.outcome.positionId) {
+  if (props?.outcome?.positionId) {
     conditionalBalance.value = await getConditionalBalance(props.outcome.positionId);
 
     if (props.status !== PredictionSetStatus.FUNDING) {

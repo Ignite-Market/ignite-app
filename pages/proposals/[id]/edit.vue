@@ -38,12 +38,27 @@
                 <n-dynamic-tags
                   v-model:value="form.outcomes"
                   size="large"
-                  tag-class="max-w-[400px] overflow-x-scroll"
-                  input-class="max-w-[400px] overflow-x-scroll"
+                  tag-class="max-w-[400px] overflow-x-auto"
+                  input-class="max-w-[400px] overflow-x-auto"
                   :input-props="{
                     maxlength: 150,
                   }"
                   class="rounded-lg [&_.n-tag]:border-1 [&_.n-tag]:border-grey-lighter [&_.n-tag]:rounded-[8px] [&_.n-tag]:px-4 [&_.n-tag]:py-2 [&_.n-tag]:h-[40px] [&_.n-tag]:flex [&_.n-tag]:items-center [&_.n-button]:h-[40px] [&_.n-button]:px-4 [&_.n-button]:py-2 [&_.n-button]:rounded-[8px] [&_.n-button]:!bg-transparent [&_.n-button]:hover:!bg-grey-light/10"
+                />
+              </n-form-item>
+
+              <n-form-item path="tags" label="Tags" class="mb-3">
+                <n-dynamic-tags
+                  v-model:value="form.tags"
+                  size="large"
+                  tag-class="max-w-[400px] overflow-x-auto"
+                  input-class="max-w-[400px] overflow-x-auto"
+                  :input-props="{
+                    maxlength: 30,
+                  }"
+                  :max="3"
+                  class="rounded-lg [&_.n-tag]:border-1 [&_.n-tag]:border-grey-lighter [&_.n-tag]:rounded-[8px] [&_.n-tag]:px-4 [&_.n-tag]:py-2 [&_.n-tag]:h-[40px] [&_.n-tag]:flex [&_.n-tag]:items-center [&_.n-button]:h-[40px] [&_.n-button]:px-4 [&_.n-button]:py-2 [&_.n-button]:rounded-[8px] [&_.n-button]:!bg-transparent [&_.n-button]:hover:!bg-grey-light/10"
+                  @create="handleCreateTag"
                 />
               </n-form-item>
 
@@ -123,6 +138,7 @@ const proposalLoading = ref(false);
 const form = ref({
   question: '',
   outcomes: [] as any,
+  tags: [] as any,
   generalResolutionDef: '',
 });
 
@@ -138,11 +154,26 @@ const rules: FormRules = {
       return form.value.outcomes.length >= 2;
     },
   },
+  tags: {
+    required: false,
+    message: 'Please specify tags with letters only (no spaces or special characters).',
+    type: 'array',
+    validator: () => {
+      // Check if all tags contain only letters (no spaces or special characters)
+      const letterOnlyRegex = /^[a-zA-Z]+$/;
+      return form.value.tags.every(tag => letterOnlyRegex.test(tag));
+    },
+  },
   generalResolutionDef: {
     required: true,
     message: 'Please provide market description and resolution criteria.',
   },
 };
+
+function handleCreateTag(tag: string) {
+  // Capitalize the first letter of the tag
+  return tag.charAt(0).toUpperCase() + tag.slice(1);
+}
 
 onMounted(async () => {
   proposalId.value = Number(params?.id);
@@ -161,6 +192,7 @@ async function getProposal() {
     form.value = {
       question: res.data.question,
       outcomes: res.data.outcomes,
+      tags: res.data.tags,
       generalResolutionDef: res.data.generalResolutionDef,
     };
 
@@ -193,6 +225,7 @@ async function submit() {
     await $api.patch(Endpoints.proposalById(proposalId.value), {
       question: form.value.question,
       outcomes: form.value.outcomes,
+      tags: form.value.tags,
       generalResolutionDef: form.value.generalResolutionDef,
     });
 
