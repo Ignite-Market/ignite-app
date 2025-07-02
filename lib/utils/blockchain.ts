@@ -1,5 +1,5 @@
 import { decodeEventLog, keccak256, parseAbiItem, toHex } from 'viem';
-import { flareTestnet, songbird } from 'viem/chains';
+import { flareTestnet, flare } from 'viem/chains';
 
 /**
  *  Parses ERC1155 TransferSingle events from transaction receipt.
@@ -124,5 +124,5 @@ export function getExplorer() {
   const config = useRuntimeConfig();
   return ['local', 'development', 'staging'].includes(config.public.ENV)
     ? flareTestnet.blockExplorers.default.url
-    : songbird.blockExplorers.default.url;
+    : flare.blockExplorers.default.url;
 }

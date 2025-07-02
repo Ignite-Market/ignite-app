@@ -76,6 +76,27 @@ export default defineNuxtConfig({
     ],
     optimizeDeps: {
       include: process.env.NODE_ENV === AppEnv.DEV ? ['color', 'mersenne-twister', 'naive-ui'] : [],
+      // Don’t try to pre-bundle the dist files in dev
+      exclude: ['~/lib/thirdwebpay/dist'],
+    },
+    build: {
+      // Tell Rollup to treat them as already-built, just copy them over
+      rollupOptions: {
+        plugins: [
+          {
+            name: 'thirdwebpay-dont-touch',
+            // `transform` runs before Rollup does any parsing;
+            // returning `null` makes Rollup leave the file alone.
+            // We only do this for the generated bundle:
+            transform(code, id) {
+              if (id.includes('/lib/thirdwebpay/dist/')) {
+                return { code, moduleSideEffects: false };
+              }
+              return null;
+            },
+          },
+        ],
+      },
     },
   },
 

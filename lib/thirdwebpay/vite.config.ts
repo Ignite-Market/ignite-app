@@ -7,6 +7,7 @@ export default defineConfig({
   plugins: [react()],
 
   build: {
+    minify: false,  
     outDir: 'dist',
     lib: {
       entry: resolve(__dirname, 'src/main.tsx'),

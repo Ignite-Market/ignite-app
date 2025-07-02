@@ -18,6 +18,7 @@ phases:
       - npm install --legacy-peer-deps
   build:
     commands:
+      - export NODE_OPTIONS="--max_old_space_size=6144"
       - npm run generate
   post_build:
     commands:
