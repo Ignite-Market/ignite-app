@@ -109,75 +109,83 @@
           class="!pt-[33px]"
           tab="Buy"
         >
-          <div class="mb-3">
-            <div class="flex flex-row text-[12px] leading-[16px] mb-2">
-              <div class="font-bold">Amount</div>
-              <div class="ml-auto flex font-medium">
-                <div class="text-grey-lightest">Balance:</div>
-                <div class="text-white/80 ml-1">{{ collateralToken.parsedBalance }} {{ collateralToken.symbol }}</div>
+          <PredictionSetBalanceCheck>
+            <div class="mb-3">
+              <div class="flex flex-row text-[12px] leading-[16px] mb-2">
+                <div class="font-bold">Amount</div>
+                <div class="ml-auto flex font-medium">
+                  <div class="text-grey-lightest">Balance:</div>
+                  <div class="text-white/80 ml-1">{{ collateralToken.parsedBalance }} {{ collateralToken.symbol }}</div>
+                </div>
+              </div>
+
+              <n-input-number
+                v-model:value="amount"
+                placeholder="0"
+                size="large"
+                class="min-w-full text-center"
+                type="number"
+                :show-button="true"
+                :max="collateralToken.parsedBalance"
+                button-placement="both"
+                :disabled="loading"
+                :validator="buyValidator"
+                @blur="onBuyBlur"
+              >
+                <template #minus-icon>
+                  <div
+                    class="min-w-[20px] min-h-[20px] rounded-[4px] flex items-center justify-center bg-none hover:bg-grey-light"
+                  >
+                    <NuxtIcon class="hover:text-white text-white" name="icon/minus" />
+                  </div>
+                </template>
+
+                <template #suffix>
+                  <div
+                    class="w-[38px] h-[20px] rounded-[4px] flex items-center justify-center absolute right-[34px] top-1/2 -translate-y-1/2 text-xs bg-none hover:bg-grey-light cursor-pointer"
+                    @click="setMaxBuyAmount"
+                  >
+                    Max
+                  </div>
+                </template>
+
+                <template #add-icon>
+                  <div
+                    class="min-w-[20px] min-h-[20px] rounded-[4px] flex items-center justify-center bg-none hover:bg-grey-light"
+                  >
+                    <NuxtIcon class="hover:text-white text-white" name="icon/plus" />
+                  </div>
+                </template>
+              </n-input-number>
+              <div v-if="buyError" class="text-statusRed mt-1">
+                {{ buyError }}
               </div>
             </div>
 
-            <n-input-number
-              v-model:value="amount"
-              placeholder="0"
-              size="large"
-              class="min-w-full text-center"
-              type="number"
-              :show-button="true"
-              :max="collateralToken.parsedBalance"
-              button-placement="both"
-              :disabled="loading"
-              :validator="buyValidator"
-              @blur="onBuyBlur"
+            <BasicButton
+              class="w-full"
+              :btn-class="['!font-bold']"
+              :size="'large'"
+              :disabled="!isConnected || !enoughCollateralBalance"
+              :loading="loading"
+              @click="buyOutcome"
             >
-              <template #minus-icon>
-                <div
-                  class="min-w-[20px] min-h-[20px] rounded-[4px] flex items-center justify-center bg-none hover:bg-grey-light"
-                >
-                  <NuxtIcon class="hover:text-white text-white" name="icon/minus" />
-                </div>
-              </template>
+              Buy
+            </BasicButton>
 
-              <template #suffix>
-                <div
-                  class="w-[38px] h-[20px] rounded-[4px] flex items-center justify-center absolute right-[34px] top-1/2 -translate-y-1/2 text-xs bg-none hover:bg-grey-light cursor-pointer"
-                  @click="setMaxBuyAmount"
-                >
-                  Max
-                </div>
-              </template>
-
-              <template #add-icon>
-                <div
-                  class="min-w-[20px] min-h-[20px] rounded-[4px] flex items-center justify-center bg-none hover:bg-grey-light"
-                >
-                  <NuxtIcon class="hover:text-white text-white" name="icon/plus" />
-                </div>
-              </template>
-            </n-input-number>
-            <div v-if="buyError" class="text-statusRed mt-1">
-              {{ buyError }}
-            </div>
-          </div>
-
-          <BasicButton
-            class="w-full"
-            :btn-class="['!font-bold']"
-            :size="'large'"
-            :disabled="!isConnected || !enoughCollateralBalance"
-            :loading="loading"
-            @click="buyOutcome"
-          >
-            Buy
-          </BasicButton>
-
-          <PredictionSetFiatBuy
-            :default-amount="amount"
-            :loading="loading"
-            :buy-fund-limit="buyFundLimit"
-            class="mt-2"
-          />
+            <PredictionSetFiatBuy
+              :default-amount="amount"
+              :loading="loading"
+              :buy-fund-limit="buyFundLimit"
+              class="mt-2"
+              @success="
+                newAmount => {
+                  amount = newAmount;
+                  buyOutcome();
+                }
+              "
+            />
+          </PredictionSetBalanceCheck>
 
           <div class="text-[16px] leading-[24px] text-grey-lightest font-normal mt-6">
             <div class="flex items-center justify-center">

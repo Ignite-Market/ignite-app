@@ -9,7 +9,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'success'): void;
+  (e: 'success', amount: number): void;
 }>();
 
 const config = useRuntimeConfig();
@@ -37,13 +37,11 @@ function startThirdweb() {
         amountInUsdc: amount.value?.toString() || '1',
         // purchaseData: { purchaseId: 1 },
         connectorId: connector.value?.id,
-        // testMode: true,
-        onSuccess: (info: any) => {
-          console.log(info);
+        onSuccess: (_info: any) => {
           /**
-           * @TODO Handle success in <PredictionSetAction />
+           * Handle success in <PredictionSetAction />
            */
-          emit('success');
+          emit('success', amount.value || 0);
         },
       });
     }, 50);
