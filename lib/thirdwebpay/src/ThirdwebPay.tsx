@@ -6,10 +6,25 @@ import {
   useConnect,
   type PayUIOptions,
 } from 'thirdweb/react';
-import { createThirdwebClient, type ThirdwebClient } from 'thirdweb';
-import { base, baseSepolia } from 'thirdweb/chains';
+import { createThirdwebClient, defineChain, type ThirdwebClient } from 'thirdweb';
 import { createWallet } from 'thirdweb/wallets';
 import { useEffect, useState } from 'react';
+
+/**
+ * @TODO Import from thirdweb/chains once available
+ */
+const flareChain = defineChain({
+  blockExplorers: [
+    {
+      apiUrl: 'https://flare-explorer.flare.network/api',
+      name: 'Flare Explorer',
+      url: 'https://flare-explorer.flare.network',
+    },
+  ],
+  id: 14,
+  name: 'Flare Mainnet',
+  nativeCurrency: { decimals: 18, name: 'Flare', symbol: 'FLR' },
+});
 
 const ExternalWalletsIdMap = {
   metaMaskSDK: 'io.metamask',
@@ -67,7 +82,10 @@ function Embed({
   const { connect } = useConnect();
   const activeAccount = useActiveAccount();
 
-  const chain = testMode ? baseSepolia : base;
+  /**
+   * @TODO add testnet once available
+   */
+  const chain = testMode ? flareChain : flareChain;
 
   useEffect(() => {
     /**

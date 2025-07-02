@@ -12,6 +12,7 @@ const { address, connector } = useAccount();
 const messageProvider = useMessage();
 const userStore = useUserStore();
 const { connectExternalWallet } = useThirdweb();
+// const { signMessageAsync } = useSignMessage();
 
 const loadingWallet = ref<boolean>(false);
 const modalWalletSelectVisible = ref<boolean>(false);
@@ -28,16 +29,13 @@ onBeforeMount(() => {
   }
 });
 
-watch(
-  () => address.value,
-  address => {
-    if (address && !userStore.loggedIn) {
-      evmWalletLogin({});
-    } else if (address && !loadingWallet.value) {
-      modalWalletSelectVisible.value = false;
-    }
+watch(address, address => {
+  if (address && !userStore.loggedIn) {
+    evmWalletLogin({});
+  } else if (address && !loadingWallet.value) {
+    modalWalletSelectVisible.value = false;
   }
-);
+});
 
 function btnAction() {
   if (address.value) {
@@ -52,7 +50,7 @@ function btnAction() {
 async function evmWalletLogin(data: Record<string, any>) {
   await sleep(200);
 
-  if (!address) {
+  if (!address.value && !data?.address) {
     messageProvider.error('A wallet account must be connected.');
     return;
   } else if (loadingWallet.value && Object.keys(data).length === 0) {

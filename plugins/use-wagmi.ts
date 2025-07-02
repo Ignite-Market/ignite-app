@@ -38,7 +38,8 @@ export default defineNuxtPlugin(nuxtApp => {
       }),
       inAppWalletConnector({
         client,
-        smartAccount: {
+        // @ts-ignore wrong types smartAccount/smartAccounts
+        smartAccounts: {
           sponsorGas: true,
           chain: thirdwebChain((config.public.ENV === AppEnv.PROD ? songbird : flareTestnet) as any),
         },
