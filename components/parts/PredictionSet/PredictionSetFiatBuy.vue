@@ -13,23 +13,27 @@ const emit = defineEmits<{
 }>();
 
 const config = useRuntimeConfig();
-const { connector, isConnected } = useAccount();
+const { connector, isConnected, address } = useAccount();
 const isOpen = ref(false);
 const isThirdweb = ref(false); // Is thirdweb step currently displayed
 const amount = ref<number | undefined>(props.defaultAmount || undefined);
 const buyError = ref<string | undefined>(undefined);
 
 function startThirdweb() {
+  if (!address.value) {
+    return;
+  }
+
   try {
     isOpen.value = true;
 
     setTimeout(() => {
-      console.log(amount.value);
       /**
        * Method from thirdwebpay package (nested react app)
        */
       startThirdwebPayment('#thirdwebpay', {
         clientId: config.public.THIRDWEB_CLIENT_KEY,
+        paymentReceiverAddress: address.value,
         amountInUsdc: amount.value?.toString() || '1',
         // purchaseData: { purchaseId: 1 },
         connectorId: connector.value?.id,
