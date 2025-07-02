@@ -23,7 +23,7 @@ const emit = defineEmits<{
 
 const siteKey = useRuntimeConfig().public.PROSOPO_CAPTCHA_SITEKEY as string;
 
-const clickOnConnector = (connector: (typeof connectors)[number], strategy?: { id: string; name: string }) => {
+function clickOnConnector(connector: (typeof connectors)[number], strategy?: { id: string; name: string }) {
   if (connector.id === 'in-app-wallet') {
     if (!strategy) {
       // Show In-App Wallet options (thirdweb)
@@ -33,6 +33,7 @@ const clickOnConnector = (connector: (typeof connectors)[number], strategy?: { i
       // Connect in-app wallet (thirdweb)
       emit('loading', true);
       loadingStrategy.value = strategy.id;
+
       connectAsync({ connector, strategy: strategy.id } as any).catch(e => {
         console.error('Connection canceled or failed', e);
         loadingStrategy.value = undefined;
@@ -56,6 +57,11 @@ const clickOnConnector = (connector: (typeof connectors)[number], strategy?: { i
       emit('loading', false);
     });
   }
+}
+
+// Must be defined here, not in the template. Otherwise the captcha fails first time
+const callbacks = (token: string) => {
+  emit('step', token ? 1 : 0);
 };
 </script>
 
@@ -92,7 +98,7 @@ const clickOnConnector = (connector: (typeof connectors)[number], strategy?: { i
         <!-- Wallets (metamask, coinbase, etc) -->
         <n-space v-if="!showStrategies" :size="8" vertical class="w-full">
           <form @submit.prevent>
-            <ProcaptchaComponent :site-key="siteKey" :callback="token => emit('step', !!token ? 1 : 0)" theme="dark" />
+            <ProcaptchaComponent :site-key="siteKey" :callback="callbacks" theme="dark" />
           </form>
 
           <BasicButton

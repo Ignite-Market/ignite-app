@@ -2,6 +2,8 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import ThirdwebPay, { type Params } from './ThirdwebPay.tsx';
 
+let root: ReactDOM.Root | null = null;
+
 export function startThirdwebPayment(selector: string, options: Params) {
   if (typeof document === 'undefined' || !selector) {
     console.error('Cannot initialize react app');
@@ -15,7 +17,11 @@ export function startThirdwebPayment(selector: string, options: Params) {
     return;
   }
 
-  ReactDOM.createRoot(el).render(
+  if (!root) {
+    root = ReactDOM.createRoot(el);
+  }
+
+  root.render(
     <React.StrictMode>
       <ThirdwebPay {...options} />
     </React.StrictMode>

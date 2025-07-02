@@ -38,8 +38,10 @@ export enum TransactionType {
  */
 export enum PredictionSetCategory {
   ALL = 'All',
+  FLARE = 'Flare',
+  XRP = 'XRP',
+  FINANCE = 'Finance',
   SPORTS = 'Sports',
-  BUSINESS = 'Business',
 }
 
 export interface OutcomeChance extends GeneralInterface {
