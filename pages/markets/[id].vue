@@ -178,7 +178,7 @@
           </div>
 
           <!-- Mobile FUND btn -->
-          <div v-if="predictionSet && !isMd" class="w-full mt-4">
+          <div v-if="predictionSet && !isMd" class="w-full mt-10">
             <BasicButton
               size="large"
               type="secondary"
@@ -357,7 +357,7 @@
         </div>
 
         <!-- RIGHT -->
-        <div class="md:sticky top-6 self-start md:ml-8 lg:ml-24 w-full min-w-[260px] md:w-[409px] mb-6">
+        <div class="md:sticky top-6 self-start md:ml-8 lg:ml-24 w-full min-w-[260px] md:w-[409px] mb-10">
           <div class="mobile:hidden">
             <PredictionSetAction
               v-if="actionsEnabled(predictionSet.setStatus, predictionSet.endTime)"
@@ -407,7 +407,7 @@
     <div class="w-16 h-1 bg-grey-lighter rounded-full"></div>
   </div>
   <n-drawer
-    v-if="predictionSet && !isMd"
+    v-if="!!predictionSet && !isMd"
     v-model:show="actionModal"
     placement="bottom"
     default-height="auto"
@@ -424,6 +424,10 @@
         :outcomes="predictionSet.outcomes"
         :default-value="defaultActionValue"
         :collateral-token="collateralToken"
+        show-select-outcome
+        @outcome-selected="
+          (outcomeId: number) => (selectedOutcome = predictionSet?.outcomes.find(o => o.id === outcomeId))
+        "
         @action-changed="(action: TransactionType) => (selectedAction = action)"
         @transaction-successful="
           (transactionType: TransactionType) =>

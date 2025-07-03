@@ -14,10 +14,40 @@
         />
       </div>
       <div v-else class="bg-grey-light rounded-[8px] p-3 flex flex-row items-center justify-center">
-        <div class="w-[30px] h-[30px] flex-shrink-0">
-          <Image :src="outcome?.imgUrl" class="rounded-[48px] w-full h-full object-cover" />
+        <n-dropdown
+          v-if="showSelectOutcome"
+          v-model:show="isDropdownOpened"
+          d
+          :options="dropdownOptions"
+          :render-option="renderDropdownOption"
+          trigger="click"
+          size="large"
+          class="bg-grey-light"
+          placement="bottom-start"
+          style="margin-top: 12px; margin-left: -12px"
+          @select="() => {}"
+        >
+          <div class="flex flex-row items-center justify-center cursor-pointer">
+            <div class="w-[30px] h-[30px] flex-shrink-0">
+              <Image :src="outcome?.imgUrl" class="rounded-[48px] w-full h-full object-cover" />
+            </div>
+            <div class="ml-2 text-[12px] leading-[16px] font-bold">{{ outcome?.name }}</div>
+
+            <NuxtIcon
+              name="icon/arrow-down"
+              class="ml-2 text-[24pxy] transition-all transform"
+              :class="{ 'rotate-180': isDropdownOpened }"
+            />
+          </div>
+        </n-dropdown>
+
+        <div v-else class="flex flex-row items-center justify-center">
+          <div class="w-[30px] h-[30px] flex-shrink-0">
+            <Image :src="outcome?.imgUrl" class="rounded-[48px] w-full h-full object-cover" />
+          </div>
+          <div class="ml-2 text-[12px] leading-[16px] font-bold">{{ outcome?.name }}</div>
         </div>
-        <div class="ml-2 text-[12px] leading-[16px] font-bold">{{ outcome?.name }}</div>
+
         <div class="text-[12px] leading-[16px] font-bold ml-auto">{{ (outcome?.latestChance * 100).toFixed(0) }} %</div>
 
         <div
@@ -505,9 +535,10 @@ const props = defineProps({
   outcomes: { type: Array as PropType<OutcomeInterface[]>, default: () => [], required: true },
   defaultValue: { type: Number, default: 0 },
   collateralToken: { type: Object as PropType<CollateralToken>, default: () => {}, required: true },
+  showSelectOutcome: { type: Boolean, default: false },
 });
 
-const emit = defineEmits(['actionChanged', 'transactionSuccessful']);
+const emit = defineEmits(['actionChanged', 'transactionSuccessful', 'outcomeSelected']);
 
 const {
   getMinTokensToBuy,
@@ -550,6 +581,7 @@ const sellError = ref('');
 const transactionStep = ref(TransactionStep.ALLOWANCE);
 
 const sellFundLimit = ref(0);
+const isDropdownOpened = ref(false);
 
 const buyValidator = (x: number) => {
   if (x > buyFundLimit.value) {
@@ -605,6 +637,59 @@ watch(
   }
 );
 
+const dropdownOptions = computed(() => {
+  return props.outcomes
+    .filter(o => o.id !== props.outcome.id)
+    .map(o => ({
+      key: o.id,
+      label: o.name,
+      imgUrl: o.imgUrl,
+    }));
+});
+
+const renderDropdownOption = (props: { node: VNode; option: any }) => {
+  return h(
+    'div',
+    {
+      class:
+        'flex items-center h-[54px] bg-grey-light rounded-[8px] w-full md:max-w-[220px] min-w-[120px] px-2 cursor-pointer hover:bg-grey-dark/40',
+      onClick: () => {
+        emit('outcomeSelected', props.option.key);
+        isDropdownOpened.value = false;
+      },
+    },
+    [
+      h(
+        'div',
+        {
+          class: 'w-[30px] h-[30px] flex-shrink-0',
+        },
+        [
+          h(resolveComponent('Image'), {
+            src: props.option.imgUrl,
+            class: 'rounded-[78px] w-full h-full object-cover',
+          }),
+        ]
+      ),
+      h(
+        'div',
+        {
+          class: 'ml-2',
+        },
+        [
+          h(
+            'div',
+            {
+              class: 'text-white text-[14px] leading-[16px] pe-2',
+            },
+            props.option.label
+          ),
+        ]
+      ),
+    ]
+  );
+};
+
 const enoughConditionalBalance = computed(() => {
   const scaledAmount = BigInt(Math.round((amount.value || 0) * 10 ** props.collateralToken.decimals));
   return conditionalBalance.value >= scaledAmount;
@@ -626,7 +711,7 @@ const buyFundLimit = computed(() => {
 watch(
   () => [currentLiquidity.value, conditionalBalance.value, props?.outcome?.outcomeIndex],
   async () => {
-    if (!props?.outcome?.outcomeIndex) {
+    if (!props?.outcome) {
       return;
     }
 
