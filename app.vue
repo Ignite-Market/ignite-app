@@ -45,35 +45,6 @@ useHead({
   htmlAttrs: {
     lang,
   },
-  title: 'Ignite Market - Future prediction market',
-  meta: [
-    { name: 'title', content: 'Ignite Market | Predict. Profit. Participate.' },
-    {
-      name: 'description',
-      content:
-        'Ignite Market is a cutting-edge prediction platform where you can forecast outcome and earn from your insights on trending events.',
-    },
-    { name: 'canonical', content: 'https://ignitemarket.xyz/' },
-
-    // Open Graph / Facebook
-    { property: 'og:type', content: 'website' },
-    { property: 'og:url', content: 'https://ignitemarket.xyz/' },
-    { property: 'og:title', content: 'Ignite Market | Predict the future!' },
-    {
-      property: 'og:description',
-      content:
-        'Forecast real-world events and earn from your predictions on XPR, Flare, Sports, and Finance. Ignite your insights.',
-    },
-    { property: 'og:image', content: 'https://images.ignitemarket.xyz/social-share.png' },
-
-    // Twitter
-    { name: 'twitter:card', content: 'summary_large_image' },
-    { name: 'twitter:site', content: '@ignitemarket' },
-    { name: 'twitter:title', content: 'Ignite Market | Predict the future!' },
-    { name: 'twitter:description', content: 'Forecast real-world events. Ignite your insights.' },
-    { name: 'twitter:image', content: 'https://images.ignitemarket.xyz/social-share.png' },
-  ],
-  link: [{ rel: 'canonical', href: 'https://ignitemarket.xyz/' }],
 });
 
 onMounted(async () => {
