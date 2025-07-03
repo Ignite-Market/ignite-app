@@ -80,7 +80,7 @@ export default defineNuxtConfig({
     ],
     optimizeDeps: {
       include: process.env.NODE_ENV === AppEnv.DEV ? ['color', 'mersenne-twister', 'naive-ui'] : [],
-      // Don’t try to pre-bundle the dist files in dev
+      // Don't try to pre-bundle the dist files in dev
       exclude: ['~/lib/thirdwebpay/dist'],
     },
     build: {
@@ -111,7 +111,6 @@ export default defineNuxtConfig({
       },
 
       title: meta.title,
-      titleTemplate: `%s - ${meta.title}`,
       charset: 'utf-8',
       viewport: 'width=device-width, initial-scale=1',
 
