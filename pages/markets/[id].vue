@@ -177,6 +177,19 @@
             <n-skeleton height="72px" width="100%" class="rounded-[8px] mt-10" />
           </div>
 
+          <!-- Mobile FUND btn -->
+          <div v-if="predictionSet && !isMd" class="w-full mt-4">
+            <BasicButton
+              size="large"
+              type="secondary"
+              class="w-full"
+              :btn-class="['bg-statusBlue/20 border-statusBlue hover:bg-statusBlue w-full']"
+              @click="() => selectOutcome(TransactionType.FUND, predictionSet?.outcomes[0])"
+            >
+              Fund
+            </BasicButton>
+          </div>
+
           <!-- OUTCOMES -->
           <div class="flex flex-col gap-y-[6px] mt-10">
             <div
@@ -253,7 +266,7 @@
                   size="large"
                   type="secondary"
                   :btn-class="['bg-statusGreen/20 border-statusGreen hover:bg-statusGreen mr-3 w-full']"
-                  :selected="selectedOutcome.id === outcome.id && selectedAction === TransactionType.BUY"
+                  :selected="selectedOutcome?.id === outcome.id && selectedAction === TransactionType.BUY"
                   :selected-class="['!bg-statusGreen !border-statusGreen']"
                   @click="selectOutcome(TransactionType.BUY, outcome)"
                 >
@@ -263,7 +276,7 @@
                   size="large"
                   type="secondary"
                   :btn-class="['bg-statusRed/20 border-statusRed hover:bg-statusRed w-full']"
-                  :selected="selectedOutcome.id === outcome.id && selectedAction === TransactionType.SELL"
+                  :selected="selectedOutcome?.id === outcome.id && selectedAction === TransactionType.SELL"
                   :selected-class="['!bg-statusRed !border-statusRed']"
                   @click="selectOutcome(TransactionType.SELL, outcome)"
                 >
@@ -393,7 +406,13 @@
   >
     <div class="w-16 h-1 bg-grey-lighter rounded-full"></div>
   </div>
-  <n-drawer v-if="predictionSet && !isMd" v-model:show="actionModal" placement="bottom" default-height="auto">
+  <n-drawer
+    v-if="predictionSet && !isMd"
+    v-model:show="actionModal"
+    placement="bottom"
+    default-height="auto"
+    @close="actionModal = false"
+  >
     <div class="h-full w-full" @touchstart="handleTouchStart" @touchend="handleTouchEnd">
       <PredictionSetAction
         v-if="actionsEnabled(predictionSet.setStatus, predictionSet.endTime)"
@@ -475,12 +494,15 @@ onMounted(async () => {
   await sleep(10);
   await getPredictionSet();
   if (query) {
-    if (query.transaction && query.outcome) {
+    if (query.transaction) {
       selectedAction.value = +query.transaction;
-      selectedOutcome.value = predictionSet.value?.outcomes.find(x => x.id === +query.outcome!);
+      if (query.outcome) {
+        selectedOutcome.value = predictionSet.value?.outcomes.find(x => x.id === +query.outcome!);
+      }
       if (query.value) {
         defaultActionValue.value = +query.value;
       }
+      actionModal.value = true;
       router.replace({ query: undefined });
     }
   }
@@ -504,7 +526,7 @@ function sellPosition(outcomeId: number, sharesAmount: number) {
   actionModal.value = true;
 }
 
-function selectOutcome(transaction: TransactionType, outcome: OutcomeInterface) {
+function selectOutcome(transaction: TransactionType, outcome?: OutcomeInterface) {
   selectedAction.value = transaction;
   selectedOutcome.value = outcome;
   actionModal.value = true;

@@ -61,11 +61,12 @@
     <div
       class="flex flex-row mt-[10px] items-center lg:justify-center text-[12px] leading-[16px] lg:flex-nowrap flex-wrap gap-y-1 gap-x-2.5"
     >
-      <Status :status="predictionSet.setStatus" :end-time="new Date(predictionSet.endTime)" class="shrink-0" />
-
-      <div class="w-full flex items-center justify-between">
-        <div class="text-[#888888]">
-          {{ getDisplayDate(predictionSet.setStatus, predictionSet.endTime, predictionSet.resolutionTime) }}
+      <div class="w-full flex items-center justify-between gap-1">
+        <div class="flex items-center gap-x-2">
+          <Status :status="predictionSet.setStatus" :end-time="new Date(predictionSet.endTime)" class="shrink-0" />
+          <div class="text-[#888888]">
+            {{ getDisplayDate(predictionSet.setStatus, predictionSet.endTime, predictionSet.resolutionTime) }}
+          </div>
         </div>
 
         <div class="ml-auto flex items-center justify-center">
@@ -115,10 +116,14 @@ const collateralToken = ref();
 function openDetails(outcome?: number, transaction?: TransactionType, value?: number) {
   let query: any = null;
   if (transaction) {
-    query =
-      transaction === TransactionType.BUY
-        ? { transaction: TransactionType.BUY, value, outcome }
-        : { transaction: TransactionType.SELL, outcome };
+    if (outcome) {
+      query =
+        transaction === TransactionType.BUY
+          ? { transaction: TransactionType.BUY, value, outcome }
+          : { transaction: TransactionType.SELL, outcome };
+    } else {
+      query = { transaction: TransactionType.FUND };
+    }
   }
 
   router.push({
