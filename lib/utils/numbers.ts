@@ -14,7 +14,7 @@ export function numToBigInt(input: number) {
 }
 
 export function bigIntToNum(input: bigint | string | number, decimals: number = 18) {
-  return Number(BigInt(input) / 10n ** BigInt(decimals));
+  return Number(input) / Math.pow(10, decimals);
 }
 
 export function formatNumber(n: number) {
