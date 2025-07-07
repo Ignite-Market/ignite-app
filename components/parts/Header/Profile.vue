@@ -119,7 +119,6 @@ const options = computed(() => [
 function handleSelect(key: string | number) {
   if (key === 'logout') {
     userStore.logout();
-    router.push('/');
   } else if (key === 'learn') {
     window.open('https://docs.ignitemarket.xyz/', '_blank');
   } else if (key) {
