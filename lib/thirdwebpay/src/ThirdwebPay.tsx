@@ -1,11 +1,4 @@
-import {
-  getDefaultToken,
-  PayEmbed,
-  ThirdwebProvider,
-  useActiveAccount,
-  useConnect,
-  type PayUIOptions,
-} from 'thirdweb/react';
+import { BuyWidget, ThirdwebProvider, useActiveAccount, useConnect, type PayUIOptions } from 'thirdweb/react';
 import { createThirdwebClient, defineChain, type ThirdwebClient } from 'thirdweb';
 import { createWallet } from 'thirdweb/wallets';
 import { useEffect, useState } from 'react';
@@ -104,14 +97,15 @@ function Embed({
       });
     }
   }, [client, connectorId, activeAccount, connect]);
-
+  console.log(paymentReceiverAddress);
+  console.log(amountInUsdc);
   if (!activeAccount && !testMode) {
     return <></>;
   }
 
   return (
     <>
-      <PayEmbed
+      {/* <PayEmbed
         client={client}
         payOptions={{
           mode: 'direct_payment',
@@ -127,16 +121,7 @@ function Embed({
           //   },
           // },
           // buyWithFiat: false,
-          buyWithCrypto: {
-            prefillSource: {
-              chain,
-              token: getDefaultToken(chain, 'USDC'),
-              // allowEdits: {
-              //   chain: false,
-              //   token: false,
-              // },
-            },
-          },
+          buyWithCrypto: false,
           paymentInfo: {
             sellerAddress: paymentReceiverAddress,
             chain,
@@ -145,6 +130,14 @@ function Embed({
           },
           onPurchaseSuccess: onSuccess,
         }}
+      /> */}
+      <BuyWidget
+        client={client}
+        chain={chain}
+        amount={amountInUsdc}
+        purchaseData={purchaseData}
+        paymentMethods={['card']} // Crypto doesn't make senese since only FLR is supported
+        onSuccess={onSuccess}
       />
     </>
   );
