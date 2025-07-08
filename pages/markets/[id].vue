@@ -657,8 +657,11 @@ function poolForPositionsChanges() {
 }
 
 function poolForFundingPositionsChanges() {
-  // Positions will also change.
-  if (predictionSet.value?.setStatus === PredictionSetStatus.ACTIVE) {
+  // Positions will also change if trading already happened.
+  if (
+    predictionSet.value?.setStatus === PredictionSetStatus.ACTIVE &&
+    BigInt(predictionSet.value?.transactionsVolume || 0) !== 0n
+  ) {
     poolForPositionsChanges();
   }
 
