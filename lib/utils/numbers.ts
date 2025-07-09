@@ -1,3 +1,5 @@
+import { parseUnits } from 'viem';
+
 export const randomNumbers = (count: number): number => {
   return Math.floor(Math.random() * 10 ** count);
 };
@@ -9,8 +11,8 @@ export const randomBigInt = (count: number): bigint => {
 /**
  *  Format numbers
  */
-export function numToBigInt(input: number) {
-  return BigInt(input * 10 ** 18);
+export function numToBigInt(input: number, decimals: number = 18) {
+  return BigInt(parseUnits(input.toString(), decimals));
 }
 
 export function bigIntToNum(input: bigint | string | number, decimals: number = 18) {

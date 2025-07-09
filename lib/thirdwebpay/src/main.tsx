@@ -3,6 +3,8 @@ import ReactDOM from 'react-dom/client';
 import ThirdwebPay, { type Params } from './ThirdwebPay.tsx';
 
 let root: ReactDOM.Root | null = null;
+// Counter to force remount of ThirdwebPay on each invocation
+let renderKey = 0;
 
 export function startThirdwebPayment(selector: string, options: Params) {
   if (typeof document === 'undefined' || !selector) {
@@ -20,12 +22,14 @@ export function startThirdwebPayment(selector: string, options: Params) {
   if (!root) {
     root = ReactDOM.createRoot(el);
   }
-
+  console.log('rendering thirdweb');
   root.render(
     <React.StrictMode>
-      <ThirdwebPay {...options} />
+      {/* Changing the key forces React to unmount + remount the component */}
+      <ThirdwebPay key={renderKey} {...options} />
     </React.StrictMode>
   );
+  renderKey += 1;
 }
 
 // startThirdwebPayment('#thirdwebpay', {

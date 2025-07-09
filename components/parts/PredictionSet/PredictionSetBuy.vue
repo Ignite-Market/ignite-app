@@ -1,23 +1,65 @@
 <script setup lang="ts">
-import { createPublicClient, http, parseUnits } from 'viem';
-import { flare } from 'viem/chains';
 import { useAccount, useBalance } from '@wagmi/vue';
+import { colors } from '../../../tailwind.config';
 import { startThirdwebPayment } from '~/lib/thirdwebpay/dist/thirdwebpay';
+import { useSwap } from '~/composables/useSwap';
 
 const props = defineProps<{
-  amount: number;
   collateralToken: CollateralToken;
 }>();
 
+enum Steps {
+  LANDING = 0,
+  THIRDWEB = 1,
+  SWAP = 2,
+}
+
 const config = useRuntimeConfig();
 const { connector, address } = useAccount();
-const { data: nativeBalance } = useBalance({ address: address.value });
+const { data: nativeBalance, refetch: refetchNativeBalance } = useBalance({ address: address.value });
+const { getQuote } = useSwap();
 const isOpen = ref(false);
-const isThirdweb = ref(false); // Is thirdweb step currently displayed
-const isSwap = ref(false); // Is swap step currently displayed
+const step = ref(Steps.LANDING);
+const collateralNeeded = ref(0);
+const nativeNeeded = ref(0); // FLR required for the swap to USDT
+const loading = ref(true);
+const gasBuffer = 0.02; // Estimated FLR reserved for gas – tweak as needed
+const totalNativeNeeded = computed(() => gasBuffer + nativeNeeded.value);
+const nativeMissing = computed(() =>
+  Math.max(0, Math.ceil((totalNativeNeeded.value - bigIntToNum(nativeBalance?.value?.value || 0n, 18)) * 10000) / 10000)
+);
+const collateralMissing = computed(
+  () =>
+    collateralNeeded.value -
+    bigIntToNum(
+      // props.collateralToken.balance
+      0n,
+      props.collateralToken.decimals
+    )
+);
 
-/* Actions */
-function topUpGas() {
+watch(collateralMissing, async () => {
+  loading.value = true;
+  console.log('collateralMissing', collateralMissing.value);
+
+  if (collateralMissing.value > 0) {
+    // const result = await getQuote(collateralMissing.value);
+    const result = (await getQuote(collateralMissing.value)).result;
+    nativeNeeded.value = bigIntToNum(result[0], 18) * 1.03;
+  }
+  console.log('collateralMissing', collateralMissing.value);
+  console.log('nativeNeeded', nativeNeeded.value);
+  console.log('totalNativeNeeded', totalNativeNeeded.value);
+  console.log('nativeMissing', nativeMissing.value);
+  loading.value = false;
+});
+
+onMounted(async () => {
+  await refetchNativeBalance();
+});
+
+function openThirdweb() {
+  console.log('nativeMissingPassed', nativeMissing.value);
   setTimeout(() => {
     /**
      * Method from thirdwebpay package (nested react app)
@@ -25,91 +67,43 @@ function topUpGas() {
     startThirdwebPayment('#thirdwebpay', {
       clientId: config.public.THIRDWEB_CLIENT_KEY,
       paymentReceiverAddress: address.value,
-      amountInUsdc: numToBigInt(props.amount),
+      amount: numToBigInt(nativeMissing.value),
       // purchaseData: { purchaseId: 1 },
       connectorId: connector.value?.id,
       onSuccess: (_info: any) => {
         /**
          * Handle success in <PredictionSetAction />
          */
-        // emit('success', props.amount || 0);
+        // emit('success', collateralNeeded.value || 0);
+        step.value = Steps.LANDING;
       },
     });
   }, 50);
   setTimeout(() => {
-    isThirdweb.value = true;
+    step.value = Steps.THIRDWEB;
   }, 100);
 }
 
-async function openSwap() {
-  try {
-    const client = createPublicClient({
-      chain: flare,
-      transport: http('https://flare-api.flare.network/ext/C/rpc'), // Use actual Flare RPC
-    });
+function openSwap() {
+  step.value = Steps.SWAP;
+}
 
-    console.log('Starting quote request...');
-
-    const result = await client.readContract({
-      address: '0x5B5513c55fd06e2658010c121c37b07fC8e8B705',
-      abi: [
-        {
-          name: 'quoteExactOutputSingle',
-          type: 'function',
-          stateMutability: 'nonpayable',
-          inputs: [
-            {
-              components: [
-                { name: 'tokenIn', type: 'address' },
-                { name: 'tokenOut', type: 'address' },
-                { name: 'amount', type: 'uint256' },
-                { name: 'fee', type: 'uint24' },
-                { name: 'sqrtPriceLimitX96', type: 'uint160' },
-              ],
-              internalType: 'struct IQuoterV2.QuoteExactOutputSingleParams',
-              name: 'params',
-              type: 'tuple',
-            },
-          ],
-          outputs: [
-            { name: 'amountIn', type: 'uint256' },
-            { name: 'sqrtPriceX96After', type: 'uint160' },
-            { name: 'initializedTicksCrossed', type: 'uint32' },
-            { name: 'gasEstimate', type: 'uint256' },
-          ],
-        },
-      ],
-      functionName: 'quoteExactOutputSingle',
-      args: [
-        {
-          tokenIn: '0x1d80c49bbbcd1c0911346656b529df9e5c2f783d',
-          tokenOut: '0xe7cd86e13AC4309349F30B3435a9d337750fC82D',
-          amount: parseUnits('10', 6),
-          fee: 500, // 3000
-          sqrtPriceLimitX96: 0n,
-        },
-      ],
-    });
-
-    console.log('Quote result:', result);
-    isSwap.value = true;
-  } catch (error) {
-    console.error('Quote request failed:', error);
-    // Still show swap UI even if quote fails
-    isSwap.value = true;
-  }
+function handleSwapSuccess() {
+  // Reset step to LANDING
+  step.value = Steps.LANDING;
 }
 
 // Expose methods and state for parent component
 defineExpose({
   isOpen,
-  openModal: () => {
+  openModal: (amount: number) => {
+    collateralNeeded.value = amount;
     isOpen.value = true;
-    isThirdweb.value = false;
+    step.value = Steps.LANDING;
   },
   closeModal: () => {
     isOpen.value = false;
-    isThirdweb.value = false;
+    step.value = Steps.LANDING;
   },
 });
 </script>
@@ -121,53 +115,99 @@ defineExpose({
     class="!max-w-[402px] !bg-[#131418] [&>.n-card-header>button]:z-1"
     @update:show="isOpen = $event"
   >
-    <div v-show="!isThirdweb">
+    <div v-show="step === Steps.LANDING">
       <h2 class="text-lg font-bold mb-4 text-center">Insufficient funds</h2>
-
-      <div class="space-y-3">
+      <div v-if="loading" class="flex justify-center items-center h-full">
+        <Spinner :size="24" color="#000" />
+      </div>
+      <div v-else class="space-y-3">
         <!-- Native token row -->
-        <div class="flex items-center p-3 rounded-[8px]" :class="amount ? 'bg-statusRed/10' : 'bg-statusGreen/10'">
+        <div
+          class="flex items-center p-3 rounded-[8px]"
+          :class="nativeMissing > 0 ? 'bg-statusRed/10' : 'bg-statusGreen/10'"
+        >
           <NuxtIcon class="text-[24px]" name="icon/flare" filled />
           <div class="ml-3 flex-1">
-            <div class="text-sm font-medium">Gas (FLR)</div>
+            <div class="text-sm font-medium">FLR (gas + swap)</div>
             <div class="text-xs text-grey-lightest">
               Balance {{ bigIntToNum(nativeBalance?.value || 0n, 18).toFixed(4) }} / Needed ≈
-              {{ amount.toFixed(4) }}
+              {{ totalNativeNeeded.toFixed(4) }}
+              <span class="block text-[10px] leading-4">
+                swap = {{ nativeNeeded.toFixed(4) }}, gas ≈ {{ gasBuffer.toFixed(2) }}
+              </span>
             </div>
           </div>
 
-          <BasicButton v-if="amount" size="small" class="!px-3" @click="topUpGas">Add</BasicButton>
+          <BasicButton v-if="nativeMissing > 0" size="small" class="!px-3" @click="openThirdweb"> Buy FLR </BasicButton>
           <NuxtIcon v-else name="icon/check" class="text-statusGreen" />
         </div>
 
         <!-- USDT row -->
-        <div class="flex items-center p-3 rounded-[8px]" :class="amount ? 'bg-statusRed/10' : 'bg-statusGreen/10'">
+        <div
+          class="flex items-center p-3 rounded-[8px]"
+          :class="collateralMissing > 0 ? 'bg-statusRed/10' : 'bg-statusGreen/10'"
+        >
           <Image
             :src="collateralToken.imgUrl"
             :title="collateralToken.name"
             class="rounded-full w-6 h-6 object-cover mr-1"
           />
           <div class="ml-3 flex-1">
-            <div class="text-sm font-medium">Collateral (USDT)</div>
+            <div class="text-sm font-medium">Collateral ({{ collateralToken.name }})</div>
             <div class="text-xs text-grey-lightest">
               Balance {{ bigIntToNum(collateralToken?.balance || 0n, collateralToken.decimals).toFixed(2) }} / Needed
-              {{ amount.toFixed(2) }}
+              {{ collateralNeeded.toFixed(2) }}
             </div>
           </div>
 
-          <BasicButton v-if="amount" size="small" class="!px-3" @click="openSwap">Swap</BasicButton>
-          <NuxtIcon v-else name="icon/check" class="text-statusGreen" />
+          <n-tooltip
+            :disabled="nativeMissing <= 0"
+            trigger="hover"
+            placement="top"
+            :theme-overrides="{
+              borderRadius: '8px',
+              color: colors.grey.light,
+            }"
+            :style="{
+              maxWidth: '60vw',
+            }"
+          >
+            <template #trigger>
+              <div>
+                <BasicButton
+                  v-if="collateralMissing > 0"
+                  size="small"
+                  class="!px-3"
+                  :disabled="nativeMissing > 0"
+                  @click="openSwap"
+                >
+                  Swap
+                </BasicButton>
+              </div>
+            </template>
+            You need more FLR to swap to {{ collateralToken.name }}
+          </n-tooltip>
+          <NuxtIcon v-if="collateralMissing <= 0" name="icon/check" class="text-statusGreen" />
         </div>
       </div>
-      <BasicButton class="w-full mt-6" type="primary" :disabled="!amount"> Done </BasicButton>
+      <BasicButton class="w-full mt-6" type="primary" :disabled="collateralMissing > 0 || nativeMissing > 0">
+        Done
+      </BasicButton>
     </div>
     <!-- Thirdweb iframe slot -->
-    <div v-show="isThirdweb">
+    <div v-show="step === Steps.THIRDWEB">
       <div id="thirdwebpay" class="[&>div]:mx-auto [&>div]:!border-none" :style="{ margin: '-20px -24px -20px' }"></div>
     </div>
-    <PredictionSetSwap v-if="isSwap" />
+    <PredictionSetSwap
+      v-if="step === Steps.SWAP"
+      :amount="collateralMissing"
+      @back="step = Steps.LANDING"
+      @success="handleSwapSuccess"
+    />
     <template #header>
-      <BasicButton v-show="isThirdweb" class="" type="primary" @click="isThirdweb = false"> Back </BasicButton>
+      <BasicButton v-show="step === Steps.THIRDWEB" class="" type="primary" @click="step = Steps.LANDING">
+        Back
+      </BasicButton>
     </template>
   </Modal>
 </template>

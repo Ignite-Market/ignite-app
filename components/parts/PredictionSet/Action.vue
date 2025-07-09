@@ -340,7 +340,6 @@
               type="number"
               :show-button="true"
               button-placement="both"
-              :max="collateralToken.parsedBalance"
               :disabled="loading"
             >
               <template #minus-icon>
@@ -365,7 +364,7 @@
             class="w-full"
             :btn-class="['bg-statusBlue hover:bg-statusBlue-hover !font-bold']"
             :size="'large'"
-            :disabled="!isConnected || !enoughCollateralBalance || !isFundEnabled"
+            :disabled="!isConnected || !isFundEnabled"
             :loading="loading"
             @click="openFiatBuyModal"
           >
@@ -508,7 +507,7 @@
       </div>
     </div>
   </n-modal>
-  <PredictionSetBuy ref="fiatBuyRef" :amount="amount || 0" :collateral-token="collateralToken" />
+  <PredictionSetBuy ref="fiatBuyRef" :collateral-token="collateralToken" />
 </template>
 
 <script setup lang="ts">
@@ -585,7 +584,7 @@ const isDropdownOpened = ref(false);
 const fiatBuyRef = ref();
 
 const openFiatBuyModal = () => {
-  fiatBuyRef.value?.openModal();
+  fiatBuyRef.value?.openModal(amount.value);
 };
 
 const buyValidator = (x: number) => {

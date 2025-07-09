@@ -8,7 +8,7 @@ import { AppEnv } from '~/lib/types/config';
 
 export default defineNuxtPlugin(nuxtApp => {
   const config = useRuntimeConfig();
-  const chains: readonly [Chain, ...Chain[]] = config.public.ENV === AppEnv.PROD ? [flare] : [flareTestnet];
+  const chains: readonly [Chain, ...Chain[]] = config.public.ENV === AppEnv.PROD ? [flare] : [flareTestnet, flare];
   const { client } = useThirdweb();
 
   const transports = chains.reduce((acc, chain) => {

@@ -2,7 +2,6 @@ import { BuyWidget, ThirdwebProvider, useActiveAccount, useConnect, type PayUIOp
 import { createThirdwebClient, defineChain, type ThirdwebClient } from 'thirdweb';
 import { createWallet } from 'thirdweb/wallets';
 import { useEffect, useState } from 'react';
-
 /**
  * @TODO Import from thirdweb/chains once available
  */
@@ -26,9 +25,9 @@ const ExternalWalletsIdMap = {
 } as const;
 
 export type PayParams = {
-  amountInUsdc: string;
+  amount: bigint;
   // tokenAddress?: string;
-  paymentReceiverAddress?: string;
+  // paymentReceiverAddress?: string;
   testMode?: boolean;
   purchaseData?: Record<string, unknown>;
   connectorId?: keyof typeof ExternalWalletsIdMap;
@@ -65,15 +64,16 @@ export default function ThirdwebPay({ clientId, ...params }: Params) {
 function Embed({
   client,
   connectorId,
-  amountInUsdc,
+  amount,
   // tokenAddress = '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913', // Base USDC
-  paymentReceiverAddress = '0x5f2B7077a7e5B4fdD97cBb56D9aD02a4f326896d', // OUR account
+  // paymentReceiverAddress = '0x5f2B7077a7e5B4fdD97cBb56D9aD02a4f326896d', // OUR account
   testMode = false,
   purchaseData = {},
   onSuccess,
 }: { client: ThirdwebClient } & PayParams) {
   const { connect } = useConnect();
   const activeAccount = useActiveAccount();
+  console.log('amount', amount);
 
   /**
    * @TODO add testnet once available
@@ -97,8 +97,7 @@ function Embed({
       });
     }
   }, [client, connectorId, activeAccount, connect]);
-  console.log(paymentReceiverAddress);
-  console.log(amountInUsdc);
+
   if (!activeAccount && !testMode) {
     return <></>;
   }
@@ -108,7 +107,7 @@ function Embed({
       {/* <PayEmbed
         client={client}
         payOptions={{
-          mode: 'direct_payment',
+          mode: 'fund_wallet',
           purchaseData,
           // prefillBuy: {
           //   token: getDefaultToken(chain, 'USDC'),
@@ -122,21 +121,31 @@ function Embed({
           // },
           // buyWithFiat: false,
           buyWithCrypto: false,
-          paymentInfo: {
-            sellerAddress: paymentReceiverAddress,
+          prefillBuy: {
             chain,
-            amount: amountInUsdc,
-            token: getDefaultToken(chain, 'USDC'),
+            amount: formatUnits(amount, 18),
+            allowEdits: {
+              amount: false,
+              token: false,
+              chain: false,
+            },
           },
+          // paymentInfo: {
+          //   sellerAddress: paymentReceiverAddress,
+          //   chain,
+          //   amount: amountInUsdc,
+          //   token: getDefaultToken(chain, 'USDC'),
+          // },
           onPurchaseSuccess: onSuccess,
         }}
       /> */}
       <BuyWidget
         client={client}
         chain={chain}
-        amount={amountInUsdc}
+        amount={amount.toString()}
         purchaseData={purchaseData}
-        paymentMethods={['card']} // Crypto doesn't make senese since only FLR is supported
+        presetOptions={[10, 20, 50]}
+        paymentMethods={['card']} // Crypto doesn't make sense since only FLR is supported
         onSuccess={onSuccess}
       />
     </>
