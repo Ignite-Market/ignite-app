@@ -17,6 +17,7 @@ export function useSwap() {
     result: [bigint, bigint, bigint, bigint];
     expiration: number;
     amountOut: number;
+    tokenOut: string;
   } | null>;
   const { address, isConnected } = useAccount();
   const { data: walletClient, refetch } = useConnectorClient();
@@ -52,7 +53,6 @@ export function useSwap() {
       return; // Already on correct network
     }
 
-    console.log(`Switching to Flare mainnet (${flare.id}) from ${chainId.value}...`);
     await switchChainAsync({ chainId: flare.id });
     await sleep(100);
     await refetch();
@@ -74,15 +74,13 @@ export function useSwap() {
    */
   async function getQuote(
     amountOut: number,
+    tokenOut = USDT_ADDRESS,
     tokenIn = WFLR_ADDRESS, // WFLR
-    tokenOut = USDT_ADDRESS, // USDT on Flare
     decimalsOut = 6,
     fee = 500
   ) {
     loading.value = true;
     try {
-      console.log('Starting quote request...');
-
       const result = (await quoter.read.quoteExactOutputSingle([
         {
           tokenIn,
@@ -94,13 +92,11 @@ export function useSwap() {
       ])) as [bigint, bigint, bigint, bigint];
 
       const expiration = Math.floor(Date.now() / 1000) + 60 * 5;
-      quote.value = { result, expiration, amountOut };
+      quote.value = { result, expiration, amountOut, tokenOut };
 
-      console.log('Quote result:', result);
       return { result, expiration };
     } catch (error) {
       console.error('Quote request failed:', error);
-      throw error;
     } finally {
       loading.value = false;
     }
@@ -109,7 +105,7 @@ export function useSwap() {
   /**
    * Executes the swap using the SparkDEX router.
    */
-  async function executeSwap(amountOut: number) {
+  async function executeSwap(amountOut: number, tokenOut = USDT_ADDRESS) {
     if (!isConnected.value || !walletClient.value) {
       console.error('Wallet not connected');
       return;
@@ -119,9 +115,13 @@ export function useSwap() {
     await ensureCorrectNetwork();
 
     // Ensure we have a fresh quote
-    if (!quote.value || quote.value.amountOut !== amountOut || quote.value.expiration < Math.floor(Date.now() / 1000)) {
-      console.log('Quote expired or missing, getting new quote...');
-      await getQuote(amountOut);
+    if (
+      !quote.value ||
+      quote.value.amountOut !== amountOut ||
+      quote.value.expiration < Math.floor(Date.now() / 1000) ||
+      quote.value.tokenOut !== tokenOut
+    ) {
+      await getQuote(amountOut, tokenOut);
     }
     if (!quote.value) {
       console.error('No quote found');
@@ -134,21 +134,11 @@ export function useSwap() {
 
     const deadline = Math.floor(Date.now() / 1000) + 60 * 5; // 5 minutes from now
 
-    console.log('Executing swap with params:', {
-      tokenIn: WFLR_ADDRESS,
-      tokenOut: USDT_ADDRESS,
-      fee: 500,
-      recipient: address.value,
-      deadline,
-      amountOut,
-      amountInMax: amountInMax.toString(),
-    });
-
     const gasEstimate = await router.estimateGas.exactOutputSingle(
       [
         {
           tokenIn: WFLR_ADDRESS,
-          tokenOut: USDT_ADDRESS,
+          tokenOut,
           fee: 500,
           recipient: address.value,
           deadline,
@@ -162,17 +152,14 @@ export function useSwap() {
       }
     );
 
-    console.log('Gas estimate:', gasEstimate);
-
     // Add 20% buffer to gas estimate
     const gasLimit = gasEstimate + (gasEstimate * 20n) / 100n; // 20% buffer
-    console.log('Gas limit:', gasLimit);
 
     const hash = await router.write.exactOutputSingle(
       [
         {
           tokenIn: WFLR_ADDRESS,
-          tokenOut: USDT_ADDRESS,
+          tokenOut,
           fee: 500,
           recipient: address.value,
           deadline,

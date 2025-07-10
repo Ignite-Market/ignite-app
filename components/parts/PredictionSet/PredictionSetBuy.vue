@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useAccount, useBalance } from '@wagmi/vue';
 import { colors } from '../../../tailwind.config';
+import CollateralToken from './Filter/CollateralToken.vue';
 import { startThirdwebPayment } from '~/lib/thirdwebpay/dist/thirdwebpay';
 import { useSwap } from '~/composables/useSwap';
 
@@ -17,6 +18,7 @@ enum Steps {
 const config = useRuntimeConfig();
 const { connector, address } = useAccount();
 const { data: nativeBalance, refetch: refetchNativeBalance } = useBalance({ address: address.value });
+const { refreshCollateralBalance } = useCollateralToken();
 const { getQuote } = useSwap();
 const isOpen = ref(false);
 const step = ref(Steps.LANDING);
@@ -28,33 +30,31 @@ const totalNativeNeeded = computed(() => gasBuffer + nativeNeeded.value);
 const nativeMissing = computed(() =>
   Math.max(0, Math.ceil((totalNativeNeeded.value - bigIntToNum(nativeBalance?.value?.value || 0n, 18)) * 10000) / 10000)
 );
+const quoteError = ref(false);
 const collateralMissing = computed(
-  () =>
-    collateralNeeded.value -
-    bigIntToNum(
-      // props.collateralToken.balance
-      0n,
-      props.collateralToken.decimals
-    )
+  () => collateralNeeded.value - bigIntToNum(props.collateralToken.balance, props.collateralToken.decimals)
 );
 
 watch(collateralMissing, async () => {
   loading.value = true;
-  console.log('collateralMissing', collateralMissing.value);
-
   if (collateralMissing.value > 0) {
     // const result = await getQuote(collateralMissing.value);
-    const result = (await getQuote(collateralMissing.value)).result;
+    const result = (await getQuote(collateralMissing.value, props.collateralToken.address))?.result;
+    if (!result) {
+      quoteError.value = true;
+      loading.value = false;
+      return;
+    }
     nativeNeeded.value = bigIntToNum(result[0], 18) * 1.03;
   }
-  console.log('collateralMissing', collateralMissing.value);
-  console.log('nativeNeeded', nativeNeeded.value);
-  console.log('totalNativeNeeded', totalNativeNeeded.value);
-  console.log('nativeMissing', nativeMissing.value);
   loading.value = false;
 });
 
 onMounted(async () => {
+  await refetchNativeBalance();
+});
+
+watch(address, async () => {
   await refetchNativeBalance();
 });
 
@@ -89,9 +89,14 @@ function openSwap() {
 }
 
 function handleSwapSuccess() {
-  // Reset step to LANDING
-  step.value = Steps.LANDING;
+  refetchNativeBalance();
+  refreshCollateralBalance(props.collateralToken.id);
 }
+
+const closeModal = () => {
+  isOpen.value = false;
+  step.value = Steps.LANDING;
+};
 
 // Expose methods and state for parent component
 defineExpose({
@@ -101,10 +106,7 @@ defineExpose({
     isOpen.value = true;
     step.value = Steps.LANDING;
   },
-  closeModal: () => {
-    isOpen.value = false;
-    step.value = Steps.LANDING;
-  },
+  closeModal,
 });
 </script>
 
@@ -160,7 +162,9 @@ defineExpose({
             </div>
           </div>
 
+          <NuxtIcon v-if="collateralMissing <= 0" name="icon/check" class="text-statusGreen" />
           <n-tooltip
+            v-else-if="!quoteError"
             :disabled="nativeMissing <= 0"
             trigger="hover"
             placement="top"
@@ -187,12 +191,10 @@ defineExpose({
             </template>
             You need more FLR to swap to {{ collateralToken.name }}
           </n-tooltip>
-          <NuxtIcon v-if="collateralMissing <= 0" name="icon/check" class="text-statusGreen" />
+          <div v-else class="text-statusRed text-xs">Swap unavailable</div>
         </div>
       </div>
-      <BasicButton class="w-full mt-6" type="primary" :disabled="collateralMissing > 0 || nativeMissing > 0">
-        Done
-      </BasicButton>
+      <BasicButton class="w-full mt-6" type="primary" @click="closeModal">Close</BasicButton>
     </div>
     <!-- Thirdweb iframe slot -->
     <div v-show="step === Steps.THIRDWEB">
@@ -201,13 +203,12 @@ defineExpose({
     <PredictionSetSwap
       v-if="step === Steps.SWAP"
       :amount="collateralMissing"
+      :collateral-token="collateralToken"
       @back="step = Steps.LANDING"
       @success="handleSwapSuccess"
     />
     <template #header>
-      <BasicButton v-show="step === Steps.THIRDWEB" class="" type="primary" @click="step = Steps.LANDING">
-        Back
-      </BasicButton>
+      <BasicButton v-show="step != Steps.LANDING" @click="step = Steps.LANDING"> Back </BasicButton>
     </template>
   </Modal>
 </template>

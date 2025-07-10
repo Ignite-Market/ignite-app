@@ -155,7 +155,6 @@
               class="min-w-full text-center"
               type="number"
               :show-button="true"
-              :max="collateralToken.parsedBalance"
               button-placement="both"
               :disabled="loading"
               :validator="buyValidator"
@@ -195,7 +194,7 @@
             class="w-full"
             :btn-class="['!font-bold']"
             :size="'large'"
-            :disabled="!isConnected || !enoughCollateralBalance"
+            :disabled="!isConnected"
             :loading="loading"
             @click="buyOutcome"
           >
@@ -366,7 +365,7 @@
             :size="'large'"
             :disabled="!isConnected || !isFundEnabled"
             :loading="loading"
-            @click="openFiatBuyModal"
+            @click="fund"
           >
             Fund
           </BasicButton>
@@ -513,7 +512,7 @@
 <script setup lang="ts">
 import { watchDebounced } from '@vueuse/core';
 import type { Address } from 'viem';
-import { useAccount } from '@wagmi/vue';
+import { useAccount, useBalance } from '@wagmi/vue';
 import ConfettiExplosion from 'vue-confetti-explosion';
 import PredictionSetBuy from './PredictionSetBuy.vue';
 import type { OutcomeInterface } from '~/lib/types/prediction-set';
@@ -553,6 +552,7 @@ const { refreshCollateralBalance, checkCollateralAllowance } = useCollateralToke
 const { getConditionalBalance, parseConditionalBalance, checkConditionalApprove } = useConditionalToken();
 const { ensureCorrectNetwork } = useContracts();
 const { isConnected, address } = useAccount();
+const { data: nativeBalance } = useBalance({ address: address.value });
 const { isMd } = useScreen();
 const message = useMessage();
 const txWait = useTxWait();
@@ -705,10 +705,7 @@ const enoughCollateralBalance = computed(() => {
 });
 
 const buyFundLimit = computed(() => {
-  let max = (BigInt(currentLiquidity.value) * 10n) / 100n;
-  if (props.collateralToken.balance < max) {
-    max = props.collateralToken.balance;
-  }
+  const max = (BigInt(currentLiquidity.value) * 10n) / 100n;
   return bigIntToNum(max, props.collateralToken.decimals || 6);
 });
 
@@ -904,9 +901,14 @@ async function updateSellAmount() {
 /**
  * Fund market.
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 async function fund() {
   if (!amount.value) {
+    return;
+  }
+
+  if (!enoughCollateralBalance.value || !nativeBalance.value?.value) {
+    openFiatBuyModal();
     return;
   }
 
@@ -959,6 +961,11 @@ async function fund() {
  */
 async function sellOutcome() {
   if (!amount.value) {
+    return;
+  }
+
+  if (!nativeBalance.value?.value) {
+    openFiatBuyModal();
     return;
   }
 
@@ -1031,6 +1038,11 @@ async function sellOutcome() {
  */
 async function buyOutcome() {
   if (!amount.value) {
+    return;
+  }
+
+  if (!enoughCollateralBalance.value || !nativeBalance.value?.value) {
+    openFiatBuyModal();
     return;
   }
 

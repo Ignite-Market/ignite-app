@@ -1,15 +1,16 @@
 <script setup lang="ts">
 import { useAccount, useBalance } from '@wagmi/vue';
+import ConfettiExplosion from 'vue-confetti-explosion';
+import type { CollateralToken } from '../../../stores/collateral-tokens';
+import { colors } from '../../../tailwind.config';
 
 const props = defineProps<{
   amount?: number;
   loading?: boolean;
+  collateralToken: CollateralToken;
 }>();
 
-const emit = defineEmits<{
-  back: [];
-  success: [amount: number];
-}>();
+const emit = defineEmits(['success']);
 
 const { isConnected, address } = useAccount();
 const { data: nativeBalance, refetch: refetchNativeBalance } = useBalance({ address: address.value });
@@ -21,7 +22,13 @@ const message = useMessage();
 const amountToSwap = ref(props.amount || 0);
 const amountQuoted = ref(0);
 const quoteAmount = ref(0);
+const quoteError = ref(false);
 const isExecuting = ref(false);
+const swapSuccess = reactive({
+  amount: 0,
+  spentAmount: 0,
+  txHash: '',
+});
 
 // Computed values
 const canSwap = computed(
@@ -48,7 +55,11 @@ async function fetchQuote() {
   if (amountToSwap.value <= 0) return;
 
   try {
-    const result = await getQuote(amountToSwap.value);
+    const result = await getQuote(amountToSwap.value, props.collateralToken.address);
+    if (!result) {
+      quoteError.value = true;
+      return;
+    }
     quoteAmount.value = bigIntToNum(result.result[0], 18);
     amountQuoted.value = amountToSwap.value;
   } catch (error) {
@@ -61,12 +72,59 @@ async function handleSwap() {
 
   isExecuting.value = true;
   try {
-    txWait.hash.value = await executeSwap(amountToSwap.value);
+    txWait.hash.value = await executeSwap(amountToSwap.value, props.collateralToken.address);
     const receipt = await txWait.wait();
 
     if (receipt.status === 'success') {
       console.log(receipt);
-      emit('success', amountToSwap.value);
+
+      // Parse ERC20 Transfer events to get the actual amounts
+      const parsedTransfers = parseTransfersERC20(receipt);
+      const txHash = receipt?.data?.transactionHash || '';
+      console.log('txHash', txHash);
+
+      let actualAmountReceived = 0;
+      let actualAmountSpent = 0;
+
+      if (parsedTransfers.length) {
+        // Find the transfer event where tokens were sent TO the user's address (amount received)
+        const receivedEvent = parsedTransfers.find((e: any) => e.to === address.value);
+        console.log('receivedEvent', receivedEvent);
+        if (receivedEvent) {
+          // Convert the bigint amount to a number with proper decimals
+          actualAmountReceived = bigIntToNum(receivedEvent.amount, props.collateralToken.decimals);
+          console.log('Actual amount received from swap:', actualAmountReceived);
+        }
+
+        // For SparkDEX swaps, the FLR spent is typically handled through WFLR transfers
+        // Look for WFLR transfers FROM the router TO the pool
+        const wflrTransfers = parsedTransfers.filter(
+          (e: any) => e.contractAddress.toLowerCase() === '0x1d80c49bbbcd1c0911346656b529df9e5c2f783d' // WFLR address
+        );
+        console.log('WFLR transfers:', wflrTransfers);
+
+        // The WFLR transfer from router to pool represents the amount spent
+        const routerToPoolTransfer = wflrTransfers.find(
+          (e: any) => e.from.toLowerCase() === '0x8a1e35f5c98c4e85b36b7b253222ee17773b2781' // Router address
+        );
+
+        if (routerToPoolTransfer) {
+          actualAmountSpent = bigIntToNum(routerToPoolTransfer.amount, 18);
+          console.log('Amount spent from WFLR transfer:', actualAmountSpent);
+        }
+
+        // Update the success state
+        swapSuccess.amount = actualAmountReceived;
+        swapSuccess.spentAmount = actualAmountSpent;
+        swapSuccess.txHash = txHash;
+
+        emit('success', actualAmountReceived);
+      } else {
+        swapSuccess.amount = amountToSwap.value;
+        swapSuccess.spentAmount = 0; // No spent amount if no transfer events
+        swapSuccess.txHash = txHash;
+        emit('success', amountToSwap.value);
+      }
     } else if (receipt.status === 'error') {
       message.error(contractError(receipt.error));
     }
@@ -75,10 +133,6 @@ async function handleSwap() {
   } finally {
     isExecuting.value = false;
   }
-}
-
-function handleBack() {
-  emit('back');
 }
 
 // Watch for amount changes to fetch new quotes
@@ -106,105 +160,143 @@ onMounted(async () => {
   <div class="space-y-6">
     <!-- Header -->
     <div class="flex items-center justify-between">
-      <h2 class="text-lg font-bold">Swap FLR to USD₮0</h2>
-      <BasicButton size="small" @click="handleBack">Back</BasicButton>
+      <h2 class="text-lg font-bold">Swap FLR to {{ collateralToken.symbol }}</h2>
     </div>
 
-    <!-- Swap Form -->
-    <div class="space-y-4">
-      <!-- Amount Input -->
-      <div class="space-y-2">
-        <label class="text-sm font-medium text-grey-lightest">Amount to receive (USD₮0)</label>
-        <div class="relative">
-          <input
-            v-model.number="amountToSwap"
-            type="number"
-            step="0.01"
-            min="0"
-            class="w-full px-3 py-2 bg-grey-dark border border-grey-light rounded-lg text-white placeholder-grey-lightest focus:outline-none focus:border-primary"
-            placeholder="0.00"
-            :disabled="swapLoading || isExecuting"
-          />
-          <div class="absolute right-3 top-2.5 text-grey-lightest text-sm">USD₮0</div>
+    <div v-if="!swapSuccess.txHash" class="space-y-6">
+      <!-- Swap Form -->
+      <div class="space-y-4">
+        <!-- Amount Input -->
+        <div v-if="quote" class="space-y-2">
+          <label class="text-sm font-medium text-grey-lightest">Amount to receive ({{ collateralToken.symbol }})</label>
+          <div class="relative">
+            <n-input-number
+              v-model:value="amountToSwap"
+              step="0.01"
+              min="0"
+              class="w-full py-2 px-2 rounded-lg text-white placeholder-grey-lightest focus:outline-none focus:border-primary"
+              placeholder="0.00"
+              :disabled="swapLoading || isExecuting"
+            >
+              <template #suffix>
+                <div class="text-grey-lightest text-sm">{{ collateralToken.symbol }}</div>
+              </template>
+            </n-input-number>
+          </div>
+        </div>
+
+        <!-- Quote Display -->
+        <div v-if="quote && !swapLoading" class="bg-grey-dark/50 rounded-lg p-4 space-y-3">
+          <!-- Balance Display -->
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-grey-lightest">Your FLR Balance:</span>
+            <span class="text-sm font-medium flex items-center">
+              {{ bigIntToNum(nativeBalance?.value || 0n, 18).toFixed(4) }}
+              <NuxtIcon name="icon/flare" class="w-3 h-3 ml-1" filled />
+            </span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-grey-lightest">You'll pay:</span>
+            <span class="text-sm font-medium flex items-center">
+              {{ quoteAmount.toFixed(4) }} <NuxtIcon name="icon/flare" class="w-3 h-3 ml-1" filled />
+            </span>
+          </div>
+
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-grey-lightest">Rate:</span>
+            <span class="text-sm font-medium flex items-center">
+              1 {{ collateralToken.symbol }} = {{ (quoteAmount / amountQuoted).toFixed(6) }}
+              <NuxtIcon name="icon/flare" class="w-3 h-3 ml-1" filled />
+            </span>
+          </div>
+
+          <!-- Balance Check -->
+          <div v-if="!hasEnoughBalance && quoteAmount > 0" class="text-statusRed text-xs">
+            Insufficient FLR balance. You need {{ balanceShortfall.toFixed(4) }} more FLR.
+          </div>
+
+          <div v-if="quoteExpired" class="text-statusRed text-xs">Quote expired. Please refresh.</div>
+        </div>
+
+        <div v-if="quoteError" class="flex items-center justify-center py-11">
+          Unable to get quote. Please try again later.
+        </div>
+
+        <!-- Loading State -->
+        <div v-if="swapLoading" class="flex items-center justify-center py-11">
+          <Spinner :size="20" color="#000" />
+          <span class="ml-2 text-sm text-grey-lightest">Getting quote...</span>
+        </div>
+
+        <!-- Error State -->
+        <div v-if="!isConnected" class="text-statusRed text-sm text-center py-2">
+          Please connect your wallet to swap
         </div>
       </div>
 
-      <!-- Quote Display -->
-      <div v-if="quote && !swapLoading" class="bg-grey-dark/50 rounded-lg p-4 space-y-3">
-        <!-- Balance Display -->
-        <div class="flex justify-between items-center">
-          <span class="text-sm text-grey-lightest">Your FLR Balance:</span>
-          <span class="text-sm font-medium flex items-center">
-            {{ bigIntToNum(nativeBalance?.value || 0n, 18).toFixed(4) }}
-            <NuxtIcon name="icon/flare" class="w-3 h-3 ml-1" filled />
-          </span>
-        </div>
-        <div class="flex justify-between items-center">
-          <span class="text-sm text-grey-lightest">You'll pay:</span>
-          <span class="text-sm font-medium flex items-center">
-            {{ quoteAmount.toFixed(4) }} <NuxtIcon name="icon/flare" class="w-3 h-3 ml-1" filled />
-          </span>
-        </div>
+      <!-- Action Buttons -->
+      <div class="space-y-3">
+        <BasicButton v-if="quoteExpired" class="w-full" type="secondary" :loading="swapLoading" @click="fetchQuote">
+          Refresh Quote
+        </BasicButton>
 
-        <div class="flex justify-between items-center">
-          <span class="text-sm text-grey-lightest">Rate:</span>
-          <span class="text-sm font-medium flex items-center">
-            1 USD₮0 = {{ (quoteAmount / amountQuoted).toFixed(6) }}
-            <NuxtIcon name="icon/flare" class="w-3 h-3 ml-1" filled />
-          </span>
-        </div>
-
-        <!-- Balance Check -->
-        <div v-if="!hasEnoughBalance && quoteAmount > 0" class="text-statusRed text-xs">
-          Insufficient FLR balance. You need {{ balanceShortfall.toFixed(4) }} more FLR.
-        </div>
-
-        <div v-if="quoteExpired" class="text-statusRed text-xs">Quote expired. Please refresh.</div>
+        <BasicButton
+          class="w-full"
+          type="primary"
+          :disabled="!canSwap || !hasEnoughBalance"
+          :loading="isExecuting"
+          @click="handleSwap"
+        >
+          {{ isExecuting ? 'Swapping...' : 'Swap FLR to ' + collateralToken.symbol }}
+        </BasicButton>
       </div>
 
-      <!-- Loading State -->
-      <div v-if="swapLoading" class="flex items-center justify-center py-4">
-        <Spinner :size="20" color="#000" />
-        <span class="ml-2 text-sm text-grey-lightest">Getting quote...</span>
+      <!-- Info Section -->
+      <div class="bg-grey-dark/30 rounded-lg p-3 space-y-2">
+        <div class="flex justify-between text-xs text-grey-lightest">
+          <span>Slippage:</span>
+          <span>3%</span>
+        </div>
       </div>
-
-      <!-- Error State -->
-      <div v-if="!isConnected" class="text-statusRed text-sm text-center py-2">Please connect your wallet to swap</div>
     </div>
 
-    <!-- Action Buttons -->
-    <div class="space-y-3">
-      <BasicButton v-if="quoteExpired" class="w-full" type="secondary" :loading="swapLoading" @click="fetchQuote">
-        Refresh Quote
-      </BasicButton>
-
-      <BasicButton
-        class="w-full"
-        type="primary"
-        :disabled="!canSwap || !hasEnoughBalance"
-        :loading="isExecuting"
-        @click="handleSwap"
-      >
-        {{ isExecuting ? 'Swapping...' : 'Swap FLR to USD₮0' }}
-      </BasicButton>
-    </div>
-
-    <!-- Info Section -->
-    <div class="bg-grey-dark/30 rounded-lg p-3 space-y-2">
-      <div class="flex justify-between text-xs text-grey-lightest">
-        <span>Network:</span>
-        <span class="flex items-center">
-          <NuxtIcon name="icon/flare" class="w-3 h-3 mr-1" filled />
-          Flare Mainnet
-        </span>
+    <div v-else class="flex flex-col items-center">
+      <ConfettiExplosion
+        v-if="swapSuccess.spentAmount"
+        :stage-width="1000"
+        :stage-height="1500"
+        :duration="3000"
+        :force="0.3"
+        :particle-count="100"
+        :colors="[
+          colors.primary.DEFAULT,
+          colors.primary.bright,
+          colors.primary.dark,
+          colors.primary.light,
+          colors.primary.hover,
+        ]"
+      />
+      <div class="flex w-full items-center justify-center mb-2">
+        <NuxtIcon name="icon/check" class="text-primary text-[40px]" />
       </div>
-      <div class="flex justify-between text-xs text-grey-lightest">
-        <span>Protocol:</span>
-        <span>SparkDEX</span>
-      </div>
-      <div class="flex justify-between text-xs text-grey-lightest">
-        <span>Slippage:</span>
-        <span>3%</span>
+      <div class="flex items-center justify-center text-[14px] leading-[20px] font-bold">Swap successful!</div>
+
+      <div class="flex flex-col items-center justify-center mt-5">
+        <div class="text-center mb-2">
+          You have successfully swapped
+          <span class="font-bold text-primary">{{ swapSuccess.spentAmount.toFixed(4) }} FLR</span>
+          for<br />
+          <span class="font-bold text-statusGreen"> {{ swapSuccess.amount }} {{ collateralToken.symbol }} </span>
+        </div>
+        <BasicButton
+          v-if="swapSuccess.txHash"
+          class="w-full font-bold mt-3"
+          type="secondary"
+          :size="'medium'"
+          :href="`https://flare-explorer.flare.network/tx/${swapSuccess.txHash}`"
+        >
+          Transaction
+        </BasicButton>
       </div>
     </div>
   </div>
