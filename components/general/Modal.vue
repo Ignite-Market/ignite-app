@@ -6,6 +6,9 @@
     :title="title"
     close-on-esc
   >
+    <template #header>
+      <slot name="header" />
+    </template>
     <slot />
   </n-modal>
 </template>

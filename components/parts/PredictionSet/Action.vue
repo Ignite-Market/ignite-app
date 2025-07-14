@@ -139,83 +139,80 @@
           class="!pt-[33px]"
           tab="Buy"
         >
-          <PredictionSetBalanceCheck>
-            <div class="mb-3">
-              <div class="flex flex-row text-[12px] leading-[16px] mb-2">
-                <div class="font-bold">Amount</div>
-                <div class="ml-auto flex font-medium">
-                  <div class="text-grey-lightest">Balance:</div>
-                  <div class="text-white/80 ml-1">{{ collateralToken.parsedBalance }} {{ collateralToken.symbol }}</div>
-                </div>
-              </div>
-
-              <n-input-number
-                v-model:value="amount"
-                placeholder="0"
-                size="large"
-                class="min-w-full text-center"
-                type="number"
-                :show-button="true"
-                :max="collateralToken.parsedBalance"
-                button-placement="both"
-                :disabled="loading"
-                :validator="buyValidator"
-                @blur="onBuyBlur"
-              >
-                <template #minus-icon>
-                  <div
-                    class="min-w-[20px] min-h-[20px] rounded-[4px] flex items-center justify-center bg-none hover:bg-grey-light"
-                  >
-                    <NuxtIcon class="hover:text-white text-white" name="icon/minus" />
-                  </div>
-                </template>
-
-                <template #suffix>
-                  <div
-                    class="w-[38px] h-[20px] rounded-[4px] flex items-center justify-center absolute right-[34px] top-1/2 -translate-y-1/2 text-xs bg-none hover:bg-grey-light cursor-pointer"
-                    @click="setMaxBuyAmount"
-                  >
-                    Max
-                  </div>
-                </template>
-
-                <template #add-icon>
-                  <div
-                    class="min-w-[20px] min-h-[20px] rounded-[4px] flex items-center justify-center bg-none hover:bg-grey-light"
-                  >
-                    <NuxtIcon class="hover:text-white text-white" name="icon/plus" />
-                  </div>
-                </template>
-              </n-input-number>
-              <div v-if="buyError" class="text-statusRed mt-1">
-                {{ buyError }}
+          <div class="mb-3">
+            <div class="flex flex-row text-[12px] leading-[16px] mb-2">
+              <div class="font-bold">Amount</div>
+              <div class="ml-auto flex font-medium">
+                <div class="text-grey-lightest">Balance:</div>
+                <div class="text-white/80 ml-1">{{ collateralToken.parsedBalance }} {{ collateralToken.symbol }}</div>
               </div>
             </div>
 
-            <BasicButton
-              class="w-full"
-              :btn-class="['!font-bold']"
-              :size="'large'"
-              :disabled="!isConnected || !enoughCollateralBalance"
-              :loading="loading"
-              @click="buyOutcome"
+            <n-input-number
+              v-model:value="amount"
+              placeholder="0"
+              size="large"
+              class="min-w-full text-center"
+              type="number"
+              :show-button="true"
+              button-placement="both"
+              :disabled="loading"
+              :validator="buyValidator"
+              @blur="onBuyBlur"
             >
-              Buy
-            </BasicButton>
+              <template #minus-icon>
+                <div
+                  class="min-w-[20px] min-h-[20px] rounded-[4px] flex items-center justify-center bg-none hover:bg-grey-light"
+                >
+                  <NuxtIcon class="hover:text-white text-white" name="icon/minus" />
+                </div>
+              </template>
 
-            <PredictionSetFiatBuy
-              :default-amount="amount"
-              :loading="loading"
-              :buy-fund-limit="buyFundLimit"
-              class="mt-2"
-              @success="
-                newAmount => {
-                  amount = newAmount;
-                  buyOutcome();
-                }
-              "
-            />
-          </PredictionSetBalanceCheck>
+              <template #suffix>
+                <div
+                  class="w-[38px] h-[20px] rounded-[4px] flex items-center justify-center absolute right-[34px] top-1/2 -translate-y-1/2 text-xs bg-none hover:bg-grey-light cursor-pointer"
+                  @click="setMaxBuyAmount"
+                >
+                  Max
+                </div>
+              </template>
+
+              <template #add-icon>
+                <div
+                  class="min-w-[20px] min-h-[20px] rounded-[4px] flex items-center justify-center bg-none hover:bg-grey-light"
+                >
+                  <NuxtIcon class="hover:text-white text-white" name="icon/plus" />
+                </div>
+              </template>
+            </n-input-number>
+            <div v-if="buyError" class="text-statusRed mt-1">
+              {{ buyError }}
+            </div>
+          </div>
+
+          <BasicButton
+            class="w-full"
+            :btn-class="['!font-bold']"
+            :size="'large'"
+            :disabled="!isConnected"
+            :loading="loading"
+            @click="buyOutcome"
+          >
+            Buy
+          </BasicButton>
+
+          <PredictionSetFiatBuy
+            :default-amount="amount"
+            :loading="loading"
+            :buy-fund-limit="buyFundLimit"
+            class="mt-2"
+            @success="
+              newAmount => {
+                amount = newAmount;
+                buyOutcome();
+              }
+            "
+          />
 
           <div class="text-[16px] leading-[24px] text-grey-lightest font-normal mt-6">
             <div class="flex items-center justify-center">
@@ -342,7 +339,6 @@
               type="number"
               :show-button="true"
               button-placement="both"
-              :max="collateralToken.parsedBalance"
               :disabled="loading"
             >
               <template #minus-icon>
@@ -367,7 +363,7 @@
             class="w-full"
             :btn-class="['bg-statusBlue hover:bg-statusBlue-hover !font-bold']"
             :size="'large'"
-            :disabled="!isConnected || !enoughCollateralBalance || !isFundEnabled"
+            :disabled="!isConnected || !isFundEnabled"
             :loading="loading"
             @click="fund"
           >
@@ -510,12 +506,13 @@
       </div>
     </div>
   </n-modal>
+  <FundModal ref="fiatBuyRef" :collateral-token="collateralToken" />
 </template>
 
 <script setup lang="ts">
 import { watchDebounced } from '@vueuse/core';
 import type { Address } from 'viem';
-import { useAccount } from '@wagmi/vue';
+import { useAccount, useBalance } from '@wagmi/vue';
 import ConfettiExplosion from 'vue-confetti-explosion';
 import type { OutcomeInterface } from '~/lib/types/prediction-set';
 import { PredictionSetStatus, TransactionType } from '~/lib/types/prediction-set';
@@ -554,6 +551,7 @@ const { refreshCollateralBalance, checkCollateralAllowance } = useCollateralToke
 const { getConditionalBalance, parseConditionalBalance, checkConditionalApprove } = useConditionalToken();
 const { ensureCorrectNetwork } = useContracts();
 const { isConnected, address } = useAccount();
+const { data: nativeBalance } = useBalance({ address: address.value });
 const { isMd } = useScreen();
 const message = useMessage();
 const txWait = useTxWait();
@@ -582,6 +580,11 @@ const transactionStep = ref(TransactionStep.ALLOWANCE);
 
 const sellFundLimit = ref(0);
 const isDropdownOpened = ref(false);
+const fiatBuyRef = ref();
+
+const openFiatBuyModal = () => {
+  fiatBuyRef.value?.openModal(amount.value);
+};
 
 const buyValidator = (x: number) => {
   if (x > buyFundLimit.value) {
@@ -701,10 +704,7 @@ const enoughCollateralBalance = computed(() => {
 });
 
 const buyFundLimit = computed(() => {
-  let max = (BigInt(currentLiquidity.value) * 10n) / 100n;
-  if (props.collateralToken.balance < max) {
-    max = props.collateralToken.balance;
-  }
+  const max = (BigInt(currentLiquidity.value) * 10n) / 100n;
   return bigIntToNum(max, props.collateralToken.decimals || 6);
 });
 
@@ -900,8 +900,14 @@ async function updateSellAmount() {
 /**
  * Fund market.
  */
+
 async function fund() {
   if (!amount.value) {
+    return;
+  }
+
+  if (!enoughCollateralBalance.value || !nativeBalance.value?.value) {
+    openFiatBuyModal();
     return;
   }
 
@@ -954,6 +960,11 @@ async function fund() {
  */
 async function sellOutcome() {
   if (!amount.value) {
+    return;
+  }
+
+  if (!nativeBalance.value?.value) {
+    openFiatBuyModal();
     return;
   }
 
@@ -1026,6 +1037,11 @@ async function sellOutcome() {
  */
 async function buyOutcome() {
   if (!amount.value) {
+    return;
+  }
+
+  if (!enoughCollateralBalance.value || !nativeBalance.value?.value) {
+    openFiatBuyModal();
     return;
   }
 
