@@ -144,11 +144,7 @@ onMounted(() => {
             type: 'secondary',
             size: 'small',
             onClick: () =>
-              emit(
-                'sell',
-                row.outcomeId,
-                Number(formatCollateralAmount(row.sharesAmount, props.collateralToken.decimals))
-              ),
+              emit('sell', row.outcomeId, Number(bigIntToNum(row.sharesAmount, props.collateralToken.decimals))),
           },
           {
             default: () => 'Sell',
