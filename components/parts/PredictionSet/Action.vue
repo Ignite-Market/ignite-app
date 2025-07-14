@@ -506,7 +506,7 @@
       </div>
     </div>
   </n-modal>
-  <PredictionSetBuy ref="fiatBuyRef" :collateral-token="collateralToken" />
+  <FundModal ref="fiatBuyRef" :collateral-token="collateralToken" />
 </template>
 
 <script setup lang="ts">
@@ -514,7 +514,6 @@ import { watchDebounced } from '@vueuse/core';
 import type { Address } from 'viem';
 import { useAccount, useBalance } from '@wagmi/vue';
 import ConfettiExplosion from 'vue-confetti-explosion';
-import PredictionSetBuy from './PredictionSetBuy.vue';
 import type { OutcomeInterface } from '~/lib/types/prediction-set';
 import { PredictionSetStatus, TransactionType } from '~/lib/types/prediction-set';
 import { colors } from '~/tailwind.config';

@@ -76,12 +76,9 @@ async function handleSwap() {
     const receipt = await txWait.wait();
 
     if (receipt.status === 'success') {
-      console.log(receipt);
-
       // Parse ERC20 Transfer events to get the actual amounts
       const parsedTransfers = parseTransfersERC20(receipt);
       const txHash = receipt?.data?.transactionHash || '';
-      console.log('txHash', txHash);
 
       let actualAmountReceived = 0;
       let actualAmountSpent = 0;
@@ -89,11 +86,9 @@ async function handleSwap() {
       if (parsedTransfers.length) {
         // Find the transfer event where tokens were sent TO the user's address (amount received)
         const receivedEvent = parsedTransfers.find((e: any) => e.to === address.value);
-        console.log('receivedEvent', receivedEvent);
         if (receivedEvent) {
           // Convert the bigint amount to a number with proper decimals
           actualAmountReceived = bigIntToNum(receivedEvent.amount, props.collateralToken.decimals);
-          console.log('Actual amount received from swap:', actualAmountReceived);
         }
 
         // For SparkDEX swaps, the FLR spent is typically handled through WFLR transfers
@@ -101,7 +96,6 @@ async function handleSwap() {
         const wflrTransfers = parsedTransfers.filter(
           (e: any) => e.contractAddress.toLowerCase() === '0x1d80c49bbbcd1c0911346656b529df9e5c2f783d' // WFLR address
         );
-        console.log('WFLR transfers:', wflrTransfers);
 
         // The WFLR transfer from router to pool represents the amount spent
         const routerToPoolTransfer = wflrTransfers.find(
@@ -110,7 +104,6 @@ async function handleSwap() {
 
         if (routerToPoolTransfer) {
           actualAmountSpent = bigIntToNum(routerToPoolTransfer.amount, 18);
-          console.log('Amount spent from WFLR transfer:', actualAmountSpent);
         }
 
         // Update the success state
@@ -172,14 +165,33 @@ onMounted(async () => {
           <div class="relative">
             <n-input-number
               v-model:value="amountToSwap"
-              step="0.01"
+              placeholder="0"
               min="0"
-              class="w-full py-2 px-2 rounded-lg text-white placeholder-grey-lightest focus:outline-none focus:border-primary"
-              placeholder="0.00"
-              :disabled="swapLoading || isExecuting"
+              size="large"
+              class="min-w-full text-center"
+              type="number"
+              :show-button="true"
+              button-placement="both"
             >
               <template #suffix>
-                <div class="text-grey-lightest text-sm">{{ collateralToken.symbol }}</div>
+                <div class="absolute right-10 top-1/2 -translate-y-1/2 text-grey-lightest text-sm">
+                  {{ collateralToken?.symbol }}
+                </div>
+              </template>
+              <template #minus-icon>
+                <div
+                  class="min-w-[20px] min-h-[20px] rounded-[4px] flex items-center justify-center bg-none hover:bg-grey-light"
+                >
+                  <NuxtIcon class="hover:text-white text-white" name="icon/minus" />
+                </div>
+              </template>
+
+              <template #add-icon>
+                <div
+                  class="min-w-[20px] min-h-[20px] rounded-[4px] flex items-center justify-center bg-none hover:bg-grey-light"
+                >
+                  <NuxtIcon class="hover:text-white text-white" name="icon/plus" />
+                </div>
               </template>
             </n-input-number>
           </div>
