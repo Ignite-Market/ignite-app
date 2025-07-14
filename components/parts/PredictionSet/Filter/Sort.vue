@@ -61,7 +61,7 @@ function getSorter(sort: number): DataTableSortState | null {
     case 3:
       return {
         columnKey: 'endTime',
-        order: 'descend',
+        order: 'ascend',
         sorter: 'default',
       };
 

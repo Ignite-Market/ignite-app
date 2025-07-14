@@ -41,12 +41,14 @@ export const usePredictionStore = defineStore('prediction', {
     async fetch(args: FetchParams = {}, force = true): Promise<PredictionSetInterface[]> {
       syncFilters(this.filters, args);
 
-      if (args.category === 'all') {
-        delete args.category;
-      }
-
       if (args.category) {
         this.category = args.category;
+      } else if (this.category) {
+        args.category = this.category;
+      }
+
+      if (args.category === 'all') {
+        delete args.category;
       }
 
       if (this.sorter && !args?.sorter) {

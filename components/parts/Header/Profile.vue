@@ -17,7 +17,7 @@
         :diameter="isMd ? 40 : 30"
       />
 
-      <div class="ml-2 font-medium text-[14px] leading-[20px] md:block hidden">
+      <div class="ml-2 font-medium text-[14px] leading-[20px] md:block hidden lg:hidden xl:block">
         {{ truncateWallet(address as string) }}
       </div>
 
