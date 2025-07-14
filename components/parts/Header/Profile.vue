@@ -42,6 +42,8 @@ const { isLg, isMd } = useScreen();
 
 const isOpened = ref(false);
 
+const emit = defineEmits(['openFundModal']);
+
 const renderLabel = option => {
   if (option.type === 'divider') return null;
 
@@ -84,6 +86,11 @@ const options = computed(() => [
           key: 'divider-1',
         },
         {
+          key: 'fund',
+          label: 'Fund',
+          iconName: 'icon/coins',
+        },
+        {
           key: 'earn',
           label: 'Earn',
           iconName: 'icon/points',
@@ -121,6 +128,8 @@ function handleSelect(key: string | number) {
     userStore.logout();
   } else if (key === 'learn') {
     window.open('https://docs.ignitemarket.xyz/', '_blank');
+  } else if (key === 'fund') {
+    emit('openFundModal');
   } else if (key) {
     router.push({ name: `${key}` });
   }

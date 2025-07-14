@@ -62,7 +62,7 @@
       <div v-if="loggedIn" class="flex-cc text-white">
         <!-- <HeaderNotifications /> -->
 
-        <HeaderProfile />
+        <HeaderProfile @open-fund-modal="openFiatBuyModal" />
       </div>
       <WalletLogin v-else />
     </div>

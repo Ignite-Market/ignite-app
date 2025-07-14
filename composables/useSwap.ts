@@ -23,6 +23,7 @@ export function useSwap() {
   const { data: walletClient, refetch } = useConnectorClient();
   const chainId = useChainId();
   const { switchChainAsync } = useSwitchChain();
+  const config = useRuntimeConfig();
 
   // Create public client for Flare mainnet
   const publicClient = createPublicClient({
@@ -81,6 +82,10 @@ export function useSwap() {
   ) {
     loading.value = true;
     try {
+      if (config.public.ENV !== 'production') {
+        throw new Error('Swap is disabled in this environment');
+      }
+
       const result = (await quoter.read.quoteExactOutputSingle([
         {
           tokenIn,
