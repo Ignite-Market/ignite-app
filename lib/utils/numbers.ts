@@ -1,3 +1,6 @@
+import { parseUnits } from 'viem';
+import { DISPLAY_DECIMALS } from '../values/general.values';
+
 export const randomNumbers = (count: number): number => {
   return Math.floor(Math.random() * 10 ** count);
 };
@@ -9,12 +12,12 @@ export const randomBigInt = (count: number): bigint => {
 /**
  *  Format numbers
  */
-export function numToBigInt(input: number) {
-  return BigInt(input * 10 ** 18);
+export function numToBigInt(input: number, decimals: number = 18) {
+  return BigInt(parseUnits(input.toString(), decimals));
 }
 
 export function bigIntToNum(input: bigint | string | number, decimals: number = 18) {
-  return Number(BigInt(input) / 10n ** BigInt(decimals));
+  return Number(input) / Math.pow(10, decimals);
 }
 
 export function formatNumber(n: number) {
@@ -34,6 +37,21 @@ export function isNumeric(n: any): n is number | string {
 
 export function intVal(n: number | string): number {
   return typeof n === 'number' ? n : parseInt(n, 10);
+}
+
+export function floorOutcomeAmount(num: bigint | string | number, decimals: number = DISPLAY_DECIMALS) {
+  if (typeof num !== 'number') {
+    num = bigIntToNum(num, 6);
+  }
+  const factor = Math.pow(10, decimals);
+
+  // Ignore tiny dust balances – treat anything smaller than 1 / factor as 0
+  if (num < 1 / factor) {
+    return 0;
+  }
+
+  // Floor so we never show a value the user cannot actually sell
+  return Math.floor(num * factor) / factor;
 }
 
 /**
@@ -67,4 +85,22 @@ export function formatCollateralAmount(
   decimals: number = 3
 ) {
   return formatNumber(+(Number(num) / Math.pow(10, collateralDecimals)).toFixed(decimals));
+}
+
+export function shortenLargeNumber(value: number | string, decimals = 2) {
+  if (typeof value === 'string') {
+    value = +value;
+  }
+
+  if (isNaN(value)) {
+    return value;
+  }
+
+  if (value > 1000000) {
+    return `${getFixed(value / 1000000, 3, false, true)}M`;
+  } else if (value > 10000) {
+    return `${getFixed(value / 1000, 2, false, true)}K`;
+  }
+
+  return `${getFixed(value, decimals)}`;
 }

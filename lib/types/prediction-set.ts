@@ -30,6 +30,7 @@ export enum TransactionType {
   FUND = 3,
   REMOVE_FUND = 4,
   CLAIM = 5,
+  FUND_EXCESS = 6,
 }
 
 /**
@@ -37,8 +38,10 @@ export enum TransactionType {
  */
 export enum PredictionSetCategory {
   ALL = 'All',
+  FLARE = 'Flare',
+  XRP = 'XRP',
+  FINANCE = 'Finance',
   SPORTS = 'Sports',
-  BUSINESS = 'Business',
 }
 
 export interface OutcomeChance extends GeneralInterface {
@@ -84,10 +87,10 @@ export interface PredictionSetInterface extends GeneralInterface {
   outcomes: OutcomeInterface[];
   chainData: ChainDataInterface;
   isWatched?: boolean;
-  fundingVolume?: number;
-  transactionsVolume?: number;
+  fundingVolume?: string;
+  transactionsVolume?: string;
   positions?: any[];
-  fundingPositions?: number;
+  fundingPositions?: string;
 }
 export interface PredictionSetResponse extends GeneralResponse<PredictionSetInterface> {}
 export interface PredictionSetsResponse extends GeneralItemsResponse<any> {}
@@ -141,7 +144,7 @@ export interface UserPredictionsResponse extends GeneralItemsResponse<UserPredic
  */
 export interface UserFundingPositionInterface extends PredictionSetInterface {
   fundedAmount: number;
-  removedAmount: number;
+  remainingShares: number;
 }
 export interface UserFundingPositionsResponse extends GeneralItemsResponse<UserFundingPositionInterface> {}
 

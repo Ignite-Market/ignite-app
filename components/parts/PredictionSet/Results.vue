@@ -102,18 +102,18 @@
       <div v-if="selectedAction === SelectedAction.CLAIM" class="flex flex-col items-center justify-center mt-5">
         <div class="text-center">You have claimed your reward of:</div>
         <span class="flex items-center justify-center text-[14px] leading-[20px] font-bold text-statusGreen mt-3">
-          {{ obtainedAmount }} {{ collateralToken.symbol }}
+          {{ obtainedAmount || 0 }} {{ collateralToken.symbol }}
         </span>
       </div>
 
       <div v-else class="flex flex-col items-center justify-center mt-5">
         <div class="text-center">You have removed your funding and obtained a reward of:</div>
         <span class="flex items-center justify-center text-[14px] leading-[20px] font-bold text-statusGreen my-3">
-          {{ obtainedFeeReward }} {{ collateralToken.symbol }}
+          {{ obtainedFeeReward || 0 }} {{ collateralToken.symbol }}
         </span>
-        <div class="text-center">You can now also claim your remaining funding of:</div>
+        <div class="text-center">You can now also claim your remaining reward of:</div>
         <span class="flex items-center justify-center text-[14px] leading-[20px] font-bold text-statusGreen my-3">
-          {{ obtainedAmount }} {{ collateralToken.symbol }}
+          {{ obtainedAmount || 0 }} {{ collateralToken.symbol }}
         </span>
       </div>
 
@@ -140,6 +140,7 @@ import type { Address } from 'viem';
 import ConfettiExplosion from 'vue-confetti-explosion';
 import type { OutcomeInterface } from '~/lib/types/prediction-set';
 import { colors } from '~/tailwind.config';
+import Endpoints from '~/lib/values/endpoints';
 
 enum SelectedAction {
   CLAIM = 1,
@@ -159,6 +160,7 @@ const props = defineProps({
   conditionId: { type: String, default: null, required: true },
   outcome: { type: Object as PropType<OutcomeInterface>, default: () => {}, required: true },
   collateralToken: { type: Object as PropType<CollateralToken>, default: () => {}, required: true },
+  predictionSetId: { type: Number, default: null, required: true },
 });
 
 const claimBalance = ref(BigInt(0));
@@ -293,7 +295,7 @@ async function withdrawFunding() {
     } else if (receipt.status === 'error') {
       message.error(contractError(receipt.error));
     }
-
+    await $api.post(Endpoints.predictionSetRemovedFunding(props.predictionSetId));
     await updateFundingBalance();
     await updateClaimBalance();
   } catch (error) {

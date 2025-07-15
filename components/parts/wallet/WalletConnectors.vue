@@ -10,42 +10,46 @@ defineProps({
 const showStrategies = ref(false);
 const { connectAsync, connectors } = useConnect();
 const { strategies } = useThirdweb();
-const selectConnector = ref();
+const selectConnector = ref<(typeof connectors)[number]>();
 const loadingStrategy = ref<string>();
 const loadingConnector = ref<string>();
 
 const finalSteps = ref(false);
 
-const emit = defineEmits(['loading', 'step']);
+const emit = defineEmits<{
+  (e: 'loading', value: boolean): void;
+  (e: 'step', value: number): void;
+}>();
 
 const siteKey = useRuntimeConfig().public.PROSOPO_CAPTCHA_SITEKEY as string;
 
-const clickOnConnector = (connector, strategy) => {
-  console.log('clickOnConnector', connector, strategy);
-  if (!strategy && connector.id === 'in-app-wallet') {
-    console.log('show strategy');
-    showStrategies.value = true;
-    selectConnector.value = connector;
-  } else if (strategy && connector.id === 'in-app-wallet') {
-    console.log('loading connector w/ strategy');
-    emit('loading', true);
-    // do loading animation
-    loadingStrategy.value = strategy.id;
-    connectAsync({ connector, strategy: strategy.id } as any).catch(e => {
-      console.log('Connection canceled or failed', e);
-      loadingStrategy.value = undefined;
-      emit('loading', false);
-    });
-  } else {
-    console.log('loading connector');
-    if (connector.id !== 'in-app-wallet') {
-      finalSteps.value = true;
+function clickOnConnector(connector: (typeof connectors)[number], strategy?: { id: string; name: string }) {
+  if (connector.id === 'in-app-wallet') {
+    if (!strategy) {
+      // Show In-App Wallet options (thirdweb)
+      showStrategies.value = true;
+      selectConnector.value = connector;
+    } else {
+      // Connect in-app wallet (thirdweb)
+      emit('loading', true);
+      loadingStrategy.value = strategy.id;
+
+      connectAsync({ connector, strategy: strategy.id } as any).catch(e => {
+        console.error('Connection canceled or failed', e);
+        loadingStrategy.value = undefined;
+        emit('loading', false);
+      });
     }
+  } else {
+    // Connect with external wallet (metamask, coinbase, etc)
+    finalSteps.value = true;
+
     emit('loading', true);
-    // do loading animation for connector
+
     loadingConnector.value = connector.id;
+
     connectAsync({ connector }).catch(e => {
-      console.log('Connection canceled or failed', e);
+      console.error('Connection canceled or failed', e);
       loadingStrategy.value = undefined;
       loadingConnector.value = undefined;
       selectConnector.value = undefined;
@@ -53,19 +57,18 @@ const clickOnConnector = (connector, strategy) => {
       emit('loading', false);
     });
   }
-};
+}
 
-const callbacks = (_token: string) => {
-  emit('step');
+// Must be defined here, not in the template. Otherwise the captcha fails first time
+const callbacks = (token: string) => {
+  emit('step', token ? 1 : 0);
 };
 </script>
 
 <template>
   <div>
     <div v-if="!finalSteps" class="flex flex-col">
-      <!--      <div class="flex w-full items-center justify-center mb-2">-->
-      <!--        <NuxtIcon name="wallet/injected" class="text-primary text-[40px]" />-->
-      <!--      </div>-->
+      <!-- Back button -->
       <div class="flex h-8 items-center justify-center text-[14px] leading-[20px] font-bold relative">
         <div class="absolute left-0 top-0">
           <BasicButton
@@ -81,6 +84,8 @@ const callbacks = (_token: string) => {
         </div>
         {{ !!showStrategies ? 'Log in with account' : 'Connect wallet' }}
       </div>
+
+      <!-- Instructions -->
       <div class="flex items-center justify-center text-center text-[12px] leading-[20px] my-3">
         {{
           !!showStrategies
@@ -90,31 +95,11 @@ const callbacks = (_token: string) => {
       </div>
 
       <div class="flex flex-col items-center justify-center">
-        <n-space v-if="showStrategies" :size="8" vertical class="w-full mt-4">
-          <BasicButton
-            v-for="(strategy, key) in strategies"
-            :key="key"
-            class="flex-cc w-full"
-            :class="{
-              'relative card flex items-center py-1 pl-2 pr-4 pointer-events-none': !selectConnector,
-            }"
-            type="outline"
-            size="large"
-            :disabled="!!loadingStrategy"
-            @click="clickOnConnector(selectConnector, strategy)"
-          >
-            <div class="flex flex-row justify-start gap-2 items-center">
-              <NuxtIcon :name="`strategies/${strategy.id}`" filled />
-              <div>{{ strategy.name }}</div>
-              <div v-if="strategy.id === loadingStrategy" class="flex items-center justify-center h-3 ml-2">
-                <Spinner :size="24" color="white" style="position: relative" />
-              </div>
-            </div>
-          </BasicButton>
-        </n-space>
-
-        <n-space v-else :size="8" vertical class="w-full">
-          <ProcaptchaComponent :site-key="siteKey" :callback="callbacks" theme="dark" />
+        <!-- Wallets (metamask, coinbase, etc) -->
+        <n-space v-if="!showStrategies" :size="8" vertical class="w-full">
+          <form @submit.prevent>
+            <ProcaptchaComponent :site-key="siteKey" :callback="callbacks" theme="dark" />
+          </form>
 
           <BasicButton
             v-for="(connector, key) in connectors"
@@ -126,7 +111,7 @@ const callbacks = (_token: string) => {
             type="outline"
             size="large"
             :disabled="loading || !!loadingConnector || step < 1"
-            @click="clickOnConnector(connector, null)"
+            @click="clickOnConnector(connector)"
           >
             <span class="flex flex-1 justify-start gap-2 items-center">
               <NuxtIcon :name="`wallet/${connector.type}`" filled />
@@ -137,9 +122,34 @@ const callbacks = (_token: string) => {
             </span>
           </BasicButton>
         </n-space>
+
+        <!-- In-App options (thirdweb) -->
+        <n-space v-else :size="8" vertical class="w-full mt-4">
+          <BasicButton
+            v-for="(strategy, key) in strategies"
+            :key="key"
+            class="flex-cc w-full"
+            :class="{
+              'relative card flex items-center py-1 pl-2 pr-4 pointer-events-none': !selectConnector,
+            }"
+            type="outline"
+            size="large"
+            :disabled="!!loadingStrategy"
+            @click="clickOnConnector(connectors.find(c => c.id === 'in-app-wallet')!, strategy)"
+          >
+            <div class="flex flex-row justify-start gap-2 items-center">
+              <NuxtIcon :name="`strategies/${strategy.id}`" filled />
+              <div>{{ strategy.name }}</div>
+              <div v-if="strategy.id === loadingStrategy" class="flex items-center justify-center h-3 ml-2">
+                <Spinner :size="24" color="white" style="position: relative" />
+              </div>
+            </div>
+          </BasicButton>
+        </n-space>
       </div>
     </div>
 
+    <!-- Wallet connection steps -->
     <div v-if="finalSteps">
       <div class="flex flex-col mt-4">
         <div class="flex w-full items-center justify-center mb-2">

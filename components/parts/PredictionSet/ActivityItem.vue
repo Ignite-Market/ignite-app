@@ -29,15 +29,44 @@
           <a
             :href="`${getExplorer()}/tx/${item.txHash}`"
             target="_blank"
-            class="underline inline-block align-middle ml-1 pb-0.5"
+            class="underline inline-block align-middle ml-1 pb-1 hover:text-primary-bright"
           >
-            <NuxtIcon name="icon/link" />
+            <NuxtIcon name="icon/external-link" />
+          </a>
+        </span>
+        <span v-else-if="item.type === TransactionType.FUND_EXCESS">
+          received
+          <span class="text-primary">
+            {{ formatCollateralAmount(item.outcomeTokens, tokensStore.getToken(item.collateral_token_id).decimals) }}
+            <span class="font-bold">{{ item.outcomeName }}</span>
+          </span>
+          from funding
+        </span>
+        <span v-else-if="item.type === TransactionType.CLAIM">
+          claimed
+          <span class="font-bold">
+            {{ formatCollateralAmount(item.userAmount, tokensStore.getToken(item.collateral_token_id).decimals) }}
+            {{ tokensStore.getToken(item.collateral_token_id).symbol }}
+          </span>
+          <a
+            :href="`${getExplorer()}/tx/${item.txHash}`"
+            target="_blank"
+            class="underline inline-block align-middle ml-1 pb-1 hover:text-primary-bright"
+          >
+            <NuxtIcon name="icon/external-link" />
           </a>
         </span>
         <span v-else>
-          {{ item.type === TransactionType.FUND ? ' funded ' : ' removed funding ' }}
+          {{ item.type === TransactionType.FUND ? ' funded ' : ' removed funding' }}
           <span v-if="item.type === TransactionType.FUND">
             for
+            <span class="font-bold">
+              {{ formatCollateralAmount(item.userAmount, tokensStore.getToken(item.collateral_token_id).decimals) }}
+              {{ tokensStore.getToken(item.collateral_token_id).symbol }}
+            </span>
+          </span>
+          <span v-else-if="item.type === TransactionType.REMOVE_FUND">
+            and received
             <span class="font-bold">
               {{ formatCollateralAmount(item.userAmount, tokensStore.getToken(item.collateral_token_id).decimals) }}
               {{ tokensStore.getToken(item.collateral_token_id).symbol }}
@@ -46,9 +75,9 @@
           <a
             :href="`${getExplorer()}/tx/${item.txHash}`"
             target="_blank"
-            class="underline inline-block align-middle ml-1 pb-0.5"
+            class="underline inline-block align-middle ml-1 pb-1 hover:text-primary-bright"
           >
-            <NuxtIcon name="icon/link" />
+            <NuxtIcon name="icon/external-link" />
           </a>
         </span>
       </div>

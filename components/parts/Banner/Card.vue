@@ -5,11 +5,11 @@
     :content-class="'!px-3 !py-4 !rounded-[8px] ' + getBg()"
   >
     <div class="flex gap-3 relative">
-      <div class="w-[106px] h-[126px] flex-shrink-0 rounded-[8px] border border-white bg-white/10">
+      <div class="w-[106px] h-[126px] flex-shrink-0 rounded-[8px] border border-white bg-white/10 m-auto">
         <Image class="w-full h-full object-cover rounded-[7px]" :src="banner.imageUrl" />
       </div>
 
-      <div class="flex flex-col">
+      <div class="flex flex-col gap-2">
         <div class="flex-grow">
           <div class="font-bold text-[16px]">
             {{ banner.title }}

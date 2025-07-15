@@ -9,12 +9,16 @@ const appConfig = getAppConfig(env);
 
 const meta = {
   lang: 'en',
-  title: 'Ignite Market',
+  title: 'Ignite Market - Future prediction market',
   description:
-    'Ignite Market is a decentralized prediction market platform, designed to enable users to trade on the outcomes of real-world events.',
-  url: appConfig.url,
-  image: `${appConfig.url}/og.png`,
+    'Ignite Market is a cutting-edge prediction platform where you can forecast outcome and earn from your insights on trending events.',
+  url: 'https://ignitemarket.xyz/',
+  image: 'https://images.ignitemarket.xyz/social-share.png',
   twitter: '@ignitemarket',
+  ogTitle: 'Ignite Market | Predict the future!',
+  ogDescription:
+    'Forecast real-world events and earn from your predictions on XPR, Flare, Sports, and Finance. Ignite your insights.',
+  ogDescriptionShort: 'Forecast real-world events. Ignite your insights.',
 };
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
@@ -26,12 +30,13 @@ export default defineNuxtConfig({
     transpile: process.env.NODE_ENV === AppEnv.PROD ? ['naive-ui', '@juggle/resize-observer'] : [''],
   },
   components: ['~/components', '~/components/general/', '~/components/parts/'],
-  devtools: { enabled: true },
+  devtools: { enabled: false },
   experimental: {
     payloadExtraction: false,
     viewTransition: true,
     renderJsonPayloads: true,
   },
+  ignore: ['**/thirdwebpay/**', '**/node_modules/**', '**/.git/**', '**/dist/**'],
   imports: {
     dirs: ['composables/', 'stores/', 'lib/utils'],
   },
@@ -75,6 +80,27 @@ export default defineNuxtConfig({
     ],
     optimizeDeps: {
       include: process.env.NODE_ENV === AppEnv.DEV ? ['color', 'mersenne-twister', 'naive-ui'] : [],
+      // Don't try to pre-bundle the dist files in dev
+      exclude: ['~/lib/thirdwebpay/dist'],
+    },
+    build: {
+      // Tell Rollup to treat them as already-built, just copy them over
+      rollupOptions: {
+        plugins: [
+          {
+            name: 'thirdwebpay-dont-touch',
+            // `transform` runs before Rollup does any parsing;
+            // returning `null` makes Rollup leave the file alone.
+            // We only do this for the generated bundle:
+            transform(code, id) {
+              if (id.includes('/lib/thirdwebpay/dist/')) {
+                return { code, moduleSideEffects: false };
+              }
+              return null;
+            },
+          },
+        ],
+      },
     },
   },
 
@@ -85,26 +111,29 @@ export default defineNuxtConfig({
       },
 
       title: meta.title,
-      titleTemplate: `%s - ${meta.title}`,
       charset: 'utf-8',
       viewport: 'width=device-width, initial-scale=1',
 
       meta: [
         { name: 'format-detection', content: 'telephone=no' },
         { name: 'theme-color', content: '#070707' },
+        { name: 'title', content: 'Ignite Market | Predict. Profit. Participate.' },
         { name: 'description', content: meta.description, hid: 'description' },
-        { name: 'og:title', content: meta.title, hid: 'og:title' },
-        { name: 'og:description', content: meta.description, hid: 'og:description' },
-        { name: 'og:url', content: meta.url, hid: 'og:url' },
-        { name: 'og:image', content: meta.image },
-        { name: 'og:type', content: 'website' },
-        { name: 'twitter:title', content: meta.title, hid: 'twitter:title' },
-        { name: 'twitter:description', content: meta.description, hid: 'twitter:description' },
-        { name: 'twitter:url', content: meta.url, hid: 'twitter:url' },
+        { name: 'canonical', content: meta.url },
+
+        // Open Graph / Facebook
+        { property: 'og:type', content: 'website' },
+        { property: 'og:url', content: meta.url },
+        { property: 'og:title', content: meta.ogTitle },
+        { property: 'og:description', content: meta.ogDescription },
+        { property: 'og:image', content: meta.image },
+
+        // Twitter
         { name: 'twitter:card', content: 'summary_large_image' },
-        { name: 'twitter:image', content: meta.image },
-        { name: 'twitter:creator', content: meta.twitter },
         { name: 'twitter:site', content: meta.twitter },
+        { name: 'twitter:title', content: meta.ogTitle },
+        { name: 'twitter:description', content: meta.ogDescriptionShort },
+        { name: 'twitter:image', content: meta.image },
         {
           'http-equiv': 'Content-Security-Policy',
           content:
@@ -112,7 +141,10 @@ export default defineNuxtConfig({
         },
       ],
 
-      link: [{ rel: 'icon', type: 'image/png', href: '/favicon.png' }],
+      link: [
+        { rel: 'icon', type: 'image/png', href: '/favicon.png' },
+        { rel: 'canonical', href: meta.url },
+      ],
 
       script: [],
     },

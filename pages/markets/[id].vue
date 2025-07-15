@@ -48,7 +48,7 @@
                     <div class="text-white/80 text-[14px] leading-[20px]">
                       {{
                         formatCollateralAmount(
-                          (predictionSet.fundingVolume || 0) + (predictionSet.transactionsVolume || 0),
+                          BigInt(predictionSet.fundingVolume || 0) + BigInt(predictionSet.transactionsVolume || 0),
                           collateralToken?.decimals || 0
                         )
                       }}
@@ -148,7 +148,7 @@
           <div
             v-if="
               predictionSet.fundingPositions &&
-              predictionSet.fundingPositions > 0 &&
+              predictionSet.fundingPositions !== '0' &&
               loggedIn &&
               predictionSet.setStatus !== PredictionSetStatus.FINALIZED
             "
@@ -175,6 +175,19 @@
           </div>
           <div v-else-if="loggedIn && fundingPositionsLoading">
             <n-skeleton height="72px" width="100%" class="rounded-[8px] mt-10" />
+          </div>
+
+          <!-- Mobile FUND btn -->
+          <div v-if="predictionSet && !isMd" class="w-full mt-10">
+            <BasicButton
+              size="large"
+              type="secondary"
+              class="w-full"
+              :btn-class="['bg-statusBlue/20 border-statusBlue hover:bg-statusBlue w-full']"
+              @click="() => selectOutcome(TransactionType.FUND, predictionSet?.outcomes[0])"
+            >
+              Fund
+            </BasicButton>
           </div>
 
           <!-- OUTCOMES -->
@@ -253,7 +266,7 @@
                   size="large"
                   type="secondary"
                   :btn-class="['bg-statusGreen/20 border-statusGreen hover:bg-statusGreen mr-3 w-full']"
-                  :selected="selectedOutcome.id === outcome.id && selectedAction === TransactionType.BUY"
+                  :selected="selectedOutcome?.id === outcome.id && selectedAction === TransactionType.BUY"
                   :selected-class="['!bg-statusGreen !border-statusGreen']"
                   @click="selectOutcome(TransactionType.BUY, outcome)"
                 >
@@ -263,7 +276,7 @@
                   size="large"
                   type="secondary"
                   :btn-class="['bg-statusRed/20 border-statusRed hover:bg-statusRed w-full']"
-                  :selected="selectedOutcome.id === outcome.id && selectedAction === TransactionType.SELL"
+                  :selected="selectedOutcome?.id === outcome.id && selectedAction === TransactionType.SELL"
                   :selected-class="['!bg-statusRed !border-statusRed']"
                   @click="selectOutcome(TransactionType.SELL, outcome)"
                 >
@@ -344,7 +357,7 @@
         </div>
 
         <!-- RIGHT -->
-        <div class="md:sticky top-6 self-start md:ml-8 lg:ml-24 w-full min-w-[260px] md:w-[409px] mb-6">
+        <div class="md:sticky top-6 self-start md:ml-8 lg:ml-24 w-full min-w-[260px] md:w-[409px] mb-10">
           <div class="mobile:hidden">
             <PredictionSetAction
               v-if="actionsEnabled(predictionSet.setStatus, predictionSet.endTime)"
@@ -377,6 +390,7 @@
             :contract-address="predictionSet.chainData.contractAddress"
             :condition-id="predictionSet.chainData.conditionId"
             :collateral-token="collateralToken"
+            :prediction-set-id="predictionSet.id"
           />
         </div>
       </div>
@@ -392,7 +406,13 @@
   >
     <div class="w-16 h-1 bg-grey-lighter rounded-full"></div>
   </div>
-  <n-drawer v-if="predictionSet && !isMd" v-model:show="actionModal" placement="bottom" default-height="auto">
+  <n-drawer
+    v-if="!!predictionSet && !isMd"
+    v-model:show="actionModal"
+    placement="bottom"
+    default-height="auto"
+    @close="actionModal = false"
+  >
     <div class="h-full w-full" @touchstart="handleTouchStart" @touchend="handleTouchEnd">
       <PredictionSetAction
         v-if="actionsEnabled(predictionSet.setStatus, predictionSet.endTime)"
@@ -404,6 +424,10 @@
         :outcomes="predictionSet.outcomes"
         :default-value="defaultActionValue"
         :collateral-token="collateralToken"
+        show-select-outcome
+        @outcome-selected="
+          (outcomeId: number) => (selectedOutcome = predictionSet?.outcomes.find(o => o.id === outcomeId))
+        "
         @action-changed="(action: TransactionType) => (selectedAction = action)"
         @transaction-successful="
           (transactionType: TransactionType) =>
@@ -474,12 +498,15 @@ onMounted(async () => {
   await sleep(10);
   await getPredictionSet();
   if (query) {
-    if (query.transaction && query.outcome) {
+    if (query.transaction) {
       selectedAction.value = +query.transaction;
-      selectedOutcome.value = predictionSet.value?.outcomes.find(x => x.id === +query.outcome!);
+      if (query.outcome) {
+        selectedOutcome.value = predictionSet.value?.outcomes.find(x => x.id === +query.outcome!);
+      }
       if (query.value) {
         defaultActionValue.value = +query.value;
       }
+      actionModal.value = true;
       router.replace({ query: undefined });
     }
   }
@@ -503,7 +530,7 @@ function sellPosition(outcomeId: number, sharesAmount: number) {
   actionModal.value = true;
 }
 
-function selectOutcome(transaction: TransactionType, outcome: OutcomeInterface) {
+function selectOutcome(transaction: TransactionType, outcome?: OutcomeInterface) {
   selectedAction.value = transaction;
   selectedOutcome.value = outcome;
   actionModal.value = true;
@@ -603,20 +630,17 @@ function poolForPositionsChanges() {
     }
   }, POLLING_TIMEOUT);
 
+  const currentPositions = predictionSet.value?.positions || [];
   return new Promise(function (resolve) {
     positionsInterval = setInterval(async () => {
       try {
         const res = await $api.get<GeneralResponse<any>>(Endpoints.predictionSetPositions(Number(params?.id)));
 
-        const currentPositions = predictionSet.value?.positions || [];
         const newPositions = res.data || [];
 
         if (predictionSet.value) {
           predictionSet.value.positions = newPositions;
         }
-
-        console.log('currentPositions', currentPositions);
-        console.log('newPositions', newPositions);
 
         if (JSON.stringify(currentPositions) !== JSON.stringify(newPositions)) {
           clearInterval(positionsInterval);
@@ -633,7 +657,14 @@ function poolForPositionsChanges() {
 }
 
 function poolForFundingPositionsChanges() {
-  console.log('called: poolForFundingPositionsChanges');
+  // Positions will also change if trading already happened.
+  if (
+    predictionSet.value?.setStatus === PredictionSetStatus.ACTIVE &&
+    BigInt(predictionSet.value?.transactionsVolume || 0) !== 0n
+  ) {
+    poolForPositionsChanges();
+  }
+
   let fundingPositionsInterval = null as any;
   fundingPositionsLoading.value = true;
 
@@ -644,12 +675,13 @@ function poolForFundingPositionsChanges() {
     }
   }, POLLING_TIMEOUT);
 
+  const currentFundingPositions = predictionSet.value?.fundingPositions || 0;
+
   return new Promise(function (resolve) {
     fundingPositionsInterval = setInterval(async () => {
       try {
         const res = await $api.get<GeneralResponse<any>>(Endpoints.predictionSetFundingPositions(Number(params?.id)));
 
-        const currentFundingPositions = predictionSet.value?.fundingPositions || 0;
         const newFundingPositions = res.data || 0;
 
         if (predictionSet.value) {

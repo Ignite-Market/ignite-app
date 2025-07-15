@@ -17,7 +17,7 @@
         :diameter="isMd ? 40 : 30"
       />
 
-      <div class="ml-2 font-medium text-[14px] leading-[20px] md:block hidden">
+      <div class="ml-2 font-medium text-[14px] leading-[20px] md:block hidden lg:hidden xl:block">
         {{ truncateWallet(address as string) }}
       </div>
 
@@ -41,6 +41,8 @@ const { loggedIn } = useLoggedIn();
 const { isLg, isMd } = useScreen();
 
 const isOpened = ref(false);
+
+const emit = defineEmits(['openFundModal']);
 
 const renderLabel = option => {
   if (option.type === 'divider') return null;
@@ -84,6 +86,11 @@ const options = computed(() => [
           key: 'divider-1',
         },
         {
+          key: 'fund',
+          label: 'Fund',
+          iconName: 'icon/coins',
+        },
+        {
           key: 'earn',
           label: 'Earn',
           iconName: 'icon/points',
@@ -119,9 +126,10 @@ const options = computed(() => [
 function handleSelect(key: string | number) {
   if (key === 'logout') {
     userStore.logout();
-    router.push('/');
   } else if (key === 'learn') {
     window.open('https://docs.ignitemarket.xyz/', '_blank');
+  } else if (key === 'fund') {
+    emit('openFundModal');
   } else if (key) {
     router.push({ name: `${key}` });
   }

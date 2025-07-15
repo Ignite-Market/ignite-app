@@ -14,11 +14,41 @@
         />
       </div>
       <div v-else class="bg-grey-light rounded-[8px] p-3 flex flex-row items-center justify-center">
-        <div class="w-[30px] h-[30px] flex-shrink-0">
-          <Image :src="outcome.imgUrl" class="rounded-[48px] w-full h-full object-cover" />
+        <n-dropdown
+          v-if="showSelectOutcome"
+          v-model:show="isDropdownOpened"
+          d
+          :options="dropdownOptions"
+          :render-option="renderDropdownOption"
+          trigger="click"
+          size="large"
+          class="bg-grey-light"
+          placement="bottom-start"
+          style="margin-top: 12px; margin-left: -12px"
+          @select="() => {}"
+        >
+          <div class="flex flex-row items-center justify-center cursor-pointer">
+            <div class="w-[30px] h-[30px] flex-shrink-0">
+              <Image :src="outcome?.imgUrl" class="rounded-[48px] w-full h-full object-cover" />
+            </div>
+            <div class="ml-2 text-[12px] leading-[16px] font-bold">{{ outcome?.name }}</div>
+
+            <NuxtIcon
+              name="icon/arrow-down"
+              class="ml-2 text-[24pxy] transition-all transform"
+              :class="{ 'rotate-180': isDropdownOpened }"
+            />
+          </div>
+        </n-dropdown>
+
+        <div v-else class="flex flex-row items-center justify-center">
+          <div class="w-[30px] h-[30px] flex-shrink-0">
+            <Image :src="outcome?.imgUrl" class="rounded-[48px] w-full h-full object-cover" />
+          </div>
+          <div class="ml-2 text-[12px] leading-[16px] font-bold">{{ outcome?.name }}</div>
         </div>
-        <div class="ml-2 text-[12px] leading-[16px] font-bold">{{ outcome.name }}</div>
-        <div class="text-[12px] leading-[16px] font-bold ml-auto">{{ (outcome.latestChance * 100).toFixed(0) }} %</div>
+
+        <div class="text-[12px] leading-[16px] font-bold ml-auto">{{ (outcome?.latestChance * 100).toFixed(0) }} %</div>
 
         <div
           class="min-w-[20px] min-h-[20px] rounded-[4px] flex items-center justify-center bg-none hover:bg-grey-dark ml-[10px] cursor-pointer"
@@ -124,8 +154,8 @@
               size="large"
               class="min-w-full text-center"
               type="number"
+              :precision="DISPLAY_DECIMALS"
               :show-button="true"
-              :max="collateralToken.parsedBalance"
               button-placement="both"
               :disabled="loading"
               :validator="buyValidator"
@@ -165,7 +195,7 @@
             class="w-full"
             :btn-class="['!font-bold']"
             :size="'large'"
-            :disabled="!isConnected || !enoughCollateralBalance"
+            :disabled="!isConnected"
             :loading="loading"
             @click="buyOutcome"
           >
@@ -203,7 +233,7 @@
               <div class="ml-auto flex font-medium">
                 <div class="text-grey-lightest">Balance:</div>
                 <div class="text-white/80 ml-1">
-                  {{ parseConditionalBalance(conditionalBalance, props.collateralToken.decimals) }}
+                  {{ sellableBalanceStr }}
                 </div>
               </div>
             </div>
@@ -215,9 +245,10 @@
               size="large"
               class="min-w-full text-center"
               type="number"
+              :precision="DISPLAY_DECIMALS"
               :show-button="true"
               button-placement="both"
-              :max="parseConditionalBalance(conditionalBalance, props.collateralToken.decimals)"
+              :max="sellableBalance"
               :validator="sellValidator"
               :disabled="loading"
               @blur="onSellBlur"
@@ -296,8 +327,8 @@
               class="min-w-full text-center"
               type="number"
               :show-button="true"
+              :precision="DISPLAY_DECIMALS"
               button-placement="both"
-              :max="collateralToken.parsedBalance"
               :disabled="loading"
             >
               <template #minus-icon>
@@ -322,7 +353,7 @@
             class="w-full"
             :btn-class="['bg-statusBlue hover:bg-statusBlue-hover !font-bold']"
             :size="'large'"
-            :disabled="!isConnected || !enoughCollateralBalance || !isFundEnabled"
+            :disabled="!isConnected || !isFundEnabled"
             :loading="loading"
             @click="fund"
           >
@@ -465,15 +496,18 @@
       </div>
     </div>
   </n-modal>
+  <FundModal ref="fiatBuyRef" :collateral-token="collateralToken" />
 </template>
 
 <script setup lang="ts">
 import { watchDebounced } from '@vueuse/core';
 import type { Address } from 'viem';
-import { useAccount } from '@wagmi/vue';
+import { useAccount, useBalance } from '@wagmi/vue';
 import ConfettiExplosion from 'vue-confetti-explosion';
 import type { OutcomeInterface } from '~/lib/types/prediction-set';
 import { PredictionSetStatus, TransactionType } from '~/lib/types/prediction-set';
+import { bigIntToNum, numToBigInt } from '~/lib/utils/numbers';
+import { DISPLAY_DECIMALS } from '~/lib/values/general.values';
 import { colors } from '~/tailwind.config';
 
 enum TransactionStep {
@@ -490,9 +524,10 @@ const props = defineProps({
   outcomes: { type: Array as PropType<OutcomeInterface[]>, default: () => [], required: true },
   defaultValue: { type: Number, default: 0 },
   collateralToken: { type: Object as PropType<CollateralToken>, default: () => {}, required: true },
+  showSelectOutcome: { type: Boolean, default: false },
 });
 
-const emit = defineEmits(['actionChanged', 'transactionSuccessful']);
+const emit = defineEmits(['actionChanged', 'transactionSuccessful', 'outcomeSelected']);
 
 const {
   getMinTokensToBuy,
@@ -501,13 +536,14 @@ const {
   sell,
   calcSellAmountInCollateral,
   getPricePerShare,
-  getTotalFunding,
+  getCurrentLiquidity,
   calcSharesForCollateral,
 } = useFixedMarketMaker();
 const { refreshCollateralBalance, checkCollateralAllowance } = useCollateralToken();
-const { getConditionalBalance, parseConditionalBalance, checkConditionalApprove } = useConditionalToken();
+const { getConditionalBalance, checkConditionalApprove } = useConditionalToken();
 const { ensureCorrectNetwork } = useContracts();
 const { isConnected, address } = useAccount();
+const { data: nativeBalance, refetch: refetchNativeBalance } = useBalance({ address: address.value });
 const { isMd } = useScreen();
 const message = useMessage();
 const txWait = useTxWait();
@@ -520,8 +556,15 @@ const amount = ref<number | undefined>(props.defaultValue || undefined);
 const returnAmount = ref<string>('0.0');
 const potentialReturn = ref<string>('0.0');
 const conditionalBalance = ref(BigInt(0));
+
+// Display helpers – show balances up to DISPLAY_DECIMALS digits and ignore dust
+const sellableBalance = computed<number>(() => {
+  return floorOutcomeAmount(conditionalBalance.value);
+});
+const sellableBalanceStr = computed<string>(() => sellableBalance.value.toFixed(DISPLAY_DECIMALS));
+
 const pricePerShare = ref(0.0);
-const totalFundAmount = ref(BigInt(0));
+const currentLiquidity = ref(BigInt(0));
 
 const givenAmount = ref();
 const obtainedAmount = ref();
@@ -535,6 +578,12 @@ const sellError = ref('');
 const transactionStep = ref(TransactionStep.ALLOWANCE);
 
 const sellFundLimit = ref(0);
+const isDropdownOpened = ref(false);
+const fiatBuyRef = ref();
+
+const openFiatBuyModal = () => {
+  fiatBuyRef.value?.openModal(amount.value);
+};
 
 const buyValidator = (x: number) => {
   if (x > buyFundLimit.value) {
@@ -587,8 +636,62 @@ watch(
   () => isConnected.value,
   async () => {
     await refreshBalances();
+    await refetchNativeBalance();
   }
 );
+
+const dropdownOptions = computed(() => {
+  return props.outcomes
+    .filter(o => o.id !== props.outcome.id)
+    .map(o => ({
+      key: o.id,
+      label: o.name,
+      imgUrl: o.imgUrl,
+    }));
+});
+
+const renderDropdownOption = (props: { node: VNode; option: any }) => {
+  return h(
+    'div',
+    {
+      class:
+        'flex items-center h-[54px] bg-grey-light rounded-[8px] w-full md:max-w-[220px] min-w-[120px] px-2 cursor-pointer hover:bg-grey-dark/40',
+      onClick: () => {
+        emit('outcomeSelected', props.option.key);
+        isDropdownOpened.value = false;
+      },
+    },
+    [
+      h(
+        'div',
+        {
+          class: 'w-[30px] h-[30px] flex-shrink-0',
+        },
+        [
+          h(resolveComponent('Image'), {
+            src: props.option.imgUrl,
+            class: 'rounded-[78px] w-full h-full object-cover',
+          }),
+        ]
+      ),
+      h(
+        'div',
+        {
+          class: 'ml-2',
+        },
+        [
+          h(
+            'div',
+            {
+              class: 'text-white text-[14px] leading-[16px] pe-2',
+            },
+            props.option.label
+          ),
+        ]
+      ),
+    ]
+  );
+};
 
 const enoughConditionalBalance = computed(() => {
   const scaledAmount = BigInt(Math.round((amount.value || 0) * 10 ** props.collateralToken.decimals));
@@ -601,17 +704,18 @@ const enoughCollateralBalance = computed(() => {
 });
 
 const buyFundLimit = computed(() => {
-  let max = (BigInt(totalFundAmount.value) * 10n) / 100n;
-  if (props.collateralToken.balance < max) {
-    max = props.collateralToken.balance;
-  }
+  const max = (BigInt(currentLiquidity.value) * 10n) / 100n;
   return bigIntToNum(max, props.collateralToken.decimals || 6);
 });
 
 watch(
-  () => [totalFundAmount.value, conditionalBalance.value, props.outcome.outcomeIndex],
+  () => [currentLiquidity.value, conditionalBalance.value, props?.outcome?.outcomeIndex],
   async () => {
-    const maxAmount = bigIntToNum((BigInt(totalFundAmount.value) * 10n) / 100n, props.collateralToken.decimals || 6);
+    if (!props?.outcome) {
+      return;
+    }
+
+    const maxAmount = bigIntToNum((BigInt(currentLiquidity.value) * 10n) / 100n, props.collateralToken.decimals || 6);
     let limit =
       (await calcSharesForCollateral(
         maxAmount,
@@ -624,7 +728,8 @@ watch(
     if (conditionalBalance.value < limit) {
       limit = conditionalBalance.value;
     }
-    sellFundLimit.value = Number(limit) / Math.pow(10, props.collateralToken.decimals);
+    const rawLimit = Number(limit) / Math.pow(10, props.collateralToken.decimals);
+    sellFundLimit.value = floorOutcomeAmount(rawLimit);
   }
 );
 
@@ -635,12 +740,13 @@ onMounted(async () => {
     selectedTab.value = props.action;
   }
 
+  await refetchNativeBalance();
   await refreshCollateralBalance(props.collateralToken.id);
-  totalFundAmount.value = await getTotalFunding(props.contractAddress);
+  currentLiquidity.value = await getCurrentLiquidity(props.contractAddress);
 });
 
 watchEffect(async () => {
-  if (props.outcome.positionId) {
+  if (props?.outcome?.positionId) {
     conditionalBalance.value = await getConditionalBalance(props.outcome.positionId);
 
     if (props.status !== PredictionSetStatus.FUNDING) {
@@ -754,7 +860,7 @@ async function refreshBalances() {
       props.outcome.outcomeIndex,
       props.collateralToken.decimals
     );
-    totalFundAmount.value = await getTotalFunding(props.contractAddress);
+    currentLiquidity.value = await getCurrentLiquidity(props.contractAddress);
   } catch (error) {
     console.log(error);
   }
@@ -796,8 +902,14 @@ async function updateSellAmount() {
 /**
  * Fund market.
  */
+
 async function fund() {
   if (!amount.value) {
+    return;
+  }
+
+  if (!enoughCollateralBalance.value || !nativeBalance.value?.value) {
+    openFiatBuyModal();
     return;
   }
 
@@ -853,6 +965,11 @@ async function sellOutcome() {
     return;
   }
 
+  if (!nativeBalance.value?.value) {
+    openFiatBuyModal();
+    return;
+  }
+
   transactionStep.value = TransactionStep.ALLOWANCE;
   showTransactionModal.value = true;
   loading.value = true;
@@ -872,15 +989,33 @@ async function sellOutcome() {
     }
     transactionStep.value = TransactionStep.CONFIRM;
 
+    const factor = Math.pow(10, DISPLAY_DECIMALS);
+
+    // Detect if the user is attempting to sell (almost) the full balance that we display
+    const sellingFullBalance =
+      Math.abs((amount.value || 0) - sellableBalance.value) < 1 / factor && conditionalBalance.value > 0n;
+
+    const sharesNumber = sellingFullBalance
+      ? Number(conditionalBalance.value) / Math.pow(10, props.collateralToken.decimals)
+      : amount.value;
+
     const collateralAmount = await calcSellAmountInCollateral(
-      amount.value,
+      sharesNumber,
       props.outcome.outcomeIndex,
       props.contractAddress,
       props.outcomes.map(o => o.positionId),
       props.collateralToken.decimals
     );
 
-    txWait.hash.value = await sell(props.contractAddress, collateralAmount, props.outcome.outcomeIndex, slippage.value);
+    const maxAmount = numToBigInt(sharesNumber, props.collateralToken.decimals);
+
+    txWait.hash.value = await sell(
+      props.contractAddress,
+      collateralAmount,
+      props.outcome.outcomeIndex,
+      slippage.value,
+      maxAmount
+    );
     const receipt = await txWait.wait();
 
     if (receipt.status === 'success') {
@@ -922,6 +1057,11 @@ async function sellOutcome() {
  */
 async function buyOutcome() {
   if (!amount.value) {
+    return;
+  }
+
+  if (!enoughCollateralBalance.value || !nativeBalance.value?.value) {
+    openFiatBuyModal();
     return;
   }
 

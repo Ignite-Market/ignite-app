@@ -58,17 +58,7 @@ const isCurrentUser = computed(() => user.value?.id === authUser.id);
 const loading = ref(true);
 const user = ref<UserInterface | null>(null);
 
-const { loggedIn, isInitializing } = useLoggedIn(onInit);
-
-onMounted(async () => {
-  if (!isInitializing.value) {
-    await getUserProfile();
-  }
-});
-
-async function onInit() {
-  await getUserProfile();
-}
+const { loggedIn } = useLoggedIn(() => getUserProfile());
 
 async function getUserProfile() {
   loading.value = true;

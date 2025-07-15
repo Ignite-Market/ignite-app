@@ -31,6 +31,7 @@ const Endpoints = {
   predictionSetHolders: `/prediction-sets/holders`,
   predictionSetPositions: (id: number) => `/prediction-sets/${id}/positions`,
   predictionSetFundingPositions: (id: number) => `/prediction-sets/${id}/funding-positions`,
+  predictionSetRemovedFunding: (id: number) => `/prediction-sets/${id}/removed-funding`,
 
   /**
    * Prediction set comments

@@ -89,8 +89,13 @@
                     <div class="mr-2" :title="dateTimeToDateAndTime(proposal.createTime)">
                       {{ formatDistanceToNow(new Date(proposal.createTime), { addSuffix: true }) }}
                     </div>
-                    <!-- TODO: tags? -->
-                    <div class="bg-grey-lighter px-2 py-0.5 rounded-full text-xs ml-1">Crypto</div>
+                    <div
+                      v-for="tag in proposal.tags"
+                      :key="tag"
+                      class="bg-grey-lighter px-2 py-0.5 rounded-full text-xs ml-1"
+                    >
+                      {{ tag }}
+                    </div>
 
                     <div v-if="loggedIn" class="ml-auto">
                       <ProposalOptions :proposal="proposal" :round="round" @delete="() => router.push('/proposals')" />
@@ -386,8 +391,6 @@ async function vote(voteType: ProposalVoteType) {
     await $api.post<ProposalVoteResponse>(Endpoints.voteOnProposal(proposal.value.id), {
       voteType,
     });
-
-    // TODO: Refresh proposal.
 
     await getProposal(true);
   } catch (error) {

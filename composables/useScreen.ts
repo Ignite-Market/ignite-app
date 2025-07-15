@@ -1,3 +1,8 @@
+/**
+ * Use screen breakpoints.
+ *
+ * @returns The screen breakpoints.
+ */
 export default function useScreen() {
   const breakpoints = useBreakpoints({
     sm: 640,

@@ -108,13 +108,7 @@
                 more points you can earn!
               </div>
               <div v-if="loggedIn" class="mt-4 pt-4 border-t border-grey-lighter">
-                <div class="flex items-center justify-between">
-                  <div class="text-[14px] font-bold text-white">Your Points</div>
-                  <div class="flex items-center">
-                    <div class="text-[20px] font-bold text-white mr-2">{{ userPoints }}</div>
-                    <NuxtIcon name="icon/points" class="text-primary text-[20px]" />
-                  </div>
-                </div>
+                <Points />
               </div>
             </div>
           </n-card>
@@ -133,28 +127,27 @@ import { RewardType } from '~/lib/types/reward';
 const { loggedIn } = useLoggedIn();
 const message = useMessage();
 const router = useRouter();
+const user = useUserStore();
 
-const userPoints = ref<number>(0);
 const rewards = ref<any[]>([]);
 
 const canClaimDaily = ref(false);
 const showReferralModal = ref(false);
 
 const loading = ref(false);
-const userPointsLoading = ref(true);
 const claimLoading = ref(true);
 
-onMounted(async () => {
-  await getRewardPoints();
-  await getUserPoints();
-  await getCanClaimDaily();
+onMounted(() => {
+  getRewardPoints();
+  user.getUserPoints();
+  getCanClaimDaily();
 });
 
 watch(
   () => loggedIn.value,
-  async _ => {
-    await getCanClaimDaily();
-    await getUserPoints();
+  _ => {
+    getCanClaimDaily();
+    user.getUserPoints();
   }
 );
 
@@ -182,7 +175,7 @@ async function claimDailyReward() {
   try {
     await $api.patch(Endpoints.dailyReward);
 
-    await getUserPoints();
+    await user.getUserPoints();
     canClaimDaily.value = false;
   } catch (error) {
     message.error('Failed to claim daily reward. Please try again later.');
@@ -200,23 +193,6 @@ async function getRewardPoints() {
     console.log(error);
   } finally {
     loading.value = false;
-  }
-}
-
-async function getUserPoints() {
-  if (!loggedIn.value) {
-    userPointsLoading.value = false;
-    return;
-  }
-
-  userPointsLoading.value = true;
-  try {
-    const res = await $api.get<GeneralResponse<any>>(Endpoints.rewardsMe);
-    userPoints.value = res.data.points;
-  } catch (error) {
-    message.error(apiError(error));
-  } finally {
-    userPointsLoading.value = false;
   }
 }
 </script>

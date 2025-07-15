@@ -50,18 +50,17 @@ const btnClass = computed(() => {
   const clsArray = [
     props.btnClass,
     {
-      'pointer-events-none pointer-default': props.disabled || props.loading,
+      'pointer-events-none pointer-default grayscale': props.disabled || props.loading,
       [sizeClass.value]: props.type !== 'link',
       'font-medium text-[14px] leading-[20px] transition-colors duration-200 text-white ': props.type !== 'link',
       'bg-primary hover:bg-primary-hover transition-none': props.type === 'primary' && !props.disabled,
       'bg-primary/20 text-white border-1 border-primary hover:bg-primary hover:text-white':
         props.type === 'secondary' && !props.disabled,
-      'text-white border-1 border-grey-lightest hover:bg-grey-lighter hover:text-white':
-        props.type === 'outline' && !props.disabled,
+      'text-white border-1 border-grey-lightest hover:bg-grey-lighter hover:text-white': props.type === 'outline',
       'bg-gradientGreen bg-clip-text text-transparent': props.type === 'gradient',
       'text-center rounded-[8px]': props.type !== 'link',
       'hover:text-green  !transition-all !duration-200': props.type === 'link',
-      '!bg-body-dark': props.type !== 'link' && props.disabled,
+      '!bg-body-dark': props.type !== 'link' && props.type !== 'outline' && props.disabled,
     },
   ];
 

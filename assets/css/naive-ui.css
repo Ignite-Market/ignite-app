@@ -305,6 +305,10 @@ body > .n-message-container {
     @apply right-2;
   }
 
+  .n-base-selection-input {
+    @apply !pr-7;
+  }
+
   .n-pagination-prefix {
     @apply text-body;
   }

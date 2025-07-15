@@ -1,5 +1,11 @@
 <template>
-  <Swiper v-if="!loading && banners.length" :slides-per-view="isLg ? 3 : 'auto'" :space-between="10" :class="'mb-6'">
+  <Swiper
+    v-if="!loading && banners.length"
+    :slides-per-view="isLg ? 3 : 'auto'"
+    :space-between="10"
+    :class="'mb-6'"
+    wrapper-class="items-center"
+  >
     <SwiperSlide v-for="(banner, i) in banners" :key="banner.id" class="min-w-[330px] max-w-[500px]">
       <BannerCard :banner="banner" :index="i" />
     </SwiperSlide>
