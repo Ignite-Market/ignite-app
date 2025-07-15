@@ -73,7 +73,6 @@ function Embed({
 }: { client: ThirdwebClient } & PayParams) {
   const { connect } = useConnect();
   const activeAccount = useActiveAccount();
-  console.log('amount', amount);
 
   /**
    * @TODO add testnet once available

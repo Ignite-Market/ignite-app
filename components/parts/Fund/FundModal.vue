@@ -30,6 +30,7 @@ const collateralNeeded = ref(0);
 const nativeNeeded = ref(0); // FLR required for the swap to USDT
 const loading = ref(true);
 const gasBuffer = 0.02; // Estimated FLR reserved for gas – tweak as needed
+const closeDisabled = ref(false);
 
 const totalNativeNeeded = computed(() => gasBuffer + nativeNeeded.value);
 const nativeMissing = computed(() =>
@@ -114,7 +115,7 @@ function openThirdweb() {
     startThirdwebPayment('#thirdwebpay', {
       clientId: config.public.THIRDWEB_CLIENT_KEY,
       paymentReceiverAddress: address.value,
-      amount: numToBigInt(nativeMissing.value),
+      amount: nativeMissing.value,
       // purchaseData: { purchaseId: 1 },
       connectorId: connector.value?.id,
       onSuccess: (_info: any) => {
@@ -178,7 +179,8 @@ defineExpose({
   <Modal
     v-model:show="isOpen"
     display-directive="show"
-    class="!max-w-[402px] !bg-[#131418] [&>.n-card-header>button]:z-1"
+    :mask-closable="!closeDisabled"
+    class="!max-w-[402px] !bg-[#131418] [&>.n-card-header>button]:z-1 border-none"
     @update:show="isOpen = $event"
   >
     <div v-if="step === Steps.ENTER_AMOUNT">
@@ -330,12 +332,22 @@ defineExpose({
       v-if="step === Steps.SWAP && selectedCollateralToken"
       :amount="collateralMissing"
       :collateral-token="selectedCollateralToken"
+      @disable-close="closeDisabled = true"
+      @enable-close="closeDisabled = false"
       @back="step = Steps.LANDING"
       @success="handleSwapSuccess"
     />
     <template #header>
-      <BasicButton v-show="(step != Steps.LANDING || isCustom) && step != Steps.ENTER_AMOUNT" @click="onBack">
-        Back
+      <BasicButton
+        v-show="(step != Steps.LANDING || isCustom) && step != Steps.ENTER_AMOUNT"
+        type="gradient"
+        inner-class="flex justify-center items-center bg-grey-lightest/20 hover:bg-grey-lightest/30 p-2"
+        btn-class="!m-0 !p-0 overflow-hidden mt-4"
+        class="mt-2"
+        :disabled="closeDisabled"
+        @click="onBack"
+      >
+        <NuxtIcon :name="'icon/arrow-back'" color="white" />
       </BasicButton>
     </template>
   </Modal>

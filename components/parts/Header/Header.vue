@@ -19,6 +19,7 @@
 
       <div class="hidden lg:flex">
         <div
+          v-if="loggedIn"
           class="group flex flex-col items-center justify-center border-1 border-white border-opacity-[24%] rounded-lg w-[70px] h-auto mr-2 hover:bg-grey-dark cursor-pointer"
           @click="openFiatBuyModal"
         >
