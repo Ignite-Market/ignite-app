@@ -10,7 +10,7 @@ const props = defineProps<{
   collateralToken: CollateralToken;
 }>();
 
-const emit = defineEmits(['success']);
+const emit = defineEmits(['success', 'disableClose', 'enableClose']);
 
 const { isConnected, address } = useAccount();
 const { data: nativeBalance, refetch: refetchNativeBalance } = useBalance({ address: address.value });
@@ -71,6 +71,7 @@ async function handleSwap() {
   if (!canSwap.value || !hasEnoughBalance.value) return;
 
   isExecuting.value = true;
+  emit('disableClose');
   try {
     txWait.hash.value = await executeSwap(amountToSwap.value, props.collateralToken.address);
     const receipt = await txWait.wait();
@@ -125,6 +126,7 @@ async function handleSwap() {
     console.error('Swap failed:', error);
   } finally {
     isExecuting.value = false;
+    emit('enableClose');
   }
 }
 
@@ -150,18 +152,20 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="space-y-6">
+  <div class="space-y-4">
     <!-- Header -->
     <div class="flex items-center justify-between">
-      <h2 class="text-lg font-bold">Swap FLR to {{ collateralToken.symbol }}</h2>
+      <h2 class="text-lg font-bold text-center w-full">Swap FLR to {{ collateralToken.symbol }}</h2>
     </div>
 
-    <div v-if="!swapSuccess.txHash" class="space-y-6">
+    <div v-if="!swapSuccess.txHash" class="space-y-5">
       <!-- Swap Form -->
       <div class="space-y-4">
         <!-- Amount Input -->
         <div v-if="quote" class="space-y-2">
-          <label class="text-sm font-medium text-grey-lightest">Amount to receive ({{ collateralToken.symbol }})</label>
+          <label class="text-sm font-medium text-grey-lightest text-center w-full">
+            Amount to receive ({{ collateralToken.symbol }})
+          </label>
           <div class="relative">
             <n-input-number
               v-model:value="amountToSwap"
@@ -198,28 +202,37 @@ onMounted(async () => {
         </div>
 
         <!-- Quote Display -->
-        <div v-if="quote && !swapLoading" class="bg-grey-dark/50 rounded-lg p-4 space-y-3">
+        <div v-if="!quoteError" class="bg-grey-dark/50 rounded-lg p-4 space-y-3">
           <!-- Balance Display -->
           <div class="flex justify-between items-center">
             <span class="text-sm text-grey-lightest">Your FLR Balance:</span>
-            <span class="text-sm font-medium flex items-center">
-              {{ bigIntToNum(nativeBalance?.value || 0n, 18).toFixed(4) }}
-              <NuxtIcon name="icon/flare" class="w-3 h-3 ml-1" filled />
-            </span>
+            <div class="flex items-center gap-2">
+              <span v-if="swapLoading" class="w-[7px] h-[7px] bg-statusGreen rounded-full animate-pulse"></span>
+              <span class="text-sm font-medium flex items-center">
+                {{ bigIntToNum(nativeBalance?.value || 0n, 18).toFixed(4) }}
+                <NuxtIcon name="icon/flare" class="w-3 h-3 ml-1" filled />
+              </span>
+            </div>
           </div>
           <div class="flex justify-between items-center">
             <span class="text-sm text-grey-lightest">You'll pay:</span>
-            <span class="text-sm font-medium flex items-center">
-              {{ quoteAmount.toFixed(4) }} <NuxtIcon name="icon/flare" class="w-3 h-3 ml-1" filled />
-            </span>
+            <div class="flex items-center gap-2">
+              <span v-if="swapLoading" class="w-[7px] h-[7px] bg-statusGreen rounded-full animate-pulse"></span>
+              <span class="text-sm font-medium flex items-center">
+                {{ quoteAmount.toFixed(4) }} <NuxtIcon name="icon/flare" class="w-3 h-3 ml-1" filled />
+              </span>
+            </div>
           </div>
 
           <div class="flex justify-between items-center">
             <span class="text-sm text-grey-lightest">Rate:</span>
-            <span class="text-sm font-medium flex items-center">
-              1 {{ collateralToken.symbol }} = {{ (quoteAmount / amountQuoted).toFixed(6) }}
-              <NuxtIcon name="icon/flare" class="w-3 h-3 ml-1" filled />
-            </span>
+            <div class="flex items-center gap-2">
+              <span v-if="swapLoading" class="w-[7px] h-[7px] bg-statusGreen rounded-full animate-pulse"></span>
+              <span class="text-sm font-medium flex items-center">
+                1 {{ collateralToken.symbol }} = {{ (quoteAmount / amountQuoted).toFixed(6) }}
+                <NuxtIcon name="icon/flare" class="w-3 h-3 ml-1" filled />
+              </span>
+            </div>
           </div>
 
           <!-- Balance Check -->
@@ -232,12 +245,6 @@ onMounted(async () => {
 
         <div v-if="quoteError" class="flex items-center justify-center py-11">
           Unable to get quote. Please try again later.
-        </div>
-
-        <!-- Loading State -->
-        <div v-if="swapLoading" class="flex items-center justify-center py-11">
-          <Spinner :size="20" color="#000" />
-          <span class="ml-2 text-sm text-grey-lightest">Getting quote...</span>
         </div>
 
         <!-- Error State -->
