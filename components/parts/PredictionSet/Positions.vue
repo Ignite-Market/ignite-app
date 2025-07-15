@@ -1,5 +1,6 @@
 <template>
   <div
+    v-if="processedPositions.length"
     class="border-1 border-grey-lighter rounded-lg mt-10 flex-col p-6 px-0 text-wrap break-words"
     :class="{ 'animate-pulse': loading }"
   >
@@ -29,6 +30,7 @@
 import type { Address } from 'viem';
 import BasicButton from '~/components/general/BasicButton.vue';
 import type { PredictionSetInterface } from '~/lib/types/prediction-set';
+import { MIN_SHARE_DISPLAY } from '~/lib/values/general.values';
 import { colors } from '~/tailwind.config';
 
 const { calcSellAmountInCollateral } = useFixedMarketMaker();
@@ -49,7 +51,7 @@ const columns = ref<any[]>([]);
 watchEffect(async () => {
   const enriched = await Promise.all(
     props.positions
-      .filter(pos => bigIntToNum(pos.sharesAmount, props.collateralToken.decimals) > 0)
+      .filter(pos => bigIntToNum(pos.sharesAmount, props.collateralToken.decimals) >= MIN_SHARE_DISPLAY)
       .map(async pos => {
         const collateralAmount = await calcSellAmountInCollateral(
           Number(pos.sharesAmount) / Math.pow(10, props.collateralToken.decimals),
@@ -82,11 +84,7 @@ onMounted(() => {
       title: 'QTY',
       key: 'sharesAmount',
       render(row: any) {
-        return h(
-          'div',
-          { class: 'text-white/80' },
-          formatCollateralAmount(row.sharesAmount, props.collateralToken.decimals)
-        );
+        return h('div', { class: 'text-white/80' }, floorOutcomeAmount(row.sharesAmount));
       },
     },
     {
@@ -143,8 +141,7 @@ onMounted(() => {
           {
             type: 'secondary',
             size: 'small',
-            onClick: () =>
-              emit('sell', row.outcomeId, Number(bigIntToNum(row.sharesAmount, props.collateralToken.decimals))),
+            onClick: () => emit('sell', row.outcomeId, floorOutcomeAmount(row.sharesAmount)),
           },
           {
             default: () => 'Sell',

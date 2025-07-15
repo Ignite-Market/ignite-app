@@ -27,3 +27,6 @@ export const WebStorageKeys = {
 export const LS_KEYS = {
   APP_VERSION: 'ignite_market_app_version',
 };
+
+export const DISPLAY_DECIMALS = 3; // number of decimal places used for balance display / dust filtering
+export const MIN_SHARE_DISPLAY = 1 / 10 ** DISPLAY_DECIMALS; // minimum share amount to consider (e.g. 0.001 when DISPLAY_DECIMALS = 3)

@@ -125,21 +125,30 @@ export default function useFixedMarketMaker() {
    * Sells outcome shares.
    *
    * @param fpmmContractAddress FPMM contract address.
-   * @param amount Amount of outcome shares to sell.
-   * @param outcomeIndex Outcome index.
-   * @param slippage Slippage value.
-   * @returns Sell TX.
+   * @param collateralAmount Expected collateral tokens the user is willing to receive.
+   * @param outcomeIndex Outcome index the user is selling.
+   * @param maxOutcomeTokensToSell Maximum amount of outcome tokens the user is willing to sell (should equal the user-entered amount).
+   * @returns Sell TX hash.
    */
-  async function sell(fpmmContractAddress: Address, collateralAmount: bigint, outcomeIndex: number, slippage: number) {
+  async function sell(
+    fpmmContractAddress: Address,
+    collateralAmount: bigint,
+    outcomeIndex: number,
+    _slippage: number,
+    maxOutcomeTokensToSell: bigint
+  ) {
     if (!isConnected.value) {
       return;
     }
 
     const contract = await initContract(ContractType.FPMM, fpmmContractAddress);
 
-    // Make sure that you check for conditional allowance separately.
-    const { maxTokensToSell } = await getMaxTokensToSell(fpmmContractAddress, collateralAmount, outcomeIndex, slippage);
-    return await contract.write.sell([collateralAmount, outcomeIndex, maxTokensToSell]);
+    // const SLIPPAGE_SCALE = 100; // keep in sync with composable
+    // const slippageInt = Math.round(slippage * SLIPPAGE_SCALE);
+    // const minCollateral =
+    //   (collateralAmount * BigInt(100 * SLIPPAGE_SCALE - slippageInt)) / BigInt(100 * SLIPPAGE_SCALE);
+
+    return await contract.write.sell([collateralAmount, outcomeIndex, maxOutcomeTokensToSell]);
   }
 
   /**

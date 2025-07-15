@@ -154,6 +154,7 @@
               size="large"
               class="min-w-full text-center"
               type="number"
+              :precision="DISPLAY_DECIMALS"
               :show-button="true"
               button-placement="both"
               :disabled="loading"
@@ -201,19 +202,6 @@
             Buy
           </BasicButton>
 
-          <PredictionSetFiatBuy
-            :default-amount="amount"
-            :loading="loading"
-            :buy-fund-limit="buyFundLimit"
-            class="mt-2"
-            @success="
-              newAmount => {
-                amount = newAmount;
-                buyOutcome();
-              }
-            "
-          />
-
           <div class="text-[16px] leading-[24px] text-grey-lightest font-normal mt-6">
             <div class="flex items-center justify-center">
               <div>Avg price</div>
@@ -245,7 +233,7 @@
               <div class="ml-auto flex font-medium">
                 <div class="text-grey-lightest">Balance:</div>
                 <div class="text-white/80 ml-1">
-                  {{ parseConditionalBalance(conditionalBalance, props.collateralToken.decimals) }}
+                  {{ sellableBalanceStr }}
                 </div>
               </div>
             </div>
@@ -257,9 +245,10 @@
               size="large"
               class="min-w-full text-center"
               type="number"
+              :precision="DISPLAY_DECIMALS"
               :show-button="true"
               button-placement="both"
-              :max="parseConditionalBalance(conditionalBalance, props.collateralToken.decimals)"
+              :max="sellableBalance"
               :validator="sellValidator"
               :disabled="loading"
               @blur="onSellBlur"
@@ -338,6 +327,7 @@
               class="min-w-full text-center"
               type="number"
               :show-button="true"
+              :precision="DISPLAY_DECIMALS"
               button-placement="both"
               :disabled="loading"
             >
@@ -516,6 +506,8 @@ import { useAccount, useBalance } from '@wagmi/vue';
 import ConfettiExplosion from 'vue-confetti-explosion';
 import type { OutcomeInterface } from '~/lib/types/prediction-set';
 import { PredictionSetStatus, TransactionType } from '~/lib/types/prediction-set';
+import { bigIntToNum, numToBigInt } from '~/lib/utils/numbers';
+import { DISPLAY_DECIMALS } from '~/lib/values/general.values';
 import { colors } from '~/tailwind.config';
 
 enum TransactionStep {
@@ -548,10 +540,10 @@ const {
   calcSharesForCollateral,
 } = useFixedMarketMaker();
 const { refreshCollateralBalance, checkCollateralAllowance } = useCollateralToken();
-const { getConditionalBalance, parseConditionalBalance, checkConditionalApprove } = useConditionalToken();
+const { getConditionalBalance, checkConditionalApprove } = useConditionalToken();
 const { ensureCorrectNetwork } = useContracts();
 const { isConnected, address } = useAccount();
-const { data: nativeBalance } = useBalance({ address: address.value });
+const { data: nativeBalance, refetch: refetchNativeBalance } = useBalance({ address: address.value });
 const { isMd } = useScreen();
 const message = useMessage();
 const txWait = useTxWait();
@@ -564,6 +556,13 @@ const amount = ref<number | undefined>(props.defaultValue || undefined);
 const returnAmount = ref<string>('0.0');
 const potentialReturn = ref<string>('0.0');
 const conditionalBalance = ref(BigInt(0));
+
+// Display helpers – show balances up to DISPLAY_DECIMALS digits and ignore dust
+const sellableBalance = computed<number>(() => {
+  return floorOutcomeAmount(conditionalBalance.value);
+});
+const sellableBalanceStr = computed<string>(() => sellableBalance.value.toFixed(DISPLAY_DECIMALS));
+
 const pricePerShare = ref(0.0);
 const currentLiquidity = ref(BigInt(0));
 
@@ -637,6 +636,7 @@ watch(
   () => isConnected.value,
   async () => {
     await refreshBalances();
+    await refetchNativeBalance();
   }
 );
 
@@ -728,7 +728,8 @@ watch(
     if (conditionalBalance.value < limit) {
       limit = conditionalBalance.value;
     }
-    sellFundLimit.value = Number(limit) / Math.pow(10, props.collateralToken.decimals);
+    const rawLimit = Number(limit) / Math.pow(10, props.collateralToken.decimals);
+    sellFundLimit.value = floorOutcomeAmount(rawLimit);
   }
 );
 
@@ -739,6 +740,7 @@ onMounted(async () => {
     selectedTab.value = props.action;
   }
 
+  await refetchNativeBalance();
   await refreshCollateralBalance(props.collateralToken.id);
   currentLiquidity.value = await getCurrentLiquidity(props.contractAddress);
 });
@@ -987,15 +989,33 @@ async function sellOutcome() {
     }
     transactionStep.value = TransactionStep.CONFIRM;
 
+    const factor = Math.pow(10, DISPLAY_DECIMALS);
+
+    // Detect if the user is attempting to sell (almost) the full balance that we display
+    const sellingFullBalance =
+      Math.abs((amount.value || 0) - sellableBalance.value) < 1 / factor && conditionalBalance.value > 0n;
+
+    const sharesNumber = sellingFullBalance
+      ? Number(conditionalBalance.value) / Math.pow(10, props.collateralToken.decimals)
+      : amount.value;
+
     const collateralAmount = await calcSellAmountInCollateral(
-      amount.value,
+      sharesNumber,
       props.outcome.outcomeIndex,
       props.contractAddress,
       props.outcomes.map(o => o.positionId),
       props.collateralToken.decimals
     );
 
-    txWait.hash.value = await sell(props.contractAddress, collateralAmount, props.outcome.outcomeIndex, slippage.value);
+    const maxAmount = numToBigInt(sharesNumber, props.collateralToken.decimals);
+
+    txWait.hash.value = await sell(
+      props.contractAddress,
+      collateralAmount,
+      props.outcome.outcomeIndex,
+      slippage.value,
+      maxAmount
+    );
     const receipt = await txWait.wait();
 
     if (receipt.status === 'success') {
