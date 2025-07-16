@@ -896,7 +896,7 @@ async function updateSellAmount() {
     props.collateralToken.decimals
   );
 
-  potentialReturn.value = (Number(result) / Math.pow(10, props.collateralToken.decimals)).toString();
+  potentialReturn.value = (Number(result) / Math.pow(10, props.collateralToken.decimals)).toFixed(3);
 }
 
 /**
