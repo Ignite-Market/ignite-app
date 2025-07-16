@@ -501,12 +501,12 @@
 
 <script setup lang="ts">
 import { watchDebounced } from '@vueuse/core';
-import type { Address } from 'viem';
 import { useAccount, useBalance } from '@wagmi/vue';
+import type { Address } from 'viem';
 import ConfettiExplosion from 'vue-confetti-explosion';
 import type { OutcomeInterface } from '~/lib/types/prediction-set';
 import { PredictionSetStatus, TransactionType } from '~/lib/types/prediction-set';
-import { bigIntToNum, numToBigInt } from '~/lib/utils/numbers';
+import { bigIntToNum, floorOutcomeAmount, numToBigInt } from '~/lib/utils/numbers';
 import { DISPLAY_DECIMALS } from '~/lib/values/general.values';
 import { colors } from '~/tailwind.config';
 
@@ -879,7 +879,7 @@ async function updateBuyAmount() {
     props.collateralToken.decimals
   );
 
-  returnAmount.value = (Number(minTokensToBuy) / Math.pow(10, props.collateralToken.decimals)).toString();
+  returnAmount.value = (Number(minTokensToBuy) / Math.pow(10, props.collateralToken.decimals)).toFixed(3);
   potentialReturn.value = (Number(minTokensToBuyNoSlippage) / Math.pow(10, props.collateralToken.decimals)).toFixed(3);
 }
 
