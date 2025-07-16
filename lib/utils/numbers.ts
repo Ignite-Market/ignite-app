@@ -39,10 +39,7 @@ export function intVal(n: number | string): number {
   return typeof n === 'number' ? n : parseInt(n, 10);
 }
 
-export function floorOutcomeAmount(num: bigint | string | number, decimals: number = DISPLAY_DECIMALS) {
-  if (typeof num !== 'number') {
-    num = bigIntToNum(num, 6);
-  }
+export function floorNumber(num: number, decimals: number = DISPLAY_DECIMALS) {
   const factor = Math.pow(10, decimals);
 
   // Ignore tiny dust balances – treat anything smaller than 1 / factor as 0

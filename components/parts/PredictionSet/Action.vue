@@ -501,12 +501,12 @@
 
 <script setup lang="ts">
 import { watchDebounced } from '@vueuse/core';
-import type { Address } from 'viem';
 import { useAccount, useBalance } from '@wagmi/vue';
+import type { Address } from 'viem';
 import ConfettiExplosion from 'vue-confetti-explosion';
 import type { OutcomeInterface } from '~/lib/types/prediction-set';
 import { PredictionSetStatus, TransactionType } from '~/lib/types/prediction-set';
-import { bigIntToNum, numToBigInt } from '~/lib/utils/numbers';
+import { bigIntToNum, floorNumber, numToBigInt } from '~/lib/utils/numbers';
 import { DISPLAY_DECIMALS } from '~/lib/values/general.values';
 import { colors } from '~/tailwind.config';
 
@@ -559,7 +559,7 @@ const conditionalBalance = ref(BigInt(0));
 
 // Display helpers – show balances up to DISPLAY_DECIMALS digits and ignore dust
 const sellableBalance = computed<number>(() => {
-  return floorOutcomeAmount(conditionalBalance.value);
+  return floorNumber(bigIntToNum(conditionalBalance.value, props.collateralToken.decimals));
 });
 const sellableBalanceStr = computed<string>(() => sellableBalance.value.toFixed(DISPLAY_DECIMALS));
 
@@ -705,7 +705,7 @@ const enoughCollateralBalance = computed(() => {
 
 const buyFundLimit = computed(() => {
   const max = (BigInt(currentLiquidity.value) * 10n) / 100n;
-  return bigIntToNum(max, props.collateralToken.decimals || 6);
+  return floorNumber(bigIntToNum(max, props.collateralToken.decimals || 6));
 });
 
 watch(
@@ -729,7 +729,7 @@ watch(
       limit = conditionalBalance.value;
     }
     const rawLimit = Number(limit) / Math.pow(10, props.collateralToken.decimals);
-    sellFundLimit.value = floorOutcomeAmount(rawLimit);
+    sellFundLimit.value = floorNumber(rawLimit);
   }
 );
 
@@ -879,7 +879,7 @@ async function updateBuyAmount() {
     props.collateralToken.decimals
   );
 
-  returnAmount.value = (Number(minTokensToBuy) / Math.pow(10, props.collateralToken.decimals)).toString();
+  returnAmount.value = (Number(minTokensToBuy) / Math.pow(10, props.collateralToken.decimals)).toFixed(3);
   potentialReturn.value = (Number(minTokensToBuyNoSlippage) / Math.pow(10, props.collateralToken.decimals)).toFixed(3);
 }
 
@@ -896,7 +896,7 @@ async function updateSellAmount() {
     props.collateralToken.decimals
   );
 
-  potentialReturn.value = (Number(result) / Math.pow(10, props.collateralToken.decimals)).toString();
+  potentialReturn.value = (Number(result) / Math.pow(10, props.collateralToken.decimals)).toFixed(3);
 }
 
 /**

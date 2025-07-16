@@ -29,7 +29,7 @@ const selectedCollateralToken = ref<CollateralToken | undefined>(props?.collater
 const collateralNeeded = ref(0);
 const nativeNeeded = ref(0); // FLR required for the swap to USDT
 const loading = ref(true);
-const gasBuffer = 0.02; // Estimated FLR reserved for gas – tweak as needed
+const gasBuffer = 1; // Estimated FLR reserved for gas – tweak as needed
 const closeDisabled = ref(false);
 
 const totalNativeNeeded = computed(() => gasBuffer + nativeNeeded.value);
@@ -77,7 +77,13 @@ const renderTokenLabel = (option: any) => {
 watch(collateralMissing, async () => {
   loading.value = true;
   if (collateralMissing.value > 0) {
-    const result = (await getQuote(collateralMissing.value, selectedCollateralToken.value?.address))?.result;
+    const result = (
+      await getQuote(
+        collateralMissing.value,
+        selectedCollateralToken.value?.address,
+        selectedCollateralToken.value?.decimals
+      )
+    )?.result;
     if (!result) {
       quoteError.value = true;
       loading.value = false;
