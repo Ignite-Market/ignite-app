@@ -97,12 +97,12 @@ async function handleSwap() {
         // For SparkDEX swaps, the FLR spent is typically handled through WFLR transfers
         // Look for WFLR transfers FROM the router TO the pool
         const wflrTransfers = parsedTransfers.filter(
-          (e: any) => e.contractAddress.toLowerCase() === WFLR_ADDRESS // WFLR address
+          (e: any) => e.contractAddress.toLowerCase() === WFLR_ADDRESS.toLowerCase() // WFLR address
         );
 
         // The WFLR transfer from router to pool represents the amount spent
         const routerToPoolTransfer = wflrTransfers.find(
-          (e: any) => e.from.toLowerCase() === ROUTER_ADDRESS // Router address
+          (e: any) => e.from.toLowerCase() === ROUTER_ADDRESS.toLowerCase() // Router address
         );
 
         if (routerToPoolTransfer) {
