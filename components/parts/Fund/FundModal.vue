@@ -77,7 +77,13 @@ const renderTokenLabel = (option: any) => {
 watch(collateralMissing, async () => {
   loading.value = true;
   if (collateralMissing.value > 0) {
-    const result = (await getQuote(collateralMissing.value, selectedCollateralToken.value?.address))?.result;
+    const result = (
+      await getQuote(
+        collateralMissing.value,
+        selectedCollateralToken.value?.address,
+        selectedCollateralToken.value?.decimals
+      )
+    )?.result;
     if (!result) {
       quoteError.value = true;
       loading.value = false;
