@@ -25,7 +25,7 @@ const ExternalWalletsIdMap = {
 } as const;
 
 export type PayParams = {
-  amount: bigint;
+  amount: string;
   // tokenAddress?: string;
   // paymentReceiverAddress?: string;
   testMode?: boolean;
@@ -97,9 +97,10 @@ function Embed({
     }
   }, [client, connectorId, activeAccount, connect]);
 
-  if (!activeAccount && !testMode) {
-    return <></>;
-  }
+  // if (!activeAccount && !testMode) {
+  //   console.log('no active account', activeAccount, testMode);
+  //   return <></>;
+  // }
 
   return (
     <>
@@ -122,7 +123,7 @@ function Embed({
           buyWithCrypto: false,
           prefillBuy: {
             chain,
-            amount: formatUnits(amount, 18),
+            amount,
             allowEdits: {
               amount: false,
               token: false,
@@ -146,6 +147,9 @@ function Embed({
         presetOptions={[10, 20, 50]}
         paymentMethods={['card']} // Crypto doesn't make sense since only FLR is supported
         onSuccess={onSuccess}
+        onError={e => {
+          console.log('error', e);
+        }}
       />
     </>
   );

@@ -84,7 +84,11 @@ onMounted(() => {
       title: 'QTY',
       key: 'sharesAmount',
       render(row: any) {
-        return h('div', { class: 'text-white/80' }, floorOutcomeAmount(row.sharesAmount));
+        return h(
+          'div',
+          { class: 'text-white/80' },
+          floorNumber(bigIntToNum(row.sharesAmount, props.collateralToken.decimals))
+        );
       },
     },
     {
@@ -141,7 +145,8 @@ onMounted(() => {
           {
             type: 'secondary',
             size: 'small',
-            onClick: () => emit('sell', row.outcomeId, floorOutcomeAmount(row.sharesAmount)),
+            onClick: () =>
+              emit('sell', row.outcomeId, floorNumber(bigIntToNum(row.sharesAmount, props.collateralToken.decimals))),
           },
           {
             default: () => 'Sell',
