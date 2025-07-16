@@ -17,7 +17,9 @@ enum Steps {
 
 const config = useRuntimeConfig();
 const { connector, address } = useAccount();
-const { data: nativeBalance, refetch: refetchNativeBalance } = useBalance({ address: address.value });
+const { data: nativeBalance, refetch: refetchNativeBalance } = useBalance({
+  address: computed(() => address.value),
+});
 const { refreshCollateralBalance } = useCollateralToken();
 const tokenStore = useTokensStore();
 const { getQuote } = useSwap();
@@ -106,7 +108,6 @@ onMounted(async () => {
       selectedCollateralToken.value = tokens[0];
     }
   }
-  await refetchNativeBalance();
 });
 
 watch(address, async () => {

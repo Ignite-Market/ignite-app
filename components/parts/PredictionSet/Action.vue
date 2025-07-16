@@ -543,7 +543,7 @@ const { refreshCollateralBalance, checkCollateralAllowance } = useCollateralToke
 const { getConditionalBalance, checkConditionalApprove } = useConditionalToken();
 const { ensureCorrectNetwork } = useContracts();
 const { isConnected, address } = useAccount();
-const { data: nativeBalance, refetch: refetchNativeBalance } = useBalance({ address: address.value });
+const { data: nativeBalance, refetch: refetchNativeBalance } = useBalance({ address: computed(() => address.value) });
 const { isMd } = useScreen();
 const message = useMessage();
 const txWait = useTxWait();
@@ -740,7 +740,6 @@ onMounted(async () => {
     selectedTab.value = props.action;
   }
 
-  await refetchNativeBalance();
   await refreshCollateralBalance(props.collateralToken.id);
   currentLiquidity.value = await getCurrentLiquidity(props.contractAddress);
 });
