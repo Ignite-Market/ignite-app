@@ -1,5 +1,5 @@
 import { ref } from 'vue';
-import { parseUnits, createPublicClient, http, getContract } from 'viem';
+import { parseUnits, getContract } from 'viem';
 import { flare } from 'viem/chains';
 import { useAccount, useConnectorClient, useChainId, useSwitchChain } from '@wagmi/vue';
 import { SPARK_DEX_QUOTER_ABI, SPARK_DEX_SWAP_ROUTER_ABI } from '~/lib/config/abi';
@@ -25,17 +25,11 @@ export function useSwap() {
   const { switchChainAsync } = useSwitchChain();
   const config = useRuntimeConfig();
 
-  // Create public client for Flare mainnet
-  const publicClient = createPublicClient({
-    chain: flare,
-    transport: http(),
-  });
-
   // Initialize contracts
   const quoter = getContract({
     address: QUOTER_ADDRESS,
     abi: SPARK_DEX_QUOTER_ABI,
-    client: publicClient,
+    client: walletClient.value!,
   });
 
   const router = getContract({
