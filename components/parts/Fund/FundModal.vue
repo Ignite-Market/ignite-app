@@ -45,9 +45,11 @@ const quoteError = ref(false);
 const collateralMissing = computed(
   () =>
     collateralNeeded.value -
-    (selectedCollateralToken.value
-      ? bigIntToNum(selectedCollateralToken.value.balance, selectedCollateralToken.value.decimals)
-      : 0)
+    (isCustom.value
+      ? 0
+      : selectedCollateralToken.value
+        ? bigIntToNum(selectedCollateralToken.value.balance, selectedCollateralToken.value.decimals)
+        : 0)
 );
 
 const tokenOptions = computed(() => {
@@ -250,7 +252,7 @@ defineExpose({
     </div>
 
     <div v-if="step === Steps.LANDING">
-      <h2 class="text-lg font-bold mb-4 text-center">Insufficient funds</h2>
+      <h2 class="text-lg font-bold mb-4 text-center">{{ isCustom ? 'Add funds' : 'Insufficient funds' }}</h2>
       <div v-if="loading" class="flex justify-center items-center h-full">
         <Spinner :size="24" color="#000" />
       </div>
