@@ -26,17 +26,8 @@ export function useSwap() {
   const config = useRuntimeConfig();
 
   // Initialize contracts
-  const quoter = getContract({
-    address: QUOTER_ADDRESS,
-    abi: SPARK_DEX_QUOTER_ABI,
-    client: walletClient.value!,
-  });
-
-  const router = getContract({
-    address: ROUTER_ADDRESS,
-    abi: SPARK_DEX_SWAP_ROUTER_ABI,
-    client: walletClient.value!,
-  });
+  let quoter: any = null;
+  let router: any = null;
 
   /**
    * Ensure the user is connected to Flare mainnet.
@@ -62,6 +53,33 @@ export function useSwap() {
     }
   }
 
+  async function initContracts() {
+    if (!walletClient.value) {
+      await refetch();
+      await sleep(200);
+    }
+
+    if (!walletClient.value) {
+      throw new Error('Wallet client not available!');
+    }
+
+    if (!quoter) {
+      quoter = getContract({
+        address: QUOTER_ADDRESS,
+        abi: SPARK_DEX_QUOTER_ABI,
+        client: walletClient.value!,
+      });
+    }
+
+    if (!router) {
+      router = getContract({
+        address: ROUTER_ADDRESS,
+        abi: SPARK_DEX_SWAP_ROUTER_ABI,
+        client: walletClient.value!,
+      });
+    }
+  }
+
   /**
    * Fetches a quote for swapping FLR → tokenOut so that `amountOut` of
    * tokenOut will be received. Returns the amount of FLR that has to be
@@ -74,12 +92,11 @@ export function useSwap() {
         throw new Error('Swap is disabled in this environment');
       }
 
-      if (!walletClient.value) {
-        await refetch();
-        await sleep(200);
+      if (!quoter) {
+        await initContracts();
       }
 
-      const result = (await quoter.read.quoteExactOutputSingle([
+      const result = (await quoter!.read.quoteExactOutputSingle([
         {
           tokenIn: WFLR_ADDRESS,
           tokenOut,
@@ -109,9 +126,8 @@ export function useSwap() {
       return;
     }
 
-    if (!walletClient.value) {
-      await refetch();
-      await sleep(200);
+    if (!router) {
+      await initContracts();
     }
 
     // Ensure user is on Flare mainnet
