@@ -74,6 +74,11 @@ export function useSwap() {
         throw new Error('Swap is disabled in this environment');
       }
 
+      if (!walletClient.value) {
+        await refetch();
+        await sleep(200);
+      }
+
       const result = (await quoter.read.quoteExactOutputSingle([
         {
           tokenIn: WFLR_ADDRESS,
@@ -102,6 +107,11 @@ export function useSwap() {
     if (!isConnected.value || !walletClient.value) {
       console.error('Wallet not connected');
       return;
+    }
+
+    if (!walletClient.value) {
+      await refetch();
+      await sleep(200);
     }
 
     // Ensure user is on Flare mainnet
