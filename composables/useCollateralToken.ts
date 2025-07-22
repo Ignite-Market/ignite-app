@@ -88,10 +88,19 @@ export default function useCollateralToken() {
     token.parsedBalance = parseBalance(token.balance, token.decimals);
   }
 
+  /**
+   * Refreshes all collateral tokens.
+   */
+  async function refreshAllCollateralBalances() {
+    const tokens = Object.values(tokensStore.items);
+    await Promise.all(tokens.map(token => refreshCollateralBalance(token.id)));
+  }
+
   return {
     checkCollateralAllowance,
     getCollateralBalance,
     refreshCollateralBalance,
+    refreshAllCollateralBalances,
     parseBalance,
   };
 }

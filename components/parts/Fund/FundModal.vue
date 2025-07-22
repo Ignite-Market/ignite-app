@@ -189,7 +189,7 @@ defineExpose({
     v-model:show="isOpen"
     display-directive="show"
     :mask-closable="!closeDisabled"
-    class="!max-w-[402px] !bg-[#131418] [&>.n-card-header>button]:z-1 border-none"
+    class="!max-w-[402px] !bg-grey-dark [&>.n-card-header>button]:z-1 border-none"
     @update:show="isOpen = $event"
   >
     <div v-if="step === Steps.ENTER_AMOUNT">
