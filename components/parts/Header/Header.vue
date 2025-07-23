@@ -1,10 +1,10 @@
 <template>
-  <div class="flex-bc w-full bg-grey px-6 gap-2 sm:gap-6">
+  <div class="flex-bc w-full bg-grey px-6 gap-2 sm:gap-6 xl:gap-12">
     <div class="mt-2">
       <Logo class="inline-block" />
     </div>
 
-    <div class="lg:grow-0 grow">
+    <div class="xl:grow-0 grow xl:max-w-[initial] max-w-[500px]">
       <PredictionSetSearch />
     </div>
 
@@ -65,7 +65,25 @@
 
         <HeaderProfile @open-fund-modal="openFiatBuyModal" />
       </div>
-      <WalletLogin v-else />
+      <div v-else class="flex-cc gap-2">
+        <WalletLogin />
+        <div class="lg:hidden">
+          <n-dropdown
+            v-model:show="menuOpened"
+            class="rounded-lg"
+            placement="bottom-end"
+            size="large"
+            :options="options"
+            style="min-width: 220px"
+            :render-label="renderLabel"
+            @select="handleSelect"
+          >
+            <div class="transition-all duration-1000 h-[24px] w-[24px] flex-cc">
+              <NuxtIcon name="icon/menu" class="text-[24px]" />
+            </div>
+          </n-dropdown>
+        </div>
+      </div>
     </div>
     <FundModal ref="fundModalRef" />
   </div>
@@ -80,6 +98,7 @@ const { address } = useAccount();
 const userStore = useUserStore();
 const router = useRouter();
 const fundModalRef = ref();
+const menuOpened = ref(false);
 
 const openFiatBuyModal = () => {
   fundModalRef.value?.openModal();
@@ -102,5 +121,58 @@ watch(
 
 function openDocs() {
   window.open('https://docs.ignitemarket.xyz/', '_blank');
+}
+
+const renderLabel = option => {
+  return h(
+    'div',
+    {
+      class: ['flex items-center gap-2 group'],
+      style: { width: '100%' },
+    },
+    [
+      option.iconName
+        ? h(
+            'div',
+            {
+              class: ['text-[16px] group-hover:text-primary transition-colors'],
+            },
+            [h(resolveComponent('NuxtIcon'), { name: option.iconName })]
+          )
+        : null,
+      h('span', {}, option.label),
+    ]
+  );
+};
+
+const options = [
+  {
+    key: 'earn',
+    label: 'Earn',
+    iconName: 'icon/points',
+  },
+  {
+    key: 'learn',
+    label: 'Learn',
+    iconName: 'icon/book',
+  },
+  {
+    key: 'activity',
+    label: 'Activity',
+    iconName: 'icon/activity',
+  },
+  {
+    key: 'ranks',
+    label: 'Ranks',
+    iconName: 'icon/trophy',
+  },
+];
+
+function handleSelect(key: string | number) {
+  if (key === 'learn') {
+    window.open('https://docs.ignitemarket.xyz/', '_blank');
+  } else if (key) {
+    router.push({ name: `${key}` });
+  }
 }
 </script>
