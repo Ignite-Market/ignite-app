@@ -377,7 +377,7 @@ const endpoint = getEndpoint();
 const sorter = getSorter();
 
 const filters = {
-  search: {
+  Search: {
     show: true,
     value: null,
   },

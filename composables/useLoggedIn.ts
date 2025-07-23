@@ -5,7 +5,7 @@ import { useAccount } from '@wagmi/vue';
  *
  * @param onInit Optional callback to run after initialization
  */
-export default function useLoggedIn(onInit?: (loggedIn: boolean) => void) {
+export default function useLoggedIn(onInit?: (loggedIn: boolean, isAdmin: boolean) => void) {
   const userStore = useUserStore();
   const { isConnected, isConnecting } = useAccount();
   const isInitializing = ref(true);
@@ -22,7 +22,7 @@ export default function useLoggedIn(onInit?: (loggedIn: boolean) => void) {
         isInitializing.value = false;
         // Use nextTick to ensure loggedIn is computed
         nextTick(() => {
-          onInit?.(loggedIn.value);
+          onInit?.(loggedIn.value, userStore.isAdmin);
         });
       }
     },
