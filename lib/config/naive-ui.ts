@@ -1,9 +1,19 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import type { GlobalThemeOverrides, MessageProviderProps } from 'naive-ui';
 import { colors } from '~/tailwind.config';
 
 type MessageThemeOverrides = NonNullable<MessageProviderProps['themeOverrides']>;
-const messageOverrides: MessageThemeOverrides = {};
+export const messageOverrides: MessageThemeOverrides = {
+  iconColor: colors.primary.DEFAULT,
+  iconColorError: colors.statusRed,
+  iconColorWarning: colors.statusYellow,
+  iconColorSuccess: colors.statusGreen,
+  iconColorInfo: colors.statusBlue.DEFAULT,
+  color: colors.grey.lighter,
+  colorError: colors.grey.lighter,
+  colorWarning: colors.grey.lighter,
+  colorSuccess: colors.grey.lighter,
+  colorInfo: colors.grey.lighter,
+};
 
 /**
  * Theme configs
@@ -27,13 +37,39 @@ export const themeOverrides: GlobalThemeOverrides = {
   },
   DatePicker: {
     iconColor: colors.grey.dark,
+    color: colors.grey.dark, // background of the picker
+    panelColor: colors.grey.dark, // panel background
+    itemTextColor: colors.white,
+    itemTextColorActive: colors.white,
+    itemTextColorDisabled: colors.grey.lighter,
+    itemColorActive: colors.primary.DEFAULT,
+    itemColorInRange: colors.primary.light,
+    itemColorHover: colors.primary.light,
+    itemColorDisabled: colors.grey.light,
+    itemBorderRadius: '8px',
+    calendarDaysColor: colors.grey.dark,
+    calendarTitleColor: colors.white,
+    panelActionDividerColor: colors.grey.light,
+    panelHeaderDividerColor: colors.grey.light,
+    panelExtraFooterDividerColor: colors.grey.light,
+    cellColorHover: colors.primary.light,
+    cellColor: colors.grey.dark,
+    cellColorInRange: colors.primary.light,
+    cellColorHoverInRange: colors.primary.light,
+    cellColorDisabled: colors.grey.light,
+    cellTextColor: colors.white,
+    cellTextColorDisabled: colors.grey.lighter,
+    cellTextColorActive: colors.white,
+    cellTextColorInRange: colors.white,
+    cellTextColorHover: colors.white,
     peers: {
       Button: {
-        colorPrimary: colors.grey.lighter,
-        colorFocusPrimary: colors.grey.lightest,
-        colorHoverPrimary: colors.grey.lightest,
+        colorPrimary: colors.grey.light,
+        colorFocusPrimary: colors.grey.lighter,
+        colorHoverPrimary: colors.grey.lighter,
         colorPressedPrimary: colors.grey.lightest,
-        // colorDisabledPrimary: colors.grey.darker,
+        textColorPrimary: colors.white,
+        textColorHoverPrimary: colors.white,
       },
     },
   },

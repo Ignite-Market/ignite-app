@@ -3,6 +3,7 @@
     :is="href ? 'a' : to ? NuxtLink : 'button'"
     v-bind="$attrs"
     :to="to"
+    :type="href || to ? undefined : submit ? 'submit' : 'button'"
     :href="href || undefined"
     :target="href ? '_blank' : undefined"
     :class="btnClass"
@@ -33,6 +34,7 @@ const props = defineProps({
   size: { type: String as PropType<BtnSize>, default: 'medium' },
   selected: { type: Boolean, default: false },
   selectedClass: { type: [String, Array, Object], default: '' },
+  submit: { type: Boolean, default: false },
 });
 const emit = defineEmits(['click']);
 

@@ -1,5 +1,6 @@
 import type { DataTableSortState } from 'naive-ui';
 import { defineStore } from 'pinia';
+import { WebStorageKeys } from '../lib/values/general.values';
 import { type PredictionSetInterface, type PredictionSetsResponse } from '~/lib/types/prediction-set';
 import Endpoints from '~/lib/values/endpoints';
 
@@ -24,6 +25,7 @@ export const usePredictionStore = defineStore('prediction', {
         value: null as number | null,
       },
     },
+    suggestions: [] as any[],
   }),
   getters: {
     data(state) {
@@ -97,5 +99,69 @@ export const usePredictionStore = defineStore('prediction', {
         return [];
       }
     },
+
+    async generateSuggestions(prompt: string): Promise<any[]> {
+      const res = await $api.post<any>(Endpoints.predictionSetsSuggestions, { prompt });
+      // const res = await Promise.resolve({
+      //   data: [
+      //     {
+      //       question: 'Will the winner of the 2025 Tour de France complete the race in under 85 hours?',
+      //       outcomeResolutionDef:
+      //         "This market will resolve to 'Yes' if the official total time of the 2025 Tour de France winner, as reported by the official Tour de France website or another reputable sports news source, is less than 85 hours. Otherwise, it will resolve to 'No'.",
+      //       startTime: '2023-10-07T00:00:00',
+      //       endTime: '2025-07-27T00:00:00',
+      //       resolutionTime: '2025-07-28T00:00:00',
+      //       predictionOutcomes: [
+      //         {
+      //           name: 'Yes',
+      //         },
+      //         {
+      //           name: 'No',
+      //         },
+      //       ],
+      //     },
+      //     {
+      //       question: 'Will a rider from France win the 2025 Tour de France?',
+      //       outcomeResolutionDef:
+      //         "This market will resolve to 'Yes' if the official winner of the 2025 Tour de France is a French national, as reported by the official Tour de France website or another reputable sports news source. Otherwise, it will resolve to 'No'.",
+      //       startTime: '2023-10-07T00:00:00',
+      //       endTime: '2025-07-27T00:00:00',
+      //       resolutionTime: '2025-07-28T00:00:00',
+      //       predictionOutcomes: [
+      //         {
+      //           name: 'Yes',
+      //         },
+      //         {
+      //           name: 'No',
+      //         },
+      //       ],
+      //     },
+      //     {
+      //       question: 'Will the 2025 Tour de France have a stage canceled due to weather?',
+      //       outcomeResolutionDef:
+      //         "This market will resolve to 'Yes' if any stage of the 2025 Tour de France is canceled due to weather conditions, as reported by the official Tour de France website or another reputable sports news source. Otherwise, it will resolve to 'No'.",
+      //       startTime: '2023-10-07T00:00:00',
+      //       endTime: '2025-07-27T00:00:00',
+      //       resolutionTime: '2025-07-28T00:00:00',
+      //       predictionOutcomes: [
+      //         {
+      //           name: 'Yes',
+      //         },
+      //         {
+      //           name: 'No',
+      //         },
+      //       ],
+      //     },
+      //   ],
+      // });
+      this.suggestions = res.data;
+      console.log(this.suggestions);
+      return this.suggestions;
+    },
+  },
+  persist: {
+    key: WebStorageKeys.PREDICTION_STORE,
+    storage: localStorage,
+    pick: ['suggestions'],
   },
 });

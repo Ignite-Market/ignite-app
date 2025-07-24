@@ -221,6 +221,19 @@ const options = computed(() => [
     type: 'divider',
     key: 'divider-2',
   },
+  ...(userStore.isAdmin
+    ? [
+        {
+          key: 'admin',
+          label: 'Admin',
+          iconName: 'icon/settings',
+        },
+        {
+          type: 'divider',
+          key: 'divider-2',
+        },
+      ]
+    : []),
   {
     key: 'logout',
     label: 'Logout',
