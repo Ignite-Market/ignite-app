@@ -141,6 +141,46 @@
             </n-form>
           </div>
         </div>
+        <div class="md:sticky top-6 self-start md:ml-8 lg:ml-24 w-full min-w-[260px] md:w-[409px] mb-6">
+          <div class="border-1 border-grey-lighter rounded-lg p-6">
+            <div class="font-medium leading-[20px] mb-6 text-white/80">
+              <h3 class="font-bold text-[16px] leading-[22px] mb-2 text-white">Generate prediction suggestions:</h3>
+              <n-input
+                v-model:value="suggestionPrompt"
+                type="textarea"
+                placeholder="Enter prompt"
+                :autosize="{ minRows: 3, maxRows: 8 }"
+                :maxlength="2000"
+                size="large"
+              />
+              <BasicButton
+                btn-class="mt-4"
+                :size="'large'"
+                :loading="loadingSuggestions || loading"
+                :disabled="!suggestionPrompt"
+                @click="generateSuggestions"
+              >
+                Generate
+              </BasicButton>
+            </div>
+            <div v-if="predictionStore.suggestions.length > 0">
+              <h3 class="font-bold text-[16px] leading-[22px] mb-2 text-white">Suggestions:</h3>
+              <div v-for="suggestion in predictionStore.suggestions" :key="suggestion.question">
+                <div
+                  class="mb-4 border-1 border-transparent flex-cc justify-between bg-grey-light rounded-lg p-2"
+                  :class="{ '!border-primary': suggestion.question === form.question }"
+                >
+                  <div class="text-white/80 text-[14px] leading-[20px]">
+                    {{ suggestion.question }}
+                  </div>
+                  <BasicButton type="gradient" btn-class="group" @click="useSuggestion(suggestion)">
+                    <NuxtIcon name="icon/plus" class="group-hover:text-primary text-[20px]" />
+                  </BasicButton>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </Dashboard>
@@ -158,7 +198,10 @@ const message = useMessage();
 const formRef = ref();
 const loading = ref(false);
 const tokensStore = useTokensStore();
+const predictionStore = usePredictionStore();
 const router = useRouter();
+const suggestionPrompt = ref('');
+const loadingSuggestions = ref(false);
 
 useLoggedIn(onInit);
 
@@ -167,7 +210,8 @@ function onInit(loggedIn: boolean, isAdmin: boolean) {
     router.replace('/');
   }
 }
-const form = ref({
+
+const initialForm = {
   collateral_token_id: null,
   question: '',
   outcomeResolutionDef: '',
@@ -177,7 +221,9 @@ const form = ref({
   imgUrl: '',
   predictionOutcomes: [] as Array<{ name: string; imgUrl: string }>,
   categories: [],
-});
+};
+
+const form = ref(initialForm);
 
 const rules: FormRules = {
   collateral_token_id: { required: true, message: 'Please select a collateral token.' },
@@ -226,6 +272,10 @@ const rules: FormRules = {
   categories: { required: true, type: 'array', message: 'Please select at least one category.' },
 };
 
+onMounted(async () => {
+  await tokensStore.ensureLoaded();
+});
+
 const categoryOptions = Object.values(PredictionSetCategory)
   .filter(x => x !== 'All')
   .map(cat => ({ label: cat, value: cat }));
@@ -259,7 +309,7 @@ const renderTokenLabel = (option: any) => {
 const startDateDisabled = (ts: number) => {
   const endTime = form.value.endTime ? new Date(form.value.endTime).getTime() : null;
   if (endTime && ts > endTime) return true;
-  return ts <= Date.now();
+  return false;
 };
 
 const endDateDisabled = (ts: number) => {
@@ -274,10 +324,6 @@ const resolutionDateDisabled = (ts: number) => {
   return ts <= Date.now();
 };
 
-onMounted(async () => {
-  await tokensStore.ensureLoaded();
-});
-
 function addOutcome() {
   form.value.predictionOutcomes.push({ name: '', imgUrl: '' });
 }
@@ -287,14 +333,15 @@ function removeOutcome(idx: number) {
 }
 
 async function submit() {
+  await formRef.value?.validate();
   try {
-    await formRef.value?.validate();
     loading.value = true;
     await $api.post(Endpoints.predictionSets, {
       ...form.value,
       consensusThreshold: 60,
       resolutionType: ResolutionType.MANUAL,
     });
+    form.value = initialForm;
     message.success('Prediction created');
   } catch (error) {
     message.error('Failed to create prediction.');
@@ -302,5 +349,25 @@ async function submit() {
   } finally {
     loading.value = false;
   }
+}
+
+async function generateSuggestions() {
+  if (!suggestionPrompt.value) return;
+
+  try {
+    loadingSuggestions.value = true;
+    // const response = await $api.post(Endpoints.predictionSets, {
+    //   prompt: suggestionPrompt.value,
+    // });
+    await predictionStore.generateSuggestions(suggestionPrompt.value);
+  } catch (error) {
+    console.error(error);
+  } finally {
+    loadingSuggestions.value = false;
+  }
+}
+
+function useSuggestion(suggestion: any) {
+  form.value = { ...suggestion };
 }
 </script>

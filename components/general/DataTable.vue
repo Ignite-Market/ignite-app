@@ -1,13 +1,15 @@
 <template>
   <div class="flex-bc mb-4 gap-2 flex-wrap">
     <!-- <h4>{{ title }}</h4> -->
-    <div class="flex gap-4 flex-wrap">
+    <div class="flex gap-4 flex-wrap w-full">
       <!--      <FormInputSearch-->
       <!--        v-if="filters?.search"-->
       <!--        v-model:value="filters.search.value"-->
       <!--        class="min-w-32 w-full xs:w-[12vw] max-w-xs"-->
       <!--      />-->
       <TableFilters v-if="filters" :filters="filters" :loading="loading" />
+
+      <slot name="actions" />
     </div>
   </div>
 
@@ -23,7 +25,7 @@
       :data="items"
       :loading="loading"
       :pagination="pagination"
-      :row-props="() => rowProps"
+      :row-props="rowProps"
       remote
       :theme-overrides="{
         tdColor: colors.grey.dark,
@@ -37,6 +39,7 @@
         thTextColor: colors.grey.lightest,
         paginationMargin: '12px 20px 12px 12px',
       }"
+      :default-expanded-row-keys="defaultExpandedRowKeys"
       @update:page="(page: number) => getItems(page, pagination.pageSize)"
       @update:page-size="(pageSize: number) => getItems(1, pageSize)"
       @update:sorter="handleSorterChange"
@@ -61,6 +64,7 @@ const props = defineProps({
   tableFilters: { type: Object as PropType<TableFilters>, default: () => null },
   title: { type: String, default: '' },
   tableSorter: { type: Object as PropType<DataTableSortState>, default: () => null },
+  defaultExpandedRowKeys: { type: Array as PropType<any[]>, default: () => [] },
 });
 
 const tableRef = ref<DataTableInst | null>(null);

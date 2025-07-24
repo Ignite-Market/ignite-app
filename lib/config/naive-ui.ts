@@ -1,9 +1,19 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import type { GlobalThemeOverrides, MessageProviderProps } from 'naive-ui';
 import { colors } from '~/tailwind.config';
 
 type MessageThemeOverrides = NonNullable<MessageProviderProps['themeOverrides']>;
-const messageOverrides: MessageThemeOverrides = {};
+export const messageOverrides: MessageThemeOverrides = {
+  iconColor: colors.primary.DEFAULT,
+  iconColorError: colors.statusRed,
+  iconColorWarning: colors.statusYellow,
+  iconColorSuccess: colors.statusGreen,
+  iconColorInfo: colors.statusBlue.DEFAULT,
+  color: colors.grey.lighter,
+  colorError: colors.grey.lighter,
+  colorWarning: colors.grey.lighter,
+  colorSuccess: colors.grey.lighter,
+  colorInfo: colors.grey.lighter,
+};
 
 /**
  * Theme configs

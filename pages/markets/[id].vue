@@ -259,7 +259,7 @@
                       {{ outcome.name }}
                     </div>
 
-                    <div class="flex flex-row items-center justify-center mt-[4px]">
+                    <div class="flex flex-row items-center justify-start mt-[4px]">
                       <div v-if="collateralToken?.imgUrl">
                         <Image
                           :src="collateralToken.imgUrl"
