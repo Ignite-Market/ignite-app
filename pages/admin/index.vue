@@ -38,8 +38,6 @@ useLoggedIn(onInit);
 
 const refreshKey = ref(0);
 
-const message = useMessage();
-
 function onInit(loggedIn: boolean, isAdmin: boolean) {
   if (!loggedIn || !isAdmin) {
     router.replace('/');
@@ -47,10 +45,6 @@ function onInit(loggedIn: boolean, isAdmin: boolean) {
 }
 
 const refresh = () => {
-  console.log('refresh');
-  message.error('Refresh');
-  message.info('Refresh');
-  message.success('Refresh');
   refreshKey.value++;
 };
 
