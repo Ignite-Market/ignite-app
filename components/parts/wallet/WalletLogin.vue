@@ -8,7 +8,7 @@ import BasicButton from '~/components/general/BasicButton.vue';
 const { resetContracts, ensureCorrectNetwork } = useContracts();
 const { disconnect } = useDisconnect();
 const { $wagmiConfig } = useNuxtApp();
-const { address, connector } = useAccount();
+const { address, isConnected, connector } = useAccount();
 const messageProvider = useMessage();
 const userStore = useUserStore();
 const { connectExternalWallet } = useThirdweb();
@@ -29,13 +29,16 @@ onBeforeMount(() => {
   }
 });
 
-watch(address, address => {
-  if (address && !userStore.loggedIn) {
-    evmWalletLogin({});
-  } else if (address && !loadingWallet.value) {
-    modalWalletSelectVisible.value = false;
+watch(
+  () => [address.value, isConnected.value],
+  ([address, isConnected]) => {
+    if (address && isConnected && !userStore.loggedIn) {
+      evmWalletLogin({});
+    } else if (address && !loadingWallet.value) {
+      modalWalletSelectVisible.value = false;
+    }
   }
-});
+);
 
 function btnAction() {
   if (address.value) {
@@ -117,7 +120,7 @@ async function evmWalletLogin(data: Record<string, any>) {
     size="large"
     @click="btnAction()"
   >
-    <span v-if="address">
+    <span v-if="address && isConnected">
       Disconnect
       <small>({{ truncateWallet(address) }})</small>
     </span>

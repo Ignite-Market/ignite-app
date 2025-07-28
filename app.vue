@@ -4,7 +4,7 @@
       <n-message-provider
         placement="bottom-right"
         :keep-alive-on-hover="true"
-        :duration="300000"
+        :duration="3000"
         closable
         :theme-overrides="messageOverrides"
       >
