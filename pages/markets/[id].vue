@@ -2,7 +2,7 @@
   <Dashboard :loading="loading">
     <div v-if="predictionSet" class="px-4 max-w-[1241px] m-auto">
       <!-- HEADER -->
-      <div class="flex mb-10 justify-between flex-wrap gap-4 relative">
+      <div class="flex mb-4 sm:mb-10 justify-between flex-wrap sm:flex-nowrap gap-4 relative">
         <Btn
           class="left-[-72px] absolute"
           btn-class="bg-grey-light h-8 w-8 rounded flex-cc hover:bg-grey-lighter"
@@ -11,84 +11,110 @@
         >
           <NuxtIcon name="icon/arrow-back" class="text-[24px]" />
         </Btn>
-
-        <div class="flex flex-wrap gap-x-8 gap-y-4">
-          <div class="w-[80px] h-[80px] flex-shrink-0">
-            <Image :src="predictionSet.imgUrl" class="rounded-[8px] w-full h-full object-cover" />
-          </div>
-          <div class="flex flex-col">
-            <div class="text-[24px] leading-[34px] font-bold text-white mt-[5px]">
-              {{ predictionSet.question }}
+        <div class="flex gap-2 justify-between w-full">
+          <div class="flex gap-x-8 gap-y-4 flex-grow">
+            <div class="w-[80px] h-[80px] flex-shrink-0">
+              <Image :src="predictionSet.imgUrl" class="rounded-[8px] w-full h-full object-cover" />
             </div>
-
-            <div class="flex mt-4 xs:items-center items-start gap-4 xs:flex-row flex-col">
-              <Status :status="predictionSet.setStatus" :end-time="new Date(predictionSet.endTime)" />
-
-              <div class="border-r-1 border-r-white/25 h-[14px] xs:block hidden"></div>
-
-              <div
-                class="text-white/80 text-[14px] leading-[20px]"
-                :title="dateTimeToDateAndTime(predictionSet.endTime)"
-              >
-                Ends on {{ toMonthAndYear(predictionSet.endTime) }}
+            <div class="flex flex-col">
+              <div class="text-[24px] leading-[34px] font-bold text-white sm:block hidden">
+                {{ predictionSet.question }}
               </div>
 
-              <div class="border-r-1 border-r-white/25 h-[14px] xs:block hidden"></div>
+              <div class="flex sm:mt-4 sm:items-center items-start gap-2 sm:gap-4 sm:flex-row flex-col">
+                <Status :status="predictionSet.setStatus" :end-time="new Date(predictionSet.endTime)" />
 
-              <n-popover trigger="hover" raw :show-arrow="false" placement="bottom-start">
-                <template #trigger>
-                  <div class="flex items-center justify-center cursor-pointer">
-                    <div v-if="collateralToken?.imgUrl">
-                      <Image
-                        :src="collateralToken.imgUrl"
-                        :title="collateralToken.name"
-                        class="rounded-full w-[18px] h-[18px] object-cover mr-1"
-                      />
+                <div class="border-r-1 border-r-white/25 h-[14px] sm:block hidden"></div>
+
+                <div
+                  class="text-white/80 text-[14px] leading-[20px]"
+                  :title="dateTimeToDateAndTime(predictionSet.endTime)"
+                >
+                  Ends on {{ toMonthAndYear(predictionSet.endTime) }}
+                </div>
+
+                <div class="border-r-1 border-r-white/25 h-[14px] sm:block hidden"></div>
+
+                <n-popover trigger="hover" raw :show-arrow="false" placement="bottom-start">
+                  <template #trigger>
+                    <div class="flex items-center justify-center cursor-pointer">
+                      <div v-if="collateralToken?.imgUrl">
+                        <Image
+                          :src="collateralToken.imgUrl"
+                          :title="collateralToken.name"
+                          class="rounded-full w-[18px] h-[18px] object-cover mr-1"
+                        />
+                      </div>
+                      <div class="text-white/80 text-[14px] leading-[20px]">
+                        {{
+                          formatCollateralAmount(
+                            BigInt(predictionSet.fundingVolume || 0) + BigInt(predictionSet.transactionsVolume || 0),
+                            collateralToken?.decimals || 0
+                          )
+                        }}
+                        {{ collateralToken?.symbol || '' }}
+                      </div>
                     </div>
-                    <div class="text-white/80 text-[14px] leading-[20px]">
+                  </template>
+                  <div class="flex flex-col text-[12px] px-2 bg-grey-dark rounded-lg">
+                    <div class="flex items-center">
+                      <div class="font-semibold">Funding volume:</div>
+                      <div v-if="collateralToken?.imgUrl">
+                        <Image
+                          :src="collateralToken.imgUrl"
+                          :title="collateralToken.name"
+                          class="rounded-full w-[14px] h-[14px] object-cover mx-1"
+                        />
+                      </div>
+
+                      {{ formatCollateralAmount(predictionSet.fundingVolume || 0, collateralToken?.decimals || 0) }}
+                      {{ collateralToken?.symbol || '' }}
+                    </div>
+
+                    <div class="flex items-center">
+                      <div class="font-semibold">Trading volume:</div>
+                      <div v-if="collateralToken?.imgUrl">
+                        <Image
+                          :src="collateralToken.imgUrl"
+                          :title="collateralToken.name"
+                          class="rounded-full w-[14px] h-[14px] object-cover mx-1"
+                        />
+                      </div>
                       {{
-                        formatCollateralAmount(
-                          BigInt(predictionSet.fundingVolume || 0) + BigInt(predictionSet.transactionsVolume || 0),
-                          collateralToken?.decimals || 0
-                        )
+                        formatCollateralAmount(predictionSet.transactionsVolume || 0, collateralToken?.decimals || 0)
                       }}
                       {{ collateralToken?.symbol || '' }}
                     </div>
                   </div>
-                </template>
-                <div class="flex flex-col text-[12px]">
-                  <div class="flex items-center">
-                    <div class="font-semibold">Funding volume:</div>
-                    <div v-if="collateralToken?.imgUrl">
-                      <Image
-                        :src="collateralToken.imgUrl"
-                        :title="collateralToken.name"
-                        class="rounded-full w-[14px] h-[14px] object-cover mx-1"
-                      />
-                    </div>
-
-                    {{ formatCollateralAmount(predictionSet.fundingVolume || 0, collateralToken?.decimals || 0) }}
-                    {{ collateralToken?.symbol || '' }}
-                  </div>
-
-                  <div class="flex items-center">
-                    <div class="font-semibold">Trading volume:</div>
-                    <div v-if="collateralToken?.imgUrl">
-                      <Image
-                        :src="collateralToken.imgUrl"
-                        :title="collateralToken.name"
-                        class="rounded-full w-[14px] h-[14px] object-cover mx-1"
-                      />
-                    </div>
-                    {{ formatCollateralAmount(predictionSet.transactionsVolume || 0, collateralToken?.decimals || 0) }}
-                    {{ collateralToken?.symbol || '' }}
-                  </div>
-                </div>
-              </n-popover>
+                </n-popover>
+              </div>
             </div>
           </div>
+
+          <div class="gap-1.5 sm:hidden flex flex-wrap flex-1 justify-end">
+            <Btn
+              v-if="loggedIn"
+              btn-class="bg-grey-light h-8 w-8 rounded flex-cc hover:bg-grey-lighter"
+              type="link"
+              @click="toggleWatchlist"
+            >
+              <NuxtIcon
+                :name="predictionSet.isWatched ? 'icon/star' : 'icon/star-outline'"
+                :class="predictionSet.isWatched && 'text-primary'"
+                class="text-[20px]"
+              />
+            </Btn>
+            <Btn btn-class="bg-grey-light h-8 w-8 rounded flex-cc hover:bg-grey-lighter" type="link" @click="copyLink">
+              <NuxtIcon name="icon/link" class="text-[20px]" />
+            </Btn>
+          </div>
         </div>
-        <div class="flex gap-1.5 mt-2">
+
+        <div class="text-[24px] leading-[34px] font-bold text-white mt-[5px] sm:hidden">
+          {{ predictionSet.question }}
+        </div>
+
+        <div class="gap-1.5 mt-2 sm:flex hidden">
           <Btn
             v-if="loggedIn"
             btn-class="bg-grey-light h-8 w-8 rounded flex-cc hover:bg-grey-lighter"
@@ -178,7 +204,10 @@
           </div>
 
           <!-- Mobile FUND btn -->
-          <div v-if="predictionSet && !isMd" class="w-full mt-10">
+          <div
+            v-if="predictionSet && !isMd && actionsEnabled(predictionSet.setStatus, predictionSet.endTime)"
+            class="w-full mt-10"
+          >
             <BasicButton
               size="large"
               type="secondary"
@@ -230,7 +259,7 @@
                       {{ outcome.name }}
                     </div>
 
-                    <div class="flex flex-row items-center justify-center mt-[4px]">
+                    <div class="flex flex-row items-center justify-start mt-[4px]">
                       <div v-if="collateralToken?.imgUrl">
                         <Image
                           :src="collateralToken.imgUrl"
@@ -411,6 +440,7 @@
     v-model:show="actionModal"
     placement="bottom"
     default-height="auto"
+    :auto-focus="false"
     @close="actionModal = false"
   >
     <div class="h-full w-full" @touchstart="handleTouchStart" @touchend="handleTouchEnd">

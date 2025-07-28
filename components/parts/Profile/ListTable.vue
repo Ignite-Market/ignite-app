@@ -201,14 +201,18 @@ const activitiesColumns = [
             : null,
           h('div', { style: { display: 'flex', flexDirection: 'column', justifyContent: 'center' } }, [
             h('span', { style: { fontSize: '15px', fontWeight: '500' } }, row.question),
-            h('div', { style: { display: 'flex', alignItems: 'center', gap: '8px' } }, [
-              h('span', { style: { fontSize: '14px', fontWeight: '600', color: '#F96B6B' } }, row.outcomeName),
-              h(
-                'span',
-                { style: { fontSize: '14px', color: '#777', fontWeight: '400' } },
-                `${formatCollateralAmount(row.outcomeTokens, collateralToken?.decimals || 0)} shares`
-              ),
-            ]),
+            h(
+              'div',
+              { style: { display: 'flex', flexWrap: 'wrap', alignItems: 'center', rowGap: '4px', columnGap: '8px' } },
+              [
+                h('span', { style: { fontSize: '14px', fontWeight: '600', color: '#F96B6B' } }, row.outcomeName),
+                h(
+                  'span',
+                  { style: { fontSize: '14px', color: '#777', fontWeight: '400' } },
+                  `${formatCollateralAmount(row.outcomeTokens, collateralToken?.decimals || 0)} shares`
+                ),
+              ]
+            ),
           ]),
         ]),
       ]);
@@ -377,7 +381,7 @@ const endpoint = getEndpoint();
 const sorter = getSorter();
 
 const filters = {
-  search: {
+  Search: {
     show: true,
     value: null,
   },

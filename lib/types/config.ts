@@ -11,7 +11,8 @@ export enum AppEnv {
 export type TableFilter = {
   options?: SelectOption[];
   show?: boolean;
-  value: string | number | null;
+  value: string | number | string[] | number[] | null;
+  isArray?: boolean;
 };
 
 export type TableFilters = Record<string, TableFilter>;

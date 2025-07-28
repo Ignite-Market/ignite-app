@@ -111,7 +111,8 @@ async function evmWalletLogin(data: Record<string, any>) {
 
 <template>
   <BasicButton
-    class="sm:py-[17px] py-[14px] px-[4px] sm:px-[16px] min-w-[55px]"
+    class="sm:py-[12px] lg:py-[17px] py-[12px] px-[4px] sm:px-[16px] min-w-[55px]"
+    :class="{ 'h-[44px] !py-0': address }"
     v-bind="$attrs"
     size="large"
     @click="btnAction()"

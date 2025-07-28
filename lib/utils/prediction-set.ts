@@ -8,6 +8,12 @@ import { PredictionSetStatus } from '../types/prediction-set';
  */
 export function getStatusName(status: PredictionSetStatus, endTime: string | Date) {
   switch (status) {
+    case PredictionSetStatus.INITIALIZED:
+      return 'Initialized';
+
+    case PredictionSetStatus.PENDING:
+      return 'Pending';
+
     case PredictionSetStatus.ACTIVE:
       if (Number(new Date()) > Number(new Date(endTime))) {
         return 'Resolving...';
@@ -24,6 +30,9 @@ export function getStatusName(status: PredictionSetStatus, endTime: string | Dat
     case PredictionSetStatus.FINALIZED:
       return 'Closed';
 
+    case PredictionSetStatus.ERROR:
+      return 'Error';
+
     default:
       break;
   }
@@ -31,6 +40,12 @@ export function getStatusName(status: PredictionSetStatus, endTime: string | Dat
 
 export function getStatusClass(status: PredictionSetStatus, endTime: string | Date) {
   switch (status) {
+    case PredictionSetStatus.INITIALIZED:
+      return 'bg-white/25 text-white';
+
+    case PredictionSetStatus.PENDING:
+      return 'bg-white/25 text-white';
+
     case PredictionSetStatus.ACTIVE:
       if (Number(new Date()) > Number(new Date(endTime))) {
         return 'bg-statusYellow/20 text-statusYellow';
@@ -46,6 +61,9 @@ export function getStatusClass(status: PredictionSetStatus, endTime: string | Da
 
     case PredictionSetStatus.FINALIZED:
       return 'bg-white/25 text-white';
+
+    case PredictionSetStatus.ERROR:
+      return 'bg-statusRed/20 text-statusRed';
 
     default:
       break;

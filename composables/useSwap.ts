@@ -96,7 +96,7 @@ export function useSwap() {
         await initContracts();
       }
 
-      const result = (await quoter!.read.quoteExactOutputSingle([
+      const result = (await quoter.read.quoteExactOutputSingle([
         {
           tokenIn: WFLR_ADDRESS,
           tokenOut,

@@ -213,19 +213,19 @@
 /** Message */
 .n-message {
   @apply relative flex flex-wrap;
-  border: 3px solid theme('colors.primary.DEFAULT');
+  border: 1px solid theme('colors.primary.DEFAULT');
 
   &--error-type {
-    border-color: theme('colors.primary.DEFAULT');
+    border-color: theme('colors.statusRed');
   }
   &--info-type {
-    border-color: theme('colors.blue.DEFAULT');
+    border-color: theme('colors.statusBlue.DEFAULT');
   }
   &--success-type {
-    border-color: theme('colors.green.DEFAULT');
+    border-color: theme('colors.statusGreen');
   }
   &--warning-type {
-    border-color: theme('colors.yellow.DEFAULT');
+    border-color: theme('colors.statusYellow');
   }
 
   .n-message__icon {

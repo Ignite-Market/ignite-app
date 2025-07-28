@@ -114,6 +114,7 @@ const tokenOptions = computed(() => {
 
   return tokens;
 });
+
 const renderTokens = () => {
   const tokens = tokenOptions.value.map(option =>
     h(
@@ -151,7 +152,7 @@ const renderTokens = () => {
                 'Send',
                 h(resolveComponent('NuxtIcon'), {
                   name: 'icon/send',
-                  class: ['text-[12px] transition-colors hover:text-primary-bright rotate-[-25deg]'],
+                  class: ['text-[12px] transition-colors hover:text-primary-bright rotate-[-15deg]'],
                 }),
               ]
             )
@@ -220,6 +221,19 @@ const options = computed(() => [
     type: 'divider',
     key: 'divider-2',
   },
+  ...(userStore.isAdmin
+    ? [
+        {
+          key: 'admin',
+          label: 'Admin',
+          iconName: 'icon/settings',
+        },
+        {
+          type: 'divider',
+          key: 'divider-2',
+        },
+      ]
+    : []),
   {
     key: 'logout',
     label: 'Logout',

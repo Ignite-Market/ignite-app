@@ -73,10 +73,7 @@ export interface PredictionSetInterface extends GeneralInterface {
   collateral_token_id: number;
   setId: string;
   question: string;
-  description: string;
-  generalResolutionDef: string;
   outcomeResolutionDef: string;
-  outcomePriceDef: string;
   startTime: Date;
   endTime: Date;
   resolutionTime: Date;
@@ -87,6 +84,7 @@ export interface PredictionSetInterface extends GeneralInterface {
   outcomes: OutcomeInterface[];
   chainData: ChainDataInterface;
   isWatched?: boolean;
+  volume?: string;
   fundingVolume?: string;
   transactionsVolume?: string;
   positions?: any[];
