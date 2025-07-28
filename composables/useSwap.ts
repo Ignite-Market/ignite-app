@@ -1,14 +1,14 @@
 import { ref } from 'vue';
-import { parseUnits, createPublicClient, http, getContract } from 'viem';
+import { parseUnits, getContract } from 'viem';
 import { flare } from 'viem/chains';
 import { useAccount, useConnectorClient, useChainId, useSwitchChain } from '@wagmi/vue';
 import { SPARK_DEX_QUOTER_ABI, SPARK_DEX_SWAP_ROUTER_ABI } from '~/lib/config/abi';
 import { sleep } from '~/lib/utils/helpers';
 
-const WFLR_ADDRESS = '0x1d80c49bbbcd1c0911346656b529df9e5c2f783d';
-const USDT_ADDRESS = '0xe7cd86e13AC4309349F30B3435a9d337750fC82D';
-const QUOTER_ADDRESS = '0x5B5513c55fd06e2658010c121c37b07fC8e8B705';
-const ROUTER_ADDRESS = '0x8a1E35F5c98C4E85B36B7B253222eE17773b2781';
+export const WFLR_ADDRESS = '0x1d80c49bbbcd1c0911346656b529df9e5c2f783d';
+export const USDT_ADDRESS = '0xe7cd86e13AC4309349F30B3435a9d337750fC82D';
+export const QUOTER_ADDRESS = '0x5B5513c55fd06e2658010c121c37b07fC8e8B705';
+export const ROUTER_ADDRESS = '0x8a1E35F5c98C4E85B36B7B253222eE17773b2781';
 
 export function useSwap() {
   // Reactive state that components can rely on
@@ -25,24 +25,9 @@ export function useSwap() {
   const { switchChainAsync } = useSwitchChain();
   const config = useRuntimeConfig();
 
-  // Create public client for Flare mainnet
-  const publicClient = createPublicClient({
-    chain: flare,
-    transport: http(),
-  });
-
   // Initialize contracts
-  const quoter = getContract({
-    address: QUOTER_ADDRESS,
-    abi: SPARK_DEX_QUOTER_ABI,
-    client: publicClient,
-  });
-
-  const router = getContract({
-    address: ROUTER_ADDRESS,
-    abi: SPARK_DEX_SWAP_ROUTER_ABI,
-    client: walletClient.value!,
-  });
+  let quoter: any = null;
+  let router: any = null;
 
   /**
    * Ensure the user is connected to Flare mainnet.
@@ -68,27 +53,52 @@ export function useSwap() {
     }
   }
 
+  async function initContracts() {
+    if (!walletClient.value) {
+      await refetch();
+      await sleep(200);
+    }
+
+    if (!walletClient.value) {
+      throw new Error('Wallet client not available!');
+    }
+
+    if (!quoter) {
+      quoter = getContract({
+        address: QUOTER_ADDRESS,
+        abi: SPARK_DEX_QUOTER_ABI,
+        client: walletClient.value!,
+      });
+    }
+
+    if (!router) {
+      router = getContract({
+        address: ROUTER_ADDRESS,
+        abi: SPARK_DEX_SWAP_ROUTER_ABI,
+        client: walletClient.value!,
+      });
+    }
+  }
+
   /**
    * Fetches a quote for swapping FLR → tokenOut so that `amountOut` of
    * tokenOut will be received. Returns the amount of FLR that has to be
    * supplied.
    */
-  async function getQuote(
-    amountOut: number,
-    tokenOut = USDT_ADDRESS,
-    tokenIn = WFLR_ADDRESS, // WFLR
-    decimalsOut = 6,
-    fee = 500
-  ) {
+  async function getQuote(amountOut: number, tokenOut = USDT_ADDRESS, decimalsOut = 6, fee = 500) {
     loading.value = true;
     try {
       if (config.public.ENV !== 'production') {
         throw new Error('Swap is disabled in this environment');
       }
 
+      if (!quoter) {
+        await initContracts();
+      }
+
       const result = (await quoter.read.quoteExactOutputSingle([
         {
-          tokenIn,
+          tokenIn: WFLR_ADDRESS,
           tokenOut,
           amount: parseUnits(amountOut.toString(), decimalsOut),
           fee,
@@ -110,10 +120,14 @@ export function useSwap() {
   /**
    * Executes the swap using the SparkDEX router.
    */
-  async function executeSwap(amountOut: number, tokenOut = USDT_ADDRESS) {
+  async function executeSwap(amountOut: number, tokenOut = USDT_ADDRESS, decimalsOut = 6) {
     if (!isConnected.value || !walletClient.value) {
       console.error('Wallet not connected');
       return;
+    }
+
+    if (!router) {
+      await initContracts();
     }
 
     // Ensure user is on Flare mainnet
@@ -126,7 +140,7 @@ export function useSwap() {
       quote.value.expiration < Math.floor(Date.now() / 1000) ||
       quote.value.tokenOut !== tokenOut
     ) {
-      await getQuote(amountOut, tokenOut);
+      await getQuote(amountOut, tokenOut, decimalsOut);
     }
     if (!quote.value) {
       console.error('No quote found');
@@ -147,7 +161,7 @@ export function useSwap() {
           fee: 500,
           recipient: address.value,
           deadline,
-          amountOut: parseUnits(amountOut.toString(), 6), // USDT amount (6 decimals)
+          amountOut: parseUnits(amountOut.toString(), decimalsOut),
           amountInMaximum: amountInMax, // bigint already in 18-dec FLR
           sqrtPriceLimitX96: 0n,
         },
@@ -168,7 +182,7 @@ export function useSwap() {
           fee: 500,
           recipient: address.value,
           deadline,
-          amountOut: parseUnits(amountOut.toString(), 6), // USDT amount (6 decimals)
+          amountOut: parseUnits(amountOut.toString(), decimalsOut),
           amountInMaximum: amountInMax, // bigint already in 18-dec FLR
           sqrtPriceLimitX96: 0n,
         },

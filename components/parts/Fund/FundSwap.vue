@@ -55,7 +55,7 @@ async function fetchQuote() {
   if (amountToSwap.value <= 0) return;
 
   try {
-    const result = await getQuote(amountToSwap.value, props.collateralToken.address);
+    const result = await getQuote(amountToSwap.value, props.collateralToken.address, props.collateralToken.decimals);
     if (!result) {
       quoteError.value = true;
       return;
@@ -73,11 +73,14 @@ async function handleSwap() {
   isExecuting.value = true;
   emit('disableClose');
   try {
-    txWait.hash.value = await executeSwap(amountToSwap.value, props.collateralToken.address);
+    txWait.hash.value = await executeSwap(
+      amountToSwap.value,
+      props.collateralToken.address,
+      props.collateralToken.decimals
+    );
     const receipt = await txWait.wait();
 
     if (receipt.status === 'success') {
-      // Parse ERC20 Transfer events to get the actual amounts
       const parsedTransfers = parseTransfersERC20(receipt);
       const txHash = receipt?.data?.transactionHash || '';
 
@@ -88,19 +91,18 @@ async function handleSwap() {
         // Find the transfer event where tokens were sent TO the user's address (amount received)
         const receivedEvent = parsedTransfers.find((e: any) => e.to === address.value);
         if (receivedEvent) {
-          // Convert the bigint amount to a number with proper decimals
           actualAmountReceived = bigIntToNum(receivedEvent.amount, props.collateralToken.decimals);
         }
 
         // For SparkDEX swaps, the FLR spent is typically handled through WFLR transfers
         // Look for WFLR transfers FROM the router TO the pool
         const wflrTransfers = parsedTransfers.filter(
-          (e: any) => e.contractAddress.toLowerCase() === '0x1d80c49bbbcd1c0911346656b529df9e5c2f783d' // WFLR address
+          (e: any) => e.contractAddress.toLowerCase() === WFLR_ADDRESS.toLowerCase() // WFLR address
         );
 
         // The WFLR transfer from router to pool represents the amount spent
         const routerToPoolTransfer = wflrTransfers.find(
-          (e: any) => e.from.toLowerCase() === '0x8a1e35f5c98c4e85b36b7b253222ee17773b2781' // Router address
+          (e: any) => e.from.toLowerCase() === ROUTER_ADDRESS.toLowerCase() // Router address
         );
 
         if (routerToPoolTransfer) {
@@ -115,7 +117,7 @@ async function handleSwap() {
         emit('success', actualAmountReceived);
       } else {
         swapSuccess.amount = amountToSwap.value;
-        swapSuccess.spentAmount = 0; // No spent amount if no transfer events
+        swapSuccess.spentAmount = quoteAmount.value;
         swapSuccess.txHash = txHash;
         emit('success', amountToSwap.value);
       }

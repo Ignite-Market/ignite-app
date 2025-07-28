@@ -17,7 +17,9 @@ enum Steps {
 
 const config = useRuntimeConfig();
 const { connector, address } = useAccount();
-const { data: nativeBalance, refetch: refetchNativeBalance } = useBalance({ address: address.value });
+const { data: nativeBalance, refetch: refetchNativeBalance } = useBalance({
+  address: computed(() => address.value),
+});
 const { refreshCollateralBalance } = useCollateralToken();
 const tokenStore = useTokensStore();
 const { getQuote } = useSwap();
@@ -43,9 +45,11 @@ const quoteError = ref(false);
 const collateralMissing = computed(
   () =>
     collateralNeeded.value -
-    (selectedCollateralToken.value
-      ? bigIntToNum(selectedCollateralToken.value.balance, selectedCollateralToken.value.decimals)
-      : 0)
+    (isCustom.value
+      ? 0
+      : selectedCollateralToken.value
+        ? bigIntToNum(selectedCollateralToken.value.balance, selectedCollateralToken.value.decimals)
+        : 0)
 );
 
 const tokenOptions = computed(() => {
@@ -77,7 +81,13 @@ const renderTokenLabel = (option: any) => {
 watch(collateralMissing, async () => {
   loading.value = true;
   if (collateralMissing.value > 0) {
-    const result = (await getQuote(collateralMissing.value, selectedCollateralToken.value?.address))?.result;
+    const result = (
+      await getQuote(
+        collateralMissing.value,
+        selectedCollateralToken.value?.address,
+        selectedCollateralToken.value?.decimals
+      )
+    )?.result;
     if (!result) {
       quoteError.value = true;
       loading.value = false;
@@ -100,7 +110,6 @@ onMounted(async () => {
       selectedCollateralToken.value = tokens[0];
     }
   }
-  await refetchNativeBalance();
 });
 
 watch(address, async () => {
@@ -180,7 +189,7 @@ defineExpose({
     v-model:show="isOpen"
     display-directive="show"
     :mask-closable="!closeDisabled"
-    class="!max-w-[402px] !bg-[#131418] [&>.n-card-header>button]:z-1 border-none"
+    class="!max-w-[402px] !bg-grey-dark [&>.n-card-header>button]:z-1 border-none"
     @update:show="isOpen = $event"
   >
     <div v-if="step === Steps.ENTER_AMOUNT">
@@ -243,7 +252,7 @@ defineExpose({
     </div>
 
     <div v-if="step === Steps.LANDING">
-      <h2 class="text-lg font-bold mb-4 text-center">Insufficient funds</h2>
+      <h2 class="text-lg font-bold mb-4 text-center">{{ isCustom ? 'Add funds' : 'Insufficient funds' }}</h2>
       <div v-if="loading" class="flex justify-center items-center h-full">
         <Spinner :size="24" color="#000" />
       </div>

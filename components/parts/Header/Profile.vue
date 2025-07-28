@@ -28,21 +28,44 @@
       />
     </div>
   </n-dropdown>
+  <HeaderTokensModal ref="tokensModal" :token-options="tokenOptions" />
 </template>
 
 <script lang="ts" setup>
-import { useAccount } from '@wagmi/vue';
+import { useAccount, useBalance } from '@wagmi/vue';
 import { truncateWallet } from '~/lib/misc/strings';
+import { formatCollateralAmount } from '~/lib/utils/numbers';
+import useCollateralToken from '~/composables/useCollateralToken';
+
+const emit = defineEmits(['openFundModal']);
 
 const router = useRouter();
-const { address } = useAccount();
+const { isConnected, address, connector } = useAccount();
 const userStore = useUserStore();
 const { loggedIn } = useLoggedIn();
 const { isLg, isMd } = useScreen();
-
+const tokenStore = useTokensStore();
+const tokensModal = ref<any>(null);
 const isOpened = ref(false);
 
-const emit = defineEmits(['openFundModal']);
+const { refreshAllCollateralBalances } = useCollateralToken();
+const { data: nativeBalance, refetch: refetchNativeBalance } = useBalance({
+  address: computed(() => address.value),
+});
+
+const isInAppWallet = computed(() => connector.value?.id === 'in-app-wallet');
+
+watch(
+  () => [isConnected.value, tokenStore.loaded],
+  async () => {
+    await refreshAllCollateralBalances();
+    await refetchNativeBalance();
+  }
+);
+
+const openSendModal = (option: any) => {
+  tokensModal.value.openModal(option.key);
+};
 
 const renderLabel = option => {
   if (option.type === 'divider') return null;
@@ -68,7 +91,89 @@ const renderLabel = option => {
   );
 };
 
+const tokenOptions = computed(() => {
+  const tokens = [
+    {
+      type: 'token',
+      key: 'native',
+      name: 'FLR',
+      label: 'FLR',
+      balance: nativeBalance.value?.value,
+      parsedBalance: formatCollateralAmount(nativeBalance.value?.value || 0n, 18),
+      iconName: 'icon/flare',
+    },
+  ] as any;
+  tokens.push(
+    ...Object.values(tokenStore.items).map(token => ({
+      type: 'token',
+      key: token.id,
+      label: token.name,
+      ...token,
+    }))
+  );
+
+  return tokens;
+});
+
+const renderTokens = () => {
+  const tokens = tokenOptions.value.map(option =>
+    h(
+      'div',
+      {
+        class: ['flex items-center gap-2 group justify-between'],
+        style: { width: '100%' },
+      },
+      [
+        h(
+          'div',
+          {
+            class: ['flex items-center gap-2 group'],
+          },
+          [
+            option.imgUrl
+              ? h(resolveComponent('Image'), { src: option.imgUrl, class: ['w-4 h-4'] })
+              : h(resolveComponent('NuxtIcon'), { name: option.iconName, filled: true }),
+            h('span', { class: ['text-[14px]'] }, option.parsedBalance),
+          ]
+        ),
+
+        isInAppWallet.value
+          ? h(
+              'div',
+              {
+                class: [
+                  'text-[10px] cursor-pointer flex items-center gap-2 transition-colors hover:text-primary-bright px-2',
+                ],
+                onClick: () => {
+                  openSendModal(option);
+                },
+              },
+              [
+                'Send',
+                h(resolveComponent('NuxtIcon'), {
+                  name: 'icon/send',
+                  class: ['text-[12px] transition-colors hover:text-primary-bright rotate-[-15deg]'],
+                }),
+              ]
+            )
+          : null,
+      ]
+    )
+  );
+
+  return h('div', { class: ['flex flex-col gap-2 px-4 py-2'] }, tokens);
+};
+
 const options = computed(() => [
+  {
+    key: 'tokens',
+    type: 'render',
+    render: renderTokens,
+  },
+  {
+    type: 'divider',
+    key: 'divider-2',
+  },
   {
     key: 'profile',
     label: 'My Profile',
@@ -116,6 +221,19 @@ const options = computed(() => [
     type: 'divider',
     key: 'divider-2',
   },
+  ...(userStore.isAdmin
+    ? [
+        {
+          key: 'admin',
+          label: 'Admin',
+          iconName: 'icon/settings',
+        },
+        {
+          type: 'divider',
+          key: 'divider-2',
+        },
+      ]
+    : []),
   {
     key: 'logout',
     label: 'Logout',

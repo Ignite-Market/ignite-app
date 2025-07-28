@@ -25,6 +25,7 @@ const Endpoints = {
    * Prediction Sets
    */
   predictionSets: '/prediction-sets',
+  predictionSetsAdmin: '/prediction-sets/admin',
   predictionSetsById: (id: number) => `/prediction-sets/${id}`,
   predictionSetChanceHistory: (id: number) => `/prediction-sets/${id}/chance-history`,
   predictionSetActivity: `/prediction-sets/activity`,
@@ -32,6 +33,7 @@ const Endpoints = {
   predictionSetPositions: (id: number) => `/prediction-sets/${id}/positions`,
   predictionSetFundingPositions: (id: number) => `/prediction-sets/${id}/funding-positions`,
   predictionSetRemovedFunding: (id: number) => `/prediction-sets/${id}/removed-funding`,
+  predictionSetsProcess: (id: number) => `/prediction-sets/${id}/process`,
 
   /**
    * Prediction set comments
@@ -43,6 +45,11 @@ const Endpoints = {
    * User prediction watchlist
    */
   predictionSetUserWatchlist: (id: number) => `/prediction-sets/${id}/watchlist`,
+
+  /**
+   * Prediction set suggestions
+   */
+  predictionSetsSuggestions: '/prediction-sets/generate-suggestions',
 
   /**
    * Banners

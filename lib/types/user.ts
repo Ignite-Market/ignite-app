@@ -17,8 +17,8 @@ declare global {
     phone?: string | null;
     status: number;
     user_uuid: string;
-    userPermissions: number[];
-    userRoles: number[];
+    roles: { name: string; id: number }[];
+    isAdmin?: boolean;
     wallet: string | null;
     token?: any;
     referralId: string | null;
