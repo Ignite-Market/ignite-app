@@ -18,29 +18,12 @@
             </button>
           </div>
           <div>
-            <div class="w-[150px]">
-              <n-select
-                v-model:value="collateralToken"
-                class="text-left"
-                :theme-overrides="{
-                  peers: {
-                    InternalSelection: {
-                      color: '#292929',
-                      clearColor: '#C56AC6',
-                    },
-                  },
-                }"
+            <div class="w-[160px]">
+              <CollateralSelect
                 placeholder="Currency"
-                :options="options"
-                :show-arrow="true"
-              >
-                <template #arrow>
-                  <NuxtIcon name="icon/arrow-down" class="icon-auto !inline-flex flex-cc" />
-                </template>
-                <template #default="{ option }">
-                  <span class="text-white text-sm pl-0">{{ option.label }}</span>
-                </template>
-              </n-select>
+                :default-value="collateralToken || undefined"
+                @update:value="collateralToken = $event || null"
+              />
             </div>
           </div>
         </div>
@@ -165,7 +148,6 @@ const loading = ref(false);
 const tokensStore = useTokensStore();
 
 const collateralToken = ref<number | null>(null);
-const options = ref<{ label: string; value: number }[]>([]);
 
 const periodMap = {
   Day: '1D',
@@ -211,14 +193,9 @@ async function fetchLeaderboardData() {
 
 onMounted(async () => {
   await tokensStore.ensureLoaded();
-  options.value = Object.values(tokensStore.items).map(token => ({
-    label: token.symbol,
-    value: token.id,
-  }));
-
   // First available currency on list.
-  if (options.value.length > 0) {
-    collateralToken.value = options.value[0].value;
+  if (Object.values(tokensStore.items)?.length > 0) {
+    collateralToken.value = Object.values(tokensStore.items)[0].id;
   }
   fetchLeaderboardData();
 });

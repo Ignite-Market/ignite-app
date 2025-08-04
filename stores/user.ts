@@ -44,7 +44,7 @@ export const useUserStore = defineStore('user', {
       return Array.isArray(state.notifications.items) && state.notifications.items.length > 0;
     },
     isAdmin(state) {
-      return state.user.roles.some(r => r.name === 'ADMIN');
+      return state.user?.roles?.some(r => r.name === 'ADMIN');
     },
   },
   actions: {

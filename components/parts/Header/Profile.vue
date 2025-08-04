@@ -98,6 +98,7 @@ const tokenOptions = computed(() => {
       key: 'native',
       name: 'FLR',
       label: 'FLR',
+      symbol: 'FLR',
       balance: nativeBalance.value?.value,
       parsedBalance: formatCollateralAmount(nativeBalance.value?.value || 0n, 18),
       iconName: 'icon/flare',
@@ -133,7 +134,10 @@ const renderTokens = () => {
             option.imgUrl
               ? h(resolveComponent('Image'), { src: option.imgUrl, class: ['w-4 h-4'] })
               : h(resolveComponent('NuxtIcon'), { name: option.iconName, filled: true }),
-            h('span', { class: ['text-[14px]'] }, option.parsedBalance),
+            h('div', {}, [
+              h('span', { class: ['text-[14px]'] }, option.parsedBalance),
+              h('span', { class: ['text-[12px]'] }, ' ' + option.symbol),
+            ]),
           ]
         ),
 

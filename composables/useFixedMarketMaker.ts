@@ -172,8 +172,14 @@ export default function useFixedMarketMaker() {
    * @param fpmmContractAddress FPMM contract address.
    * @param amount Funding amount in collateral token.
    * @param collateralDecimals Number of decimal places of collateral token.
+   * @param distribution Distribution of funding among outcomes.
    */
-  async function addFunding(fpmmContractAddress: Address, amount: number, collateralDecimals: number) {
+  async function addFunding(
+    fpmmContractAddress: Address,
+    amount: number,
+    collateralDecimals: number,
+    distribution: number[] = []
+  ) {
     if (!isConnected.value) {
       return;
     }
@@ -181,7 +187,7 @@ export default function useFixedMarketMaker() {
 
     // Make sure that you check for collateral allowance separately.
     const scaledAmount = BigInt(Math.round(amount * 10 ** collateralDecimals));
-    return await contract.write.addFunding([scaledAmount, []]);
+    return await contract.write.addFunding([scaledAmount, distribution]);
   }
 
   /**
