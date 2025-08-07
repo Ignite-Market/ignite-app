@@ -82,7 +82,11 @@
               <n-form-item path="imgUrl" label="Market Image" class="mb-3">
                 <div class="flex items-center gap-2 w-full">
                   <!-- <n-input v-model:value="form.imgUrl" placeholder="Image URL" class="w-full" /> -->
-                  <PredictionSetAdminImageUpload v-model:model-value="form.imgUrl" :default-value="form.imgUrl" />
+                  <PredictionSetAdminImageUpload
+                    v-model:model-value="form.imgUrl"
+                    :default-value="form.imgUrl"
+                    folder="prediction-sets"
+                  />
                   <div v-if="form.imgUrl">
                     <img
                       :src="form.imgUrl"
@@ -108,6 +112,7 @@
                     <div class="sm:max-w-[200px] lg:max-w-[300px]">
                       <PredictionSetAdminImageUpload
                         v-model:model-value="outcome.imgUrl"
+                        folder="outcomes"
                         :default-value="outcome.imgUrl"
                       />
                     </div>
@@ -346,6 +351,6 @@ async function generateSuggestions() {
 }
 
 function useSuggestion(suggestion: any) {
-  form.value = { ...suggestion };
+  form.value = JSON.parse(JSON.stringify(suggestion));
 }
 </script>

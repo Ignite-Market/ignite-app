@@ -52,6 +52,7 @@ import Endpoints from '~/lib/values/endpoints';
 
 const props = defineProps({
   defaultValue: { type: String, default: undefined },
+  folder: { type: String, default: '' },
 });
 
 const emit = defineEmits<{
@@ -63,17 +64,17 @@ const showModal = ref(false);
 const uploadRef = ref<any | null>(null);
 const file = ref<File | null | undefined>(null);
 
-const isExistingImage = computed(() => images.value.some(image => image.key === 'upload/' + selectedImage.value));
+const isExistingImage = computed(() =>
+  images.value.some(image => image.key === 'upload/' + props.folder + '/' + selectedImage.value)
+);
 
 const { images, fetchImages, getFileName } = useS3Images();
 
 // S3 bucket URL
 const S3_BUCKET_URL = 'https://ignite-market-images.s3.amazonaws.com/';
-const IMAGE_URL = 'https://images.ignitemarket.xyz/upload/';
+const IMAGE_URL = 'https://images.ignitemarket.xyz/upload/' + props.folder + '/';
 
 watch(selectedImage, () => {
-  console.log('selectedImage', selectedImage.value);
-  console.log('isExistingImage', isExistingImage.value);
   if (selectedImage.value?.startsWith('http')) {
     emit('update:modelValue', selectedImage.value);
   } else if (selectedImage.value && isExistingImage.value) {
@@ -133,7 +134,7 @@ function handleChange(data: { fileList: UploadFileInfo[] }) {
 async function uploadFile(file: File, onUrlCreated?: () => void) {
   if (!file) return;
 
-  const res = await $api.post<any>(Endpoints.imageUpload, { fileName: file.name });
+  const res = await $api.post<any>(Endpoints.imageUpload, { fileName: props.folder + '/' + file.name });
   onUrlCreated?.();
   await fetch(res.data.uploadUrl, {
     method: 'PUT',
@@ -159,6 +160,8 @@ async function customUpload({ file, onFinish, onError, onProgress }: UploadCusto
     onFinish();
     refreshImages();
     selectedImage.value = file.file.name;
+    await sleep(100);
+    emit('update:modelValue', IMAGE_URL + selectedImage.value);
     showModal.value = false;
   } catch (error) {
     onError();
@@ -171,7 +174,7 @@ function startUpload() {
 }
 
 async function refreshImages() {
-  await fetchImages(S3_BUCKET_URL, 'upload/');
+  await fetchImages(S3_BUCKET_URL, `upload/${props.folder}`);
 }
 
 // Load images when component mounts
