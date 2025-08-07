@@ -347,18 +347,22 @@
                 </div>
               </template>
             </n-input-number>
-          </div>
+            <div v-if="isInitialFunding" class="my-4 gap-x-2 gap-y-3">
+              <n-divider />
+              <DistributionSliders v-model="distribution" :outcomes="outcomes" />
+            </div>
 
-          <BasicButton
-            class="w-full"
-            :btn-class="['bg-statusBlue hover:bg-statusBlue-hover !font-bold']"
-            :size="'large'"
-            :disabled="!isConnected || !isFundEnabled"
-            :loading="loading"
-            @click="fund"
-          >
-            Fund
-          </BasicButton>
+            <BasicButton
+              class="w-full mt-3"
+              :btn-class="['bg-statusBlue hover:bg-statusBlue-hover !font-bold']"
+              :size="'large'"
+              :disabled="!isConnected || !isFundEnabled"
+              :loading="loading"
+              @click="fund"
+            >
+              Fund
+            </BasicButton>
+          </div>
         </n-tab-pane>
       </n-tabs>
     </div>
@@ -504,6 +508,7 @@ import { watchDebounced } from '@vueuse/core';
 import { useAccount, useBalance } from '@wagmi/vue';
 import type { Address } from 'viem';
 import ConfettiExplosion from 'vue-confetti-explosion';
+import DistributionSliders from './DistributionSliders.vue';
 import type { OutcomeInterface } from '~/lib/types/prediction-set';
 import { PredictionSetStatus, TransactionType } from '~/lib/types/prediction-set';
 import { bigIntToNum, floorNumber, numToBigInt } from '~/lib/utils/numbers';
@@ -524,6 +529,7 @@ const props = defineProps({
   outcomes: { type: Array as PropType<OutcomeInterface[]>, default: () => [], required: true },
   defaultValue: { type: Number, default: 0 },
   collateralToken: { type: Object as PropType<CollateralToken>, default: () => {}, required: true },
+  isInitialFunding: { type: Boolean, default: false },
   showSelectOutcome: { type: Boolean, default: false },
 });
 
@@ -565,6 +571,7 @@ const sellableBalanceStr = computed<string>(() => sellableBalance.value.toFixed(
 
 const pricePerShare = ref(0.0);
 const currentLiquidity = ref(BigInt(0));
+const distribution = ref<number[]>([]);
 
 const givenAmount = ref();
 const obtainedAmount = ref();
@@ -931,7 +938,11 @@ async function fund() {
     }
     transactionStep.value = TransactionStep.CONFIRM;
 
-    txWait.hash.value = await addFunding(props.contractAddress, amount.value, props.collateralToken.decimals);
+    const dist = props.isInitialFunding ? distribution.value : [];
+
+    console.log('dist', dist, distribution.value);
+
+    txWait.hash.value = await addFunding(props.contractAddress, amount.value, props.collateralToken.decimals, dist);
     const receipt = await txWait.wait();
 
     if (receipt.status === 'success') {

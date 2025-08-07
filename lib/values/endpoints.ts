@@ -82,6 +82,11 @@ const Endpoints = {
    */
   leaderboardVolume: '/stats/leaderboard/volume',
   leaderboardProfit: '/stats/leaderboard/profit',
+
+  /**
+   * File upload
+   */
+  imageUpload: '/files/image',
 };
 
 export default Endpoints;

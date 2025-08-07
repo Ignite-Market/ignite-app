@@ -52,32 +52,6 @@ const collateralMissing = computed(
         : 0)
 );
 
-const tokenOptions = computed(() => {
-  return Object.values(tokenStore.items).map(token => ({
-    label: token.name,
-    value: token.id,
-  }));
-});
-
-const renderTokenLabel = (option: any) => {
-  const token = tokenStore.items[option.value];
-  return [
-    h(
-      'div',
-      {
-        class: 'flex items-center',
-      },
-      [
-        h(resolveComponent('Image'), {
-          src: token.imgUrl,
-          class: 'rounded-full w-6 h-6 object-cover mr-1',
-        }),
-        h('div', token.name),
-      ]
-    ),
-  ];
-};
-
 watch(collateralMissing, async () => {
   loading.value = true;
   if (collateralMissing.value > 0) {
@@ -198,12 +172,10 @@ defineExpose({
       <p class="text-sm text-grey-lightest text-center mb-4">
         Select the token you want to buy with your card or crypto assets.
       </p>
-      <SelectOptions
+      <CollateralSelect
         class="w-full mb-4"
-        :options="tokenOptions"
         :default-value="selectedCollateralToken?.id"
-        :render-label="renderTokenLabel"
-        @update:value="value => (selectedCollateralToken = tokenStore.items[value])"
+        @update:value="value => (selectedCollateralToken = value ? tokenStore.items[value] : undefined)"
       />
       <div v-if="selectedCollateralToken">
         <p class="text-sm text-grey-lightest text-center mb-4">Enter the amount you want to buy.</p>

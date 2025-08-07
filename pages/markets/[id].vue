@@ -398,6 +398,9 @@
               :outcomes="predictionSet.outcomes"
               :default-value="defaultActionValue"
               :collateral-token="collateralToken"
+              :is-initial-funding="
+                predictionSet.setStatus === PredictionSetStatus.FUNDING && predictionSet.fundingVolume === '0'
+              "
               @action-changed="(action: TransactionType) => (selectedAction = action)"
               @transaction-successful="
                 (transactionType: TransactionType) =>
@@ -454,6 +457,9 @@
         :outcomes="predictionSet.outcomes"
         :default-value="defaultActionValue"
         :collateral-token="collateralToken"
+        :is-initial-funding="
+          predictionSet.setStatus === PredictionSetStatus.FUNDING && predictionSet.fundingVolume === '0'
+        "
         show-select-outcome
         @outcome-selected="
           (outcomeId: number) => (selectedOutcome = predictionSet?.outcomes.find(o => o.id === outcomeId))

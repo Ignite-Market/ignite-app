@@ -28,11 +28,10 @@
           <div class="border-1 border-grey-lighter rounded-lg p-6 w-full">
             <n-form ref="formRef" :model="form" :rules="rules" @submit.prevent="submit">
               <n-form-item path="collateral_token_id" label="Collateral Token" class="mb-3">
-                <SelectOptions
-                  v-model:value="form.collateral_token_id"
-                  :options="tokenOptions"
-                  :render-label="renderTokenLabel"
+                <CollateralSelect
+                  :default-value="form.collateral_token_id || undefined"
                   placeholder="Select token"
+                  @update:value="value => (form.collateral_token_id = value || null)"
                 />
               </n-form-item>
               <n-form-item path="question" label="Market question" class="mb-3">
@@ -82,12 +81,13 @@
               </div>
               <n-form-item path="imgUrl" label="Market Image" class="mb-3">
                 <div class="flex items-center gap-2 w-full">
-                  <n-input v-model:value="form.imgUrl" placeholder="Image URL" class="w-full" />
-                  <div v-if="form.imgUrl" class="mt-2">
+                  <!-- <n-input v-model:value="form.imgUrl" placeholder="Image URL" class="w-full" /> -->
+                  <PredictionSetAdminImageUpload v-model:model-value="form.imgUrl" :default-value="form.imgUrl" />
+                  <div v-if="form.imgUrl">
                     <img
                       :src="form.imgUrl"
                       alt="Market image"
-                      class="w-16 h-16 min-w-16 min-h-16 object-cover rounded"
+                      class="w-10 h-10 min-w-10 min-h-10 object-cover rounded"
                     />
                   </div>
                 </div>
@@ -105,7 +105,12 @@
                       :maxlength="150"
                       class="sm:max-w-[200px]"
                     />
-                    <n-input v-model:value="outcome.imgUrl" placeholder="Outcome image URL" class="sm:max-w-[200px]" />
+                    <div class="sm:max-w-[200px] lg:max-w-[300px]">
+                      <PredictionSetAdminImageUpload
+                        v-model:model-value="outcome.imgUrl"
+                        :default-value="outcome.imgUrl"
+                      />
+                    </div>
                     <div v-if="outcome.imgUrl">
                       <img
                         :src="outcome.imgUrl"
@@ -212,7 +217,7 @@ function onInit(loggedIn: boolean, isAdmin: boolean) {
 }
 
 const initialForm = {
-  collateral_token_id: null,
+  collateral_token_id: null as number | null,
   question: '',
   outcomeResolutionDef: '',
   startTime: new Date().getTime() + 1000 * 60 * 60,
@@ -269,7 +274,6 @@ const rules: FormRules = {
       message: 'Each outcome must have an image.',
     },
   ],
-  categories: { required: true, type: 'array', message: 'Please select at least one category.' },
 };
 
 onMounted(async () => {
@@ -279,32 +283,6 @@ onMounted(async () => {
 const categoryOptions = Object.values(PredictionSetCategory)
   .filter(x => x !== 'All')
   .map(cat => ({ label: cat, value: cat }));
-
-const tokenOptions = computed(() => {
-  return Object.values(tokensStore.items).map(token => ({
-    label: token.name,
-    value: token.id,
-  }));
-});
-
-const renderTokenLabel = (option: any) => {
-  const token = tokensStore.items[option.value];
-  return [
-    h(
-      'div',
-      {
-        class: 'flex items-center',
-      },
-      [
-        h(resolveComponent('Image'), {
-          src: token.imgUrl,
-          class: 'rounded-full w-6 h-6 object-cover mr-1',
-        }),
-        h('div', token.name),
-      ]
-    ),
-  ];
-};
 
 const startDateDisabled = (ts: number) => {
   const endTime = form.value.endTime ? new Date(form.value.endTime).getTime() : null;
