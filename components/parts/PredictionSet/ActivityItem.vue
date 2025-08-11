@@ -26,6 +26,10 @@
             {{ formatCollateralAmount(item.userAmount, tokensStore.getToken(item.collateral_token_id).decimals) }}
             {{ tokensStore.getToken(item.collateral_token_id).symbol }}
           </span>
+          <span v-if="isUser" class="text-[10px] sm:text-xs text-grey-lightest">
+            at {{ getFixed(item.userAmount / item.outcomeTokens, DISPLAY_DECIMALS) }}
+            {{ tokensStore.getToken(item.collateral_token_id).symbol }}
+          </span>
           <a
             :href="`${getExplorer()}/tx/${item.txHash}`"
             target="_blank"
@@ -82,7 +86,10 @@
         </span>
       </div>
 
-      <div class="ml-[10px] sm:text-[12px] leading-[16px] text-grey-lightest font-medium text-[10px] text-right">
+      <div
+        class="ml-[10px] sm:text-[12px] leading-[16px] text-grey-lightest font-medium text-[10px] text-right"
+        :title="dateTimeToDateAndTime(item.transactionTime)"
+      >
         {{ formatDistanceToNow(new Date(item.transactionTime), { addSuffix: true }) }}
       </div>
     </div>
@@ -91,10 +98,12 @@
 
 <script lang="ts" setup>
 import { formatDistanceToNow } from 'date-fns';
+import { DISPLAY_DECIMALS } from '../../../lib/values/general.values';
 import { TransactionType, type ActivityInterface } from '~/lib/types/prediction-set';
 
 defineProps({
   item: { type: Object as PropType<ActivityInterface>, default: () => {}, required: true },
+  isUser: { type: Boolean, default: false },
 });
 
 const router = useRouter();

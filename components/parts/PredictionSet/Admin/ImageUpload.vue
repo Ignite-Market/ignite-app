@@ -160,7 +160,7 @@ async function customUpload({ file, onFinish, onError, onProgress }: UploadCusto
     onFinish();
     refreshImages();
     selectedImage.value = file.file.name;
-    await sleep(100);
+    await sleep(500);
     emit('update:modelValue', IMAGE_URL + selectedImage.value);
     showModal.value = false;
   } catch (error) {

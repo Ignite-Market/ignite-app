@@ -101,3 +101,7 @@ export function shortenLargeNumber(value: number | string, decimals = 2) {
 
   return `${getFixed(value, decimals)}`;
 }
+
+export function numberToBytes32(num: number) {
+  return `0x${num.toString(16).padStart(64, '0')}`;
+}
