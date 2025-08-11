@@ -33,6 +33,11 @@
     "ERR_CONNECTION_REFUSED": "Connection refused, please check your internet connection.",
     "Failed to fetch": "Connection refused, please check your internet connection.",
     "jwt expired": "Your session has expired, please log in again.",
-    "walletSignature": "'Could not capture your signature, check your wallet connection"
+    "walletSignature": "'Could not capture your signature, check your wallet connection",
+    "AIRDROP_USER_WALLET_ADDRESS_NOT_PRESENT": "Wallet address is required",
+    "AIRDROP_USER_WALLET_ADDRESS_NOT_UNIQUE": "Wallet address is already registered",
+    "AIRDROP_USER_EMAIL_NOT_PRESENT": "Email is required",
+    "AIRDROP_USER_EMAIL_NOT_UNIQUE": "Email is already registered",
+    "AIRDROP_USER_EMAIL_NOT_VALID": "Invalid email"
   }
 }

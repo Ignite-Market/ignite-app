@@ -87,6 +87,11 @@ const Endpoints = {
    * File upload
    */
   imageUpload: '/files/image',
+
+  /**
+   * Airdrop
+   */
+  airdropJoin: '/airdrop/join',
 };
 
 export default Endpoints;

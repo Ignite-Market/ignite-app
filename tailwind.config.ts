@@ -89,8 +89,6 @@ export default {
       hd: '1920px',
     },
 
-    colors,
-
     fontFamily: {
       heading: ['Inter', 'serif'],
       sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
@@ -107,6 +105,7 @@ export default {
     },
 
     extend: {
+      colors,
       backgroundImage: {
         gradientGreen: 'linear-gradient(180deg, #028787 0%, #3EDEDE 100%)',
         gradientPurple: 'linear-gradient(180deg, #B779F1 0%, #CAA0F1 100%)',
