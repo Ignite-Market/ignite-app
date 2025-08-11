@@ -113,10 +113,14 @@
               </div>
             </div> -->
 
+            <div class="flex justify-center">
+              <ProcaptchaComponent :site-key="siteKey" :callback="callbacks" theme="dark" />
+            </div>
+
             <!-- Submit Button -->
             <button
               type="submit"
-              :disabled="isSubmitting"
+              :disabled="isSubmitting || !isEnabled"
               class="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold py-4 px-6 rounded-lg transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
               <span v-if="!isSubmitting">Register for Airdrop</span>
@@ -166,6 +170,7 @@
 
 <script setup>
 import { ref, reactive } from 'vue';
+import { ProcaptchaComponent } from '@prosopo/vue-procaptcha-wrapper';
 import Endpoints from '../lib/values/endpoints';
 
 definePageMeta({
@@ -173,6 +178,10 @@ definePageMeta({
 });
 
 const message = useMessage();
+
+const siteKey = useRuntimeConfig().public.PROSOPO_CAPTCHA_SITEKEY;
+
+const isEnabled = ref(false);
 
 const form = reactive({
   walletAddress: '',
@@ -189,6 +198,10 @@ const errors = reactive({
 
 const isSubmitting = ref(false);
 const showSuccess = ref(false);
+
+const callbacks = token => {
+  isEnabled.value = !!token;
+};
 
 const validateForm = () => {
   errors.walletAddress = '';
