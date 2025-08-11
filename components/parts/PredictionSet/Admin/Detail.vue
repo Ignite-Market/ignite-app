@@ -66,6 +66,12 @@
           {{ collateralToken?.symbol || '' }}
         </div>
       </div>
+      <div v-if="prediction.setStatus > PredictionSetStatus.PENDING">
+        <div class="text-[14px] text-white font-semibold">Question ID</div>
+        <div class="text-[14px] text-grey-lightest">
+          {{ numberToBytes32(prediction.id) }}
+        </div>
+      </div>
     </div>
 
     <!-- Outcomes -->
@@ -82,6 +88,7 @@
             <div v-if="outcome.latestChance" class="text-[12px] text-grey-lightest">
               Chance: {{ outcome.latestChance }}%
             </div>
+            <div class="text-xs text-grey-lightest">Index: {{ outcome.outcomeIndex }}</div>
           </div>
           <div
             v-if="outcome.id === prediction.winner_outcome_id"
@@ -103,7 +110,7 @@ import { formatCollateralAmount } from '~/lib/utils/numbers';
 import { getStatusName } from '~/lib/utils/prediction-set';
 import Image from '~/components/general/Image.vue';
 
-import { ResolutionType } from '~/lib/types/prediction-set';
+import { PredictionSetStatus, ResolutionType } from '~/lib/types/prediction-set';
 
 const { prediction } = defineProps<{ prediction: PredictionSetInterface }>();
 
