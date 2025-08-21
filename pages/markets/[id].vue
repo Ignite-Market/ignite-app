@@ -381,7 +381,7 @@
               <n-tab-pane name="Activity" tab="Activity">
                 <PredictionSetActivity :prediction-set-id="predictionSet.id" />
               </n-tab-pane>
-              <n-tab-pane name="My Activity" tab="My Activity">
+              <n-tab-pane v-if="loggedIn" name="My Activity" tab="My Activity">
                 <PredictionSetActivity :prediction-set-id="predictionSet.id" :user-id="userStore.user?.id" />
               </n-tab-pane>
             </n-tabs>

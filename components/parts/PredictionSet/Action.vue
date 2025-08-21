@@ -596,6 +596,9 @@ const buyValidator = (x: number) => {
   if (x > buyFundLimit.value) {
     // Because input is calling -1 +1 for buttons
     if (amount.value !== x - 1) {
+      console.log('buyFundLimit.value', buyFundLimit.value);
+      console.log('x', x);
+      console.log('amount.value', amount.value);
       buyError.value = `Amount can not exceed 10% of total liquidity.`;
     }
   } else {
