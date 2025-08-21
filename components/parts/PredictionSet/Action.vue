@@ -1124,6 +1124,7 @@ async function buyOutcome() {
     emit('transactionSuccessful', TransactionType.BUY);
   } catch (error) {
     console.error(error);
+    message.error(contractError(error));
   } finally {
     loading.value = false;
     transactionStep.value = TransactionStep.ALLOWANCE;

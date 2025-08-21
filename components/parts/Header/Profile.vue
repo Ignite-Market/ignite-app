@@ -55,6 +55,11 @@ const { data: nativeBalance, refetch: refetchNativeBalance } = useBalance({
 
 const isInAppWallet = computed(() => connector.value?.id === 'in-app-wallet');
 
+onMounted(async () => {
+  await refreshAllCollateralBalances();
+  await refetchNativeBalance();
+});
+
 watch(
   () => [isConnected.value, tokenStore.loaded],
   async () => {
