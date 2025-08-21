@@ -12,7 +12,7 @@
       value-field="key"
       :default-value="selectedToken?.key"
       :render-label="renderTokenLabel"
-      @update:value="value => (selectedToken = value)"
+      @update:value="value => (selectedToken = props.tokenOptions.find(token => token.key === value))"
     />
     <div v-if="selectedToken" class="flex flex-col items-center gap-4 w-full">
       <div class="flex flex-col gap-3 w-full">
