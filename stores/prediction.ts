@@ -4,6 +4,18 @@ import { WebStorageKeys } from '../lib/values/general.values';
 import { type PredictionSetInterface, type PredictionSetsResponse } from '~/lib/types/prediction-set';
 import Endpoints from '~/lib/values/endpoints';
 
+interface CopiedPredictionData {
+  question: string;
+  outcomeResolutionDef: string;
+  imgUrl: string;
+  predictionOutcomes: Array<{ name: string; imgUrl: string }>;
+  startTime: number;
+  endTime: number;
+  resolutionTime: number;
+  collateral_token_id: number;
+  categories: string[];
+}
+
 export const usePredictionStore = defineStore('prediction', {
   state: () => ({
     items: {} as { [category: string]: { items: PredictionSetInterface[]; ttl: number } },
@@ -26,6 +38,7 @@ export const usePredictionStore = defineStore('prediction', {
       },
     },
     suggestions: [] as any[],
+    copiedPrediction: null as CopiedPredictionData | null,
   }),
   getters: {
     data(state) {
@@ -157,6 +170,27 @@ export const usePredictionStore = defineStore('prediction', {
       this.suggestions = res.data;
       console.log(this.suggestions);
       return this.suggestions;
+    },
+
+    setCopiedPrediction(prediction: PredictionSetInterface) {
+      this.copiedPrediction = {
+        question: prediction.question,
+        outcomeResolutionDef: prediction.outcomeResolutionDef,
+        imgUrl: prediction.imgUrl,
+        predictionOutcomes: prediction.outcomes.map(outcome => ({
+          name: outcome.name,
+          imgUrl: outcome.imgUrl,
+        })),
+        startTime: new Date(prediction.startTime).getTime(),
+        endTime: new Date(prediction.endTime).getTime(),
+        resolutionTime: new Date(prediction.resolutionTime).getTime(),
+        collateral_token_id: prediction.collateral_token_id,
+        categories: [],
+      };
+    },
+
+    clearCopiedPrediction() {
+      this.copiedPrediction = null;
     },
   },
   persist: {

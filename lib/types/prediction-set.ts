@@ -42,6 +42,7 @@ export enum PredictionSetCategory {
   XRP = 'XRP',
   FINANCE = 'Finance',
   SPORTS = 'Sports',
+  SOCIAL = 'Social',
 }
 
 export interface OutcomeChance extends GeneralInterface {
