@@ -1,28 +1,77 @@
 <template>
   <Dashboard>
-    <div class="flex mb-4">
-      <BasicButton to="/admin/add">Add Prediction</BasicButton>
-    </div>
-    <DataTable
-      :key="refreshKey"
-      :columns="predictionColumns"
-      :endpoint="Endpoints.predictionSetsAdmin"
-      :title="'All Predictions'"
-      :table-filters="filters"
-      :table-sorter="sorter"
-      :row-key="rowKey"
-      :row-props="rowProps"
-      :default-expanded-row-keys="expanded"
-    >
-      <template #actions>
-        <div class="flex md:justify-end gap-4 flex-grow m-auto">
-          <Btn btn-class="bg-grey-light h-8 w-8 rounded flex-cc hover:bg-grey-lighter" type="link" @click="refresh">
-            <NuxtIcon name="icon/refresh" />
-          </Btn>
-          <div></div>
+    <n-tabs v-model:value="activeTab" type="line" animated>
+      <!-- Predictions Tab -->
+      <n-tab-pane name="predictions" tab="Prediction Sets">
+        <div class="flex mb-4">
+          <BasicButton to="/admin/add">Add Prediction</BasicButton>
         </div>
-      </template>
-    </DataTable>
+        <DataTable
+          :key="refreshKey"
+          :columns="predictionColumns"
+          :endpoint="Endpoints.predictionSetsAdmin"
+          :title="'All Predictions'"
+          :table-filters="predictionFilters"
+          :table-sorter="predictionSorter"
+          :row-key="predictionRowKey"
+          :row-props="predictionRowProps"
+          :default-expanded-row-keys="predictionExpanded"
+        >
+          <template #actions>
+            <div class="flex md:justify-end gap-4 flex-grow m-auto">
+              <Btn
+                btn-class="bg-grey-light h-8 w-8 rounded flex-cc hover:bg-grey-lighter"
+                type="link"
+                @click="refreshPredictions"
+              >
+                <NuxtIcon name="icon/refresh" />
+              </Btn>
+              <div></div>
+            </div>
+          </template>
+        </DataTable>
+      </n-tab-pane>
+
+      <!-- Banners Tab -->
+      <n-tab-pane name="banners" tab="Banners">
+        <div class="mb-6 p-4 bg-primary/10 border border-primary/20 rounded-lg">
+          <div class="flex items-center gap-2 text-primary">
+            <NuxtIcon name="icon/info" class="text-[16px]" />
+            <span class="text-[14px] font-medium"> Only the latest 3 active banners are shown on the home page. </span>
+          </div>
+        </div>
+        <div class="flex mb-4">
+          <BasicButton @click="openBannerModal()">Add Banner</BasicButton>
+        </div>
+        <DataTable
+          :key="bannerRefreshKey"
+          :columns="bannerColumns"
+          :endpoint="Endpoints.bannersAdmin"
+          :title="'All Banners'"
+          :table-filters="bannerFilters"
+          :table-sorter="bannerSorter"
+          :row-key="bannerRowKey"
+          :row-props="bannerRowProps"
+          :default-expanded-row-keys="bannerExpanded"
+        >
+          <template #actions>
+            <div class="flex md:justify-end gap-4 flex-grow m-auto">
+              <Btn
+                btn-class="bg-grey-light h-8 w-8 rounded flex-cc hover:bg-grey-lighter"
+                type="link"
+                @click="refreshBanners"
+              >
+                <NuxtIcon name="icon/refresh" />
+              </Btn>
+              <div></div>
+            </div>
+          </template>
+        </DataTable>
+      </n-tab-pane>
+    </n-tabs>
+
+    <!-- Banner Modal -->
+    <BannerAdminModal ref="bannerModalRef" @refresh="refreshBanners" @close="closeBannerModal" />
   </Dashboard>
 </template>
 
@@ -30,13 +79,17 @@
 import type { DataTableColumns, DataTableSortState } from 'naive-ui';
 import { format } from 'date-fns';
 import { PredictionSetStatus, type PredictionSetInterface } from '~/lib/types/prediction-set';
+import type { BannerInterface } from '~/lib/types/banner';
 import Endpoints from '~/lib/values/endpoints';
 import type { TableFilters } from '~/lib/types/config';
 
 const router = useRouter();
 useLoggedIn(onInit);
 
+const route = useRoute();
+const activeTab = ref((route.query.tab as string) || 'predictions');
 const refreshKey = ref(0);
+const bannerRefreshKey = ref(0);
 
 function onInit(loggedIn: boolean, isAdmin: boolean) {
   if (!loggedIn || !isAdmin) {
@@ -44,24 +97,25 @@ function onInit(loggedIn: boolean, isAdmin: boolean) {
   }
 }
 
-const refresh = () => {
+// Prediction related functions
+const refreshPredictions = () => {
   refreshKey.value++;
 };
 
-const rowClick = (row: PredictionSetInterface) => {
-  const indexExpanded = expanded.value.findIndex(i => i === row.id);
+const predictionRowClick = (row: PredictionSetInterface) => {
+  const indexExpanded = predictionExpanded.value.findIndex(i => i === row.id);
   if (indexExpanded > -1) {
-    expanded.value.splice(indexExpanded, 1);
+    predictionExpanded.value.splice(indexExpanded, 1);
   } else {
-    expanded.value.push(row.id);
+    predictionExpanded.value.push(row.id);
   }
 };
 
-const expanded = ref<(number | string)[]>([]);
-const rowKey = (row: PredictionSetInterface) => row.id;
-const rowProps = (row: PredictionSetInterface) => ({
+const predictionExpanded = ref<(number | string)[]>([]);
+const predictionRowKey = (row: PredictionSetInterface) => row.id;
+const predictionRowProps = (row: PredictionSetInterface) => ({
   onClick: () => {
-    rowClick(row);
+    predictionRowClick(row);
   },
 });
 
@@ -73,6 +127,11 @@ const predictionColumns = [
         prediction: row,
       });
     },
+  },
+  {
+    key: 'id',
+    title: 'ID',
+    sorter: 'default',
   },
   {
     key: 'question',
@@ -132,13 +191,13 @@ const predictionColumns = [
     render(row: PredictionSetInterface) {
       return h(resolveComponent('PredictionSetAdminAction'), {
         prediction: row,
-        refresh,
+        onRefresh: refreshPredictions,
       });
     },
   },
 ] as DataTableColumns<PredictionSetInterface>;
 
-const filters = {
+const predictionFilters = {
   Search: {
     show: true,
     value: null,
@@ -159,5 +218,114 @@ const filters = {
   },
 } as TableFilters;
 
-const sorter = { columnKey: 'id', order: 'descend', sorter: 'default' } as DataTableSortState;
+const predictionSorter = { columnKey: 'id', order: 'descend', sorter: 'default' } as DataTableSortState;
+
+// Banner related functions
+const refreshBanners = () => {
+  bannerRefreshKey.value++;
+};
+
+const bannerRowClick = (row: BannerInterface) => {
+  const indexExpanded = bannerExpanded.value.findIndex(i => i === row.id);
+  if (indexExpanded > -1) {
+    bannerExpanded.value.splice(indexExpanded, 1);
+  } else {
+    bannerExpanded.value.push(row.id);
+  }
+};
+
+const bannerExpanded = ref<(number | string)[]>([]);
+const bannerRowKey = (row: BannerInterface) => row.id;
+const bannerRowProps = (row: BannerInterface) => ({
+  onClick: () => {
+    bannerRowClick(row);
+  },
+});
+
+const bannerColumns = [
+  {
+    type: 'expand',
+    renderExpand(row: BannerInterface) {
+      return h(resolveComponent('BannerAdminDetail'), {
+        banner: row,
+      });
+    },
+  },
+  {
+    key: 'title',
+    title: 'Banner',
+    sorter: 'default',
+    minWidth: 300,
+    render(row: BannerInterface) {
+      return h('div', { style: { display: 'flex', gap: '12px' } }, [
+        h('div', { style: { width: '44px', height: '44px', flexShrink: 0 } }, [
+          h('img', {
+            src: row.imageUrl,
+            style: { width: '100%', height: '100%', borderRadius: '4px', objectFit: 'cover' },
+          }),
+        ]),
+        h('div', { style: { display: 'flex', flexDirection: 'column', justifyContent: 'center' } }, [
+          h('span', { style: { fontSize: '15px', fontWeight: '500' } }, row.title),
+          h('span', { style: { fontSize: '12px', color: '#9CA3AF' } }, row.description),
+        ]),
+      ]);
+    },
+  },
+  {
+    key: 'prediction_set_id',
+    title: 'Prediction Set ID',
+    sorter: 'default',
+    minWidth: 120,
+    render(row: BannerInterface) {
+      return row.prediction_set_id;
+    },
+  },
+  {
+    key: 'isActive',
+    title: 'Active',
+    sorter: 'default',
+    minWidth: 90,
+    render(row: BannerInterface) {
+      return h(
+        'div',
+        { style: { display: 'flex', alignItems: 'center', gap: '8px', color: row.isActive ? '#10B981' : '#EF4444' } },
+        [h('span', { style: { fontSize: '14px', fontWeight: '500' } }, row.isActive ? 'Active' : 'Inactive')]
+      );
+    },
+  },
+  {
+    key: 'action',
+    title: '',
+    align: 'right',
+    render(row: BannerInterface) {
+      return h(resolveComponent('BannerAdminAction'), {
+        banner: row,
+        onRefresh: refreshBanners,
+        onEdit: (banner: BannerInterface) => openBannerModal(banner),
+      });
+    },
+  },
+] as DataTableColumns<BannerInterface>;
+
+const bannerFilters = {
+  Search: {
+    show: true,
+    value: null,
+  },
+} as TableFilters;
+
+const bannerSorter = { columnKey: 'id', order: 'descend', sorter: 'default' } as DataTableSortState;
+
+// Banner modal functionality
+const bannerModalRef = ref();
+const selectedBanner = ref<BannerInterface | null>(null);
+
+function openBannerModal(banner?: BannerInterface | null) {
+  selectedBanner.value = banner || null;
+  bannerModalRef.value?.openModal(banner || null);
+}
+
+function closeBannerModal() {
+  selectedBanner.value = null;
+}
 </script>

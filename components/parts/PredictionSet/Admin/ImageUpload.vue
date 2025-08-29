@@ -74,6 +74,15 @@ const { images, fetchImages, getFileName } = useS3Images();
 const S3_BUCKET_URL = 'https://ignite-market-images.s3.amazonaws.com/';
 const IMAGE_URL = 'https://images.ignitemarket.xyz/upload/' + props.folder + '/';
 
+watch(
+  () => props.defaultValue,
+  () => {
+    if (props.defaultValue) {
+      selectedImage.value = props.defaultValue;
+    }
+  }
+);
+
 watch(selectedImage, () => {
   if (selectedImage.value?.startsWith('http')) {
     emit('update:modelValue', selectedImage.value);
@@ -92,7 +101,6 @@ const imageOptions = computed(() => {
       type: 'image',
     }))
     .filter(x => x.label.includes(selectedImage.value || ''));
-  console.log('options', options);
   return options;
 });
 

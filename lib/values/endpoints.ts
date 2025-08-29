@@ -54,7 +54,10 @@ const Endpoints = {
   /**
    * Banners
    */
-  banners: '/prediction-sets/banners',
+  banners: '/banners',
+  bannersAdmin: '/banners/admin',
+  bannerById: (id: number) => `/banners/${id}`,
+  bannerToggle: (id: number) => `/banners/${id}/toggle`,
 
   /**
    * Proposals

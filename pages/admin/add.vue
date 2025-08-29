@@ -22,6 +22,17 @@
           </div>
         </div>
       </div>
+
+      <!-- COPY NOTIFICATION -->
+      <div v-if="showCopyNotification" class="mb-6 p-4 bg-primary/10 border border-primary/20 rounded-lg">
+        <div class="flex items-center gap-2 text-primary">
+          <NuxtIcon name="icon/copy" class="text-[16px]" />
+          <span class="text-[14px] font-medium">
+            Prediction data has been copied from another prediction. You can modify the details below.
+            <span class="text-white/80 text-[12px]">*Categories are not copied!</span>
+          </span>
+        </div>
+      </div>
       <!-- CONTENT -->
       <div class="flex flex-col-reverse md:flex-row justify-center">
         <div class="flex flex-col min-w-[250px] max-w-[736px] w-full">
@@ -201,6 +212,7 @@ import { ref, onMounted } from 'vue';
 import { useMessage, type FormRules } from 'naive-ui';
 import Endpoints from '../../lib/values/endpoints';
 import { useTokensStore } from '~/stores/collateral-tokens';
+import { usePredictionStore } from '~/stores/prediction';
 import { PredictionSetCategory, ResolutionType } from '~/lib/types/prediction-set';
 import BasicButton from '~/components/general/BasicButton.vue';
 
@@ -212,6 +224,7 @@ const predictionStore = usePredictionStore();
 const router = useRouter();
 const suggestionPrompt = ref('');
 const loadingSuggestions = ref(false);
+const showCopyNotification = ref(false);
 
 useLoggedIn(onInit);
 
@@ -226,11 +239,11 @@ const initialForm = {
   question: '',
   outcomeResolutionDef: '',
   startTime: new Date().getTime() + 1000 * 60 * 60,
-  endTime: null,
-  resolutionTime: null,
+  endTime: null as number | null,
+  resolutionTime: null as number | null,
   imgUrl: '',
   predictionOutcomes: [] as Array<{ name: string; imgUrl: string }>,
-  categories: [],
+  categories: [] as string[],
 };
 
 const form = ref(initialForm);
@@ -283,6 +296,36 @@ const rules: FormRules = {
 
 onMounted(async () => {
   await tokensStore.ensureLoaded();
+
+  // Check for copied prediction data from store
+  if (predictionStore.copiedPrediction) {
+    try {
+      const copiedData = predictionStore.copiedPrediction;
+      // Populate form with copied data
+      form.value = {
+        ...form.value,
+        collateral_token_id: copiedData.collateral_token_id || null,
+        question: copiedData.question || '',
+        outcomeResolutionDef: copiedData.outcomeResolutionDef || '',
+        imgUrl: copiedData.imgUrl || '',
+        predictionOutcomes: copiedData.predictionOutcomes || [],
+        categories: copiedData.categories || [],
+        startTime: copiedData.startTime || new Date().getTime() + 1000 * 60 * 60,
+        endTime: copiedData.endTime || null,
+        resolutionTime: copiedData.resolutionTime || null,
+      };
+
+      // Clear the copied data from store
+      predictionStore.clearCopiedPrediction();
+
+      // Show success message and notification
+      message.success('Prediction data copied successfully!');
+      showCopyNotification.value = true;
+    } catch (error) {
+      console.error('Error using copied prediction data:', error);
+      predictionStore.clearCopiedPrediction();
+    }
+  }
 });
 
 const categoryOptions = Object.values(PredictionSetCategory)
