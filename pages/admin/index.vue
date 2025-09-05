@@ -77,11 +77,11 @@
 
 <script lang="ts" setup>
 import type { DataTableColumns, DataTableSortState } from 'naive-ui';
-import { format } from 'date-fns';
 import { PredictionSetStatus, type PredictionSetInterface } from '~/lib/types/prediction-set';
 import type { BannerInterface } from '~/lib/types/banner';
 import Endpoints from '~/lib/values/endpoints';
 import type { TableFilters } from '~/lib/types/config';
+import { formatDateToUTC } from '~/lib/utils/dates';
 
 const router = useRouter();
 useLoggedIn(onInit);
@@ -156,20 +156,20 @@ const predictionColumns = [
   },
   {
     key: 'startTime',
-    title: 'Start Time',
+    title: 'Start Time (UTC)',
     sorter: 'default',
-    minWidth: 90,
+    minWidth: 120,
     render(row: PredictionSetInterface) {
-      return format(row.startTime, 'dd/MM/yyyy HH:mm');
+      return h('div', { title: localDate(row.startTime) }, [formatDateToUTC(row.startTime)]);
     },
   },
   {
     key: 'endTime',
-    title: 'End Time',
+    title: 'End Time (UTC)',
     sorter: 'default',
-    minWidth: 90,
+    minWidth: 120,
     render(row: PredictionSetInterface) {
-      return format(row.endTime, 'dd/MM/yyyy HH:mm');
+      return h('div', { title: localDate(row.endTime) }, [formatDateToUTC(row.endTime)]);
     },
   },
   {
@@ -327,5 +327,11 @@ function openBannerModal(banner?: BannerInterface | null) {
 
 function closeBannerModal() {
   selectedBanner.value = null;
+}
+
+function localDate(date: string | Date) {
+  if (!date) return '-';
+  const d = typeof date === 'string' ? new Date(date) : date;
+  return 'Local: ' + d.toLocaleString();
 }
 </script>

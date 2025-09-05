@@ -152,3 +152,78 @@ export function isTimestampPassedBy(timestamp: number): boolean {
 export function isTimePassedBy(time: number): boolean {
   return time * 1000 < Date.now();
 }
+
+/**
+ * Admin UTC Date Functions
+ */
+
+/**
+ * Format date to UTC string for admin table display (shorter format)
+ * @param date - Date string, Date object, or timestamp
+ * @returns Formatted UTC date string
+ */
+export function formatDateToUTC(date: string | Date | number): string {
+  if (!date) return '-';
+
+  let dateObj: Date;
+  if (typeof date === 'number') {
+    dateObj = new Date(date);
+  } else if (typeof date === 'string') {
+    dateObj = new Date(date);
+  } else {
+    dateObj = date;
+  }
+
+  return (
+    dateObj.toLocaleString('en-US', {
+      timeZone: 'UTC',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    }) + ' UTC'
+  );
+}
+
+/**
+ * Convert local date to UTC timestamp for form submission
+ * @param date - Date object or timestamp
+ * @returns UTC timestamp in milliseconds
+ */
+export function convertToUTCTimestamp(date: Date | number): number {
+  if (typeof date === 'number') {
+    return new Date(date).getTime();
+  }
+  return date.getTime();
+}
+
+/**
+ * Get current UTC timestamp
+ * @returns Current UTC timestamp in milliseconds
+ */
+export function getCurrentUTCTimestamp(): number {
+  return new Date().getTime();
+}
+
+/**
+ * Get UTC timestamp for a specific date/time
+ * @param year - Year
+ * @param month - Month (0-11)
+ * @param day - Day
+ * @param hour - Hour (0-23)
+ * @param minute - Minute (0-59)
+ * @param second - Second (0-59)
+ * @returns UTC timestamp in milliseconds
+ */
+export function getUTCTimestamp(
+  year: number,
+  month: number,
+  day: number,
+  hour: number = 0,
+  minute: number = 0,
+  second: number = 0
+): number {
+  return new Date(Date.UTC(year, month, day, hour, minute, second)).getTime();
+}

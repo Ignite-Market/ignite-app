@@ -12,6 +12,6 @@ export interface BannerInterface {
   prediction_set_id: number;
   isActive: boolean;
   status: SqlModelStatus;
-  created_at: string;
-  updated_at: string;
+  createTime: string;
+  updateTime: string;
 }

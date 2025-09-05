@@ -22,17 +22,17 @@
         <div class="text-[14px] text-white font-semibold">Status</div>
         <div class="text-[14px] text-grey-lightest">{{ getStatusName(prediction.setStatus, prediction.endTime) }}</div>
       </div>
-      <div>
-        <div class="text-[14px] text-white font-semibold">Start Time</div>
-        <div class="text-[14px] text-grey-lightest">{{ formatDate(prediction.startTime) }}</div>
+      <div :title="localDate(prediction.startTime)">
+        <div class="text-[14px] text-white font-semibold">Start Time (UTC)</div>
+        <div class="text-[14px] text-grey-lightest">{{ formatDateToUTC(prediction.startTime) }}</div>
       </div>
-      <div>
-        <div class="text-[14px] text-white font-semibold">End Time</div>
-        <div class="text-[14px] text-grey-lightest">{{ formatDate(prediction.endTime) }}</div>
+      <div :title="localDate(prediction.endTime)">
+        <div class="text-[14px] text-white font-semibold">End Time (UTC)</div>
+        <div class="text-[14px] text-grey-lightest">{{ formatDateToUTC(prediction.endTime) }}</div>
       </div>
-      <div>
-        <div class="text-[14px] text-white font-semibold">Resolution Time</div>
-        <div class="text-[14px] text-grey-lightest">{{ formatDate(prediction.resolutionTime) }}</div>
+      <div :title="localDate(prediction.resolutionTime)">
+        <div class="text-[14px] text-white font-semibold">Resolution Time (UTC)</div>
+        <div class="text-[14px] text-grey-lightest">{{ formatDateToUTC(prediction.resolutionTime) }}</div>
       </div>
       <div>
         <div class="text-[14px] text-white font-semibold">Resolution Type</div>
@@ -109,6 +109,7 @@ import { useTokensStore } from '~/stores/collateral-tokens';
 import { formatCollateralAmount } from '~/lib/utils/numbers';
 import { getStatusName } from '~/lib/utils/prediction-set';
 import Image from '~/components/general/Image.vue';
+import { formatDateToUTC } from '~/lib/utils/dates';
 
 import { PredictionSetStatus, ResolutionType } from '~/lib/types/prediction-set';
 
@@ -128,9 +129,9 @@ const resolutionTypeName = computed(() => {
   }
 });
 
-function formatDate(date: string | Date) {
+function localDate(date: string | Date) {
   if (!date) return '-';
   const d = typeof date === 'string' ? new Date(date) : date;
-  return d.toLocaleString();
+  return 'Local: ' + d.toLocaleString();
 }
 </script>
