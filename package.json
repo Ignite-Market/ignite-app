@@ -54,7 +54,7 @@
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-nuxt": "^4.0.0",
     "eslint-plugin-prettier": "^5.2.1",
-    "naive-ui": "^2.40.2",
+    "naive-ui": "^2.42.0",
     "nuxtjs-naive-ui": "^1.0.2",
     "postcss": "^8.5.3",
     "postcss-loader": "^8.1.1",

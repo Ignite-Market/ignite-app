@@ -49,11 +49,11 @@
     <div class="flex flex-row gap-x-10">
       <div>
         <div class="text-[14px] text-white font-semibold">Created At</div>
-        <div class="text-[14px] text-grey-lightest">{{ formatDate(banner.created_at) }}</div>
+        <div class="text-[14px] text-grey-lightest">{{ formatDate(banner.createTime) }}</div>
       </div>
       <div>
         <div class="text-[14px] text-white font-semibold">Updated At</div>
-        <div class="text-[14px] text-grey-lightest">{{ formatDate(banner.updated_at) }}</div>
+        <div class="text-[14px] text-grey-lightest">{{ formatDate(banner.updateTime) }}</div>
       </div>
     </div>
   </div>

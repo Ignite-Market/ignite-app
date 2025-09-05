@@ -59,35 +59,47 @@
                 />
               </n-form-item>
               <div class="flex gap-4 flex-wrap">
-                <n-form-item path="startTime" label="Start Time" class="mb-3">
+                <n-form-item path="startTime" label="Start Time (UTC)" class="mb-3">
                   <n-date-picker
-                    v-model:value="form.startTime"
+                    v-model:value="startTimeDisplay"
                     type="datetime"
-                    placeholder="Select start time"
+                    placeholder="Select start time (UTC)"
                     update-value-on-close
-                    :is-date-disabled="startDateDisabled"
+                    :is-date-disabled="(ts: number) => startDateDisabled(ts, true)"
                     default-time="00:00:00"
-                  />
+                  >
+                    <template #now>
+                      <n-button size="tiny" @click="onNow('startTime')">Now</n-button>
+                    </template>
+                  </n-date-picker>
                 </n-form-item>
-                <n-form-item path="endTime" label="End Time" class="mb-3">
+                <n-form-item path="endTime" label="End Time (UTC)" class="mb-3">
                   <n-date-picker
-                    v-model:value="form.endTime"
+                    v-model:value="endTimeDisplay"
                     type="datetime"
-                    placeholder="Select end time"
+                    placeholder="Select end time (UTC)"
                     update-value-on-close
-                    :is-date-disabled="endDateDisabled"
+                    :is-date-disabled="(ts: number) => endDateDisabled(ts, true)"
                     default-time="00:00:00"
-                  />
+                  >
+                    <template #now>
+                      <n-button size="tiny" @click="onNow('endTime')">Now</n-button>
+                    </template>
+                  </n-date-picker>
                 </n-form-item>
-                <n-form-item path="resolutionTime" label="Resolution Time" class="mb-3" update-value-on-close>
+                <n-form-item path="resolutionTime" label="Resolution Time (UTC)" class="mb-3" update-value-on-close>
                   <n-date-picker
-                    v-model:value="form.resolutionTime"
+                    v-model:value="resolutionTimeDisplay"
                     type="datetime"
-                    placeholder="Select resolution time"
+                    placeholder="Select resolution time (UTC)"
                     update-value-on-close
-                    :is-date-disabled="resolutionDateDisabled"
+                    :is-date-disabled="(ts: number) => resolutionDateDisabled(ts, true)"
                     default-time="00:00:00"
-                  />
+                  >
+                    <template #now>
+                      <n-button size="small" @click="onNow('resolutionTime')">Now</n-button>
+                    </template>
+                  </n-date-picker>
                 </n-form-item>
               </div>
               <n-form-item path="imgUrl" label="Market Image" class="mb-3">
@@ -208,13 +220,14 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useMessage, type FormRules } from 'naive-ui';
 import Endpoints from '../../lib/values/endpoints';
 import { useTokensStore } from '~/stores/collateral-tokens';
 import { usePredictionStore } from '~/stores/prediction';
 import { PredictionSetCategory, ResolutionType } from '~/lib/types/prediction-set';
 import BasicButton from '~/components/general/BasicButton.vue';
+import { getCurrentUTCTimestamp } from '~/lib/utils/dates';
 
 const message = useMessage();
 const formRef = ref();
@@ -238,7 +251,7 @@ const initialForm = {
   collateral_token_id: null as number | null,
   question: '',
   outcomeResolutionDef: '',
-  startTime: new Date().getTime() + 1000 * 60 * 60,
+  startTime: getCurrentUTCTimestamp() + 1000 * 60 * 60, // 1 hour from now in UTC
   endTime: null as number | null,
   resolutionTime: null as number | null,
   imgUrl: '',
@@ -248,6 +261,73 @@ const initialForm = {
 
 const form = ref(initialForm);
 
+// Helper function to convert UTC timestamp to display format for date picker
+function utcToDisplay(utcTimestamp: number): number {
+  // The timestamp is already UTC, we want to show it as UTC in the picker
+  // We need to adjust it so the picker displays it as UTC time
+  const utcDate = new Date(utcTimestamp);
+  // Add timezone offset to make the picker show UTC time instead of local time
+  return utcDate.getTime() + utcDate.getTimezoneOffset() * 60000;
+}
+
+// Helper function to convert display timestamp from date picker to UTC timestamp
+function displayToUtc(displayTimestamp: number): number {
+  // The date picker gives us a timestamp that represents UTC time
+  // We need to convert this back to actual UTC timestamp
+  const displayDate = new Date(displayTimestamp);
+  // Subtract timezone offset to get the actual UTC timestamp
+  return displayDate.getTime() - displayDate.getTimezoneOffset() * 60000;
+}
+
+// Computed properties to handle UTC display in date pickers
+const startTimeDisplay = computed({
+  get: () => {
+    if (!form.value.startTime) return null;
+    // Convert UTC timestamp to display format for the picker
+    return utcToDisplay(form.value.startTime);
+  },
+  set: (value: number | null) => {
+    if (value) {
+      // Convert display format to UTC timestamp
+      form.value.startTime = displayToUtc(value);
+    } else {
+      form.value.startTime = null as any;
+    }
+  },
+});
+
+const endTimeDisplay = computed({
+  get: () => {
+    if (!form.value.endTime) return null;
+    // Convert UTC timestamp to display format for the picker
+    return utcToDisplay(form.value.endTime);
+  },
+  set: (value: number | null) => {
+    if (value) {
+      // Convert display format to UTC timestamp
+      form.value.endTime = displayToUtc(value);
+    } else {
+      form.value.endTime = null as any;
+    }
+  },
+});
+
+const resolutionTimeDisplay = computed({
+  get: () => {
+    if (!form.value.resolutionTime) return null;
+    // Convert UTC timestamp to display format for the picker
+    return utcToDisplay(form.value.resolutionTime);
+  },
+  set: (value: number | null) => {
+    if (value) {
+      // Convert display format to UTC timestamp
+      form.value.resolutionTime = displayToUtc(value);
+    } else {
+      form.value.resolutionTime = null as any;
+    }
+  },
+});
+
 const rules: FormRules = {
   collateral_token_id: { required: true, message: 'Please select a collateral token.' },
   question: { required: true, message: 'Please enter a market question.' },
@@ -255,7 +335,7 @@ const rules: FormRules = {
   startTime: [
     { required: true, message: 'Please select a start time.' },
     {
-      validator: () => !startDateDisabled(new Date(form.value.startTime!).getTime()),
+      validator: () => !startDateDisabled(new Date(form.value.startTime!).getTime(), false),
       message: 'Start time must be in the future.',
       trigger: 'change',
     },
@@ -263,7 +343,7 @@ const rules: FormRules = {
   endTime: [
     { required: true, message: 'Please select an end time.' },
     {
-      validator: () => !endDateDisabled(new Date(form.value.endTime!).getTime()),
+      validator: () => !endDateDisabled(new Date(form.value.endTime!).getTime(), false),
       message: 'End time must be after start time.',
       trigger: 'change',
     },
@@ -271,7 +351,7 @@ const rules: FormRules = {
   resolutionTime: [
     { required: true, message: 'Please select a resolution time.' },
     {
-      validator: () => !resolutionDateDisabled(new Date(form.value.resolutionTime!).getTime()),
+      validator: () => !resolutionDateDisabled(new Date(form.value.resolutionTime!).getTime(), false),
       message: 'Resolution time must be after end time.',
       trigger: 'change',
     },
@@ -310,7 +390,7 @@ onMounted(async () => {
         imgUrl: copiedData.imgUrl || '',
         predictionOutcomes: copiedData.predictionOutcomes || [],
         categories: copiedData.categories || [],
-        startTime: copiedData.startTime || new Date().getTime() + 1000 * 60 * 60,
+        startTime: copiedData.startTime || getCurrentUTCTimestamp() + 1000 * 60 * 60,
         endTime: copiedData.endTime || null,
         resolutionTime: copiedData.resolutionTime || null,
       };
@@ -332,22 +412,30 @@ const categoryOptions = Object.values(PredictionSetCategory)
   .filter(x => x !== 'All')
   .map(cat => ({ label: cat, value: cat }));
 
-const startDateDisabled = (ts: number) => {
+const startDateDisabled = (ts: number, format = true) => {
+  const utcTs = format ? displayToUtc(ts) : ts;
   const endTime = form.value.endTime ? new Date(form.value.endTime).getTime() : null;
-  if (endTime && ts > endTime) return true;
+  if (endTime && utcTs > endTime) return true;
   return false;
 };
 
-const endDateDisabled = (ts: number) => {
+const endDateDisabled = (ts: number, format = true) => {
   const startTime = form.value.startTime ? new Date(form.value.startTime).getTime() : null;
-  if (startTime && ts < startTime) return true;
-  return ts <= Date.now();
+  const utcTs = format ? displayToUtc(ts) : ts;
+  if (startTime && utcTs < startTime) return true;
+  return utcTs <= Date.now();
 };
 
-const resolutionDateDisabled = (ts: number) => {
+const resolutionDateDisabled = (ts: number, format = true) => {
   const endTime = form.value.endTime ? new Date(form.value.endTime).getTime() : null;
-  if (endTime && ts < endTime) return true;
-  return ts <= Date.now();
+  const utcTs = format ? displayToUtc(ts) : ts;
+  if (endTime && utcTs < endTime) return true;
+  return utcTs <= Date.now();
+};
+
+const onNow = (date: 'endTime' | 'resolutionTime' | 'startTime') => {
+  const currentUtcTimestamp = getCurrentUTCTimestamp();
+  form.value[date] = currentUtcTimestamp;
 };
 
 function addOutcome() {
