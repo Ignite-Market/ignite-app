@@ -722,23 +722,16 @@ const buyFundLimit = computed(() => {
 watch(
   () => [currentLiquidity.value, conditionalBalance.value, props?.outcome?.outcomeIndex],
   async () => {
-    if (!props?.outcome) {
+    if (!props?.outcome || !currentLiquidity.value) {
       return;
     }
     console.log('currentLiquidity.value', currentLiquidity.value);
-    const maxAmount = bigIntToNum((BigInt(currentLiquidity.value) * 10n) / 100n, props.collateralToken.decimals || 6);
+    const maxAmount = (BigInt(currentLiquidity.value) * 10n) / 100n;
     console.log('maxAmount', maxAmount);
-    let limit =
-      (await calcSharesForCollateral(
-        maxAmount,
-        props.outcome.outcomeIndex,
-        props.contractAddress,
-        props.outcomes.map(o => o.positionId),
-        props.collateralToken.decimals
-      )) || 0n;
+    let limit = (await calcSharesForCollateral(maxAmount, props.outcome.outcomeIndex, props.contractAddress)) || 0n;
 
     console.log('limit', limit);
-    if (conditionalBalance.value < limit) {
+    if (conditionalBalance.value < limit || limit === -1n) {
       limit = conditionalBalance.value;
     }
     const rawLimit = Number(limit) / Math.pow(10, props.collateralToken.decimals);
@@ -788,7 +781,7 @@ watch(
 );
 
 watchDebounced(
-  () => amount.value,
+  () => [amount.value, props.outcome],
   async () => {
     if (amount.value === 0) {
       returnAmount.value = '0.0';
