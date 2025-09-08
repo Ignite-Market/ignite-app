@@ -612,6 +612,7 @@ const sellValidator = (x: number) => {
   if (x > sellFundLimit.value) {
     // Because input is calling -1 +1 for buttons
     if (amount.value !== x - 1) {
+      console.log('sellFundLimit.value validator', sellFundLimit.value);
       sellError.value = `Sell amount can not exceed 10% of total liquidity.`;
     }
   } else {
@@ -724,8 +725,9 @@ watch(
     if (!props?.outcome) {
       return;
     }
-
+    console.log('currentLiquidity.value', currentLiquidity.value);
     const maxAmount = bigIntToNum((BigInt(currentLiquidity.value) * 10n) / 100n, props.collateralToken.decimals || 6);
+    console.log('maxAmount', maxAmount);
     let limit =
       (await calcSharesForCollateral(
         maxAmount,
@@ -735,11 +737,14 @@ watch(
         props.collateralToken.decimals
       )) || 0n;
 
+    console.log('limit', limit);
     if (conditionalBalance.value < limit) {
       limit = conditionalBalance.value;
     }
     const rawLimit = Number(limit) / Math.pow(10, props.collateralToken.decimals);
+    console.log('rawLimit', rawLimit);
     sellFundLimit.value = floorNumber(rawLimit);
+    console.log('sellFundLimit.value', sellFundLimit.value);
   }
 );
 
