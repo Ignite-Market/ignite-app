@@ -21,7 +21,7 @@
       />
     </template>
   </div>
-  <div v-if="!predictionStore.loading && !predictionStore.data?.length" class="text-center mt-8">No results found</div>
+  <div v-if="!predictionStore.loading && !predictionStore.data?.length" class="text-center mt-8">Coming soon...</div>
 </template>
 
 <script lang="ts" setup>

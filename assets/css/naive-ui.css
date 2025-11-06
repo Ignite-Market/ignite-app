@@ -273,13 +273,17 @@ body > .n-message-container {
 
 /** Modal */
 .n-modal-container {
-  z-index: 1000 !important;
+  z-index: 1900 !important;
   .n-modal-scroll-content {
     @apply z-1;
   }
   .n-modal-mask {
     @apply -z-1;
   }
+}
+
+.n-drawer-container {
+  z-index: 1800 !important;
 }
 
 .n-modal {
