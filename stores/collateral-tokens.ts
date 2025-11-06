@@ -8,6 +8,7 @@ import Endpoints from '~/lib/values/endpoints';
 export interface CollateralToken extends CollateralTokenInterface {
   balance: bigint;
   parsedBalance: string;
+  quickBuy: number[];
 }
 
 /**
@@ -22,7 +23,13 @@ export const useTokensStore = defineStore('collateralTokens', {
   }),
   getters: {
     getToken: state => (id: number) => {
-      return state.items[id];
+      const token = state.items[id];
+      if (token?.name === 'FXRP') {
+        token.quickBuy = [0.5, 1];
+      } else {
+        token.quickBuy = [1, 3];
+      }
+      return token;
     },
   },
   actions: {

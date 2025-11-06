@@ -30,15 +30,15 @@
               <div v-if="tradeEnabled(predictionSet.setStatus, predictionSet.endTime)" class="flex">
                 <div
                   class="mr-[6px] px-1.5 border-1 bg-statusGreen/20 border-statusGreen rounded-[8px] hover:bg-statusGreen"
-                  @click="openDetails(outcome.id, TransactionType.BUY, 5)"
+                  @click="openDetails(outcome.id, TransactionType.BUY, collateralToken?.quickBuy[0])"
                 >
-                  Buy 5
+                  Buy {{ collateralToken?.quickBuy[0] }}
                 </div>
                 <div
                   class="mr-[6px] px-1.5 border-1 bg-statusGreen/20 border-statusGreen rounded-[8px] hover:bg-statusGreen"
-                  @click="openDetails(outcome.id, TransactionType.BUY, 10)"
+                  @click="openDetails(outcome.id, TransactionType.BUY, collateralToken?.quickBuy[1])"
                 >
-                  Buy 10
+                  Buy {{ collateralToken?.quickBuy[1] }}
                 </div>
                 <div
                   class="px-1.5 border-1 bg-statusRed/20 border-statusRed rounded-[8px] hover:bg-statusRed"
