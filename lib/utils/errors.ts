@@ -19,6 +19,17 @@ export function contractError(error: any) {
 
 function contractErrorMsg(e: any) {
   const errorData = e?.reason || e?.data?.message || e?.error?.data?.message || e?.error?.message || e?.message || '';
+  const errorDetails = e?.details || e?.cause?.message || e?.cause?.details || '';
+
+  // Check for WalletConnect session errors
+  if (
+    errorData.includes('session topic does not exist') ||
+    errorData.includes('Missing or invalid') ||
+    errorDetails.includes('session topic does not exist') ||
+    errorDetails.includes('Missing or invalid')
+  ) {
+    return 'WalletConnect session expired. Please reconnect your wallet.';
+  }
 
   if (errorData.includes('insufficient funds')) {
     return 'Wallet account does not have enough funds.';

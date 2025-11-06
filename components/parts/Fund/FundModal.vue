@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useAccount, useBalance } from '@wagmi/vue';
+import { useAccount, useBalance, useConnectorClient } from '@wagmi/vue';
 import { colors } from '../../../tailwind.config';
 import { startThirdwebPayment } from '~/lib/thirdwebpay/dist/thirdwebpay';
 import { useSwap } from '~/composables/useSwap';
@@ -17,6 +17,7 @@ enum Steps {
 
 const config = useRuntimeConfig();
 const { connector, address } = useAccount();
+const { data: walletClient } = useConnectorClient();
 const { data: nativeBalance, refetch: refetchNativeBalance } = useBalance({
   address: computed(() => address.value),
 });
@@ -101,6 +102,8 @@ function openThirdweb() {
       amount: nativeMissing.value,
       // purchaseData: { purchaseId: 1 },
       connectorId: connector.value?.id,
+      // Pass wagmi walletClient for WalletConnect to avoid double initialization
+      wagmiWalletClient: connector.value?.id === 'walletConnect' && walletClient.value ? walletClient.value : undefined,
       onSuccess: (_info: any) => {
         /**
          * Handle success in <PredictionSetAction />
