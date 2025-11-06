@@ -1,6 +1,6 @@
 import { BuyWidget, ThirdwebProvider, useActiveAccount, useConnect, type PayUIOptions } from 'thirdweb/react';
 import { createThirdwebClient, defineChain, type ThirdwebClient } from 'thirdweb';
-import { createWallet } from 'thirdweb/wallets';
+import { createWallet, createWalletAdapter } from 'thirdweb/wallets';
 import { useEffect, useState } from 'react';
 /**
  * @TODO Import from thirdweb/chains once available
@@ -31,6 +31,8 @@ export type PayParams = {
   testMode?: boolean;
   purchaseData?: Record<string, unknown>;
   connectorId?: keyof typeof ExternalWalletsIdMap;
+  // Optional: Pass wagmi walletClient to use with viemAdapter (avoids double initialization)
+  wagmiWalletClient?: any; // Viem WalletClient type
 
   // https://portal.thirdweb.com/references/typescript/v5/PayUIOptions
   onSuccess?: PayUIOptions['onPurchaseSuccess'];
@@ -70,7 +72,9 @@ function Embed({
   testMode = false,
   purchaseData = {},
   onSuccess,
-}: { client: ThirdwebClient } & PayParams) {
+  wagmiWalletClient,
+}: { client: ThirdwebClient
+ } & PayParams) {
   const { connect } = useConnect();
   const activeAccount = useActiveAccount();
 
@@ -89,13 +93,27 @@ function Embed({
       !!client &&
       ['metaMaskSDK', 'coinbaseWalletSDK', 'walletConnect'].includes(connectorId)
     ) {
+      // For WalletConnect, use createWalletAdapter to convert wagmi walletClient to thirdweb wallet
+      // This avoids double initialization by reusing the existing wagmi connection
+      if (connectorId === 'walletConnect' && wagmiWalletClient) {
+        connect(async () => {
+          // Convert viem walletClient directly to thirdweb wallet
+          const wallet = createWalletAdapter({adaptedAccount: wagmiWalletClient.account, client, chain, onDisconnect: () => {}, switchChain: () => {}})
+          
+          wallet.connect({ client });
+          return wallet;
+        });
+        return;
+      }
+
+      // For other wallets or WalletConnect without wagmi account, create new connection
       connect(async () => {
         const wallet = createWallet(ExternalWalletsIdMap[connectorId]);
         await wallet.connect({ client });
         return wallet;
       });
     }
-  }, [client, connectorId, activeAccount, connect]);
+  }, [client, connectorId, activeAccount, connect, wagmiWalletClient, chain]);
 
   // if (!activeAccount && !testMode) {
   //   console.log('no active account', activeAccount, testMode);

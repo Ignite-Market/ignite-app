@@ -273,6 +273,7 @@ body > .n-message-container {
 
 /** Modal */
 .n-modal-container {
+  z-index: 1000 !important;
   .n-modal-scroll-content {
     @apply z-1;
   }

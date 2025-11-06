@@ -92,10 +92,19 @@ async function evmWalletLogin(data: Record<string, any>) {
 
     const res = await $api.post<WalletLoginResponse>(Endpoints.walletLogin, body);
 
-    // Connect wallet with thirdweb to make it available for Thirdweb PayEmbed
-    connectExternalWallet(connector.value?.id || data?.connector?.id || '');
-
     userStore.saveUser(res.data);
+
+    // Connect wallet with thirdweb to make it available for Thirdweb PayEmbed
+    const connectorId = connector.value?.id || data?.connector?.id || '';
+    // Skip WalletConnect - it's already initialized via wagmi and re-initializing causes conflicts
+    if (connectorId && connectorId !== 'walletConnect') {
+      // Add a delay to ensure wagmi connection is fully established before connecting thirdweb
+      setTimeout(() => {
+        connectExternalWallet(connectorId).catch(err => {
+          console.warn('Thirdweb wallet connection failed (optional):', err);
+        });
+      }, 500);
+    }
 
     messageProvider.success('Wallet has been successfully connected.');
   } catch (error) {
