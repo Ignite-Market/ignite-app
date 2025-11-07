@@ -76,13 +76,13 @@
                     Explore Markets
                   </BasicButton>
 
-                  <BasicButton
+                  <!-- <BasicButton
                     v-else-if="reward.type === RewardType.PROPOSAL_WINNER || reward.type === RewardType.PROPOSAL_VOTE"
                     class="w-full bg-primary hover:bg-primary-hover"
                     @click="router.push('/proposals')"
                   >
                     View Proposals
-                  </BasicButton>
+                  </BasicButton> -->
 
                   <BasicButton
                     v-else-if="reward.type === RewardType.USER_REFERRAL"
