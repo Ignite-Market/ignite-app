@@ -108,6 +108,7 @@ const callbacks = (token: string) => {
             :class="{
               'relative card flex items-center py-1 pl-2 pr-4 pointer-events-none': !connector,
             }"
+            btn-class="py-2"
             type="outline"
             size="large"
             :disabled="loading || !!loadingConnector || step < 1"

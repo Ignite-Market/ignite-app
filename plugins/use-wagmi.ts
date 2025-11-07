@@ -19,6 +19,15 @@ export default defineNuxtPlugin(nuxtApp => {
   const wagmiConfig = createConfig({
     chains,
     connectors: [
+      inAppWalletConnector({
+        client,
+        // @ts-ignore wrong types smartAccount/smartAccounts
+        smartAccounts: {
+          sponsorGas: true,
+          chain: thirdwebChain((config.public.ENV === AppEnv.PROD ? flare : flareTestnet) as any),
+        },
+        metadata: { name: 'Embedded Wallet (Google & Apple & Social)' },
+      }),
       metaMask({
         dappMetadata: {
           name: 'Ignite Market Metamask wallet',
@@ -34,15 +43,6 @@ export default defineNuxtPlugin(nuxtApp => {
             '--wcm-z-index': '2001',
           },
         },
-      }),
-      inAppWalletConnector({
-        client,
-        // @ts-ignore wrong types smartAccount/smartAccounts
-        smartAccounts: {
-          sponsorGas: true,
-          chain: thirdwebChain((config.public.ENV === AppEnv.PROD ? flare : flareTestnet) as any),
-        },
-        metadata: { name: 'Embedded Wallet' },
       }),
     ],
     multiInjectedProviderDiscovery: false,
