@@ -154,7 +154,6 @@
               size="large"
               class="min-w-full text-center"
               type="number"
-              :precision="DISPLAY_DECIMALS"
               :show-button="true"
               button-placement="both"
               :disabled="loading"
@@ -203,7 +202,12 @@
           </BasicButton>
 
           <div class="text-[16px] leading-[24px] text-grey-lightest font-normal mt-6">
-            <div class="flex items-center justify-center">
+            <div class="flex items-center justify-center text-lg">
+              <div>Potential return</div>
+              <div class="ml-auto text-statusGreen">{{ potentialReturn }} {{ collateralToken.symbol }}</div>
+            </div>
+            <n-divider class="!my-3" />
+            <div class="flex items-center justify-center mt-2">
               <div>Avg price</div>
               <div class="ml-auto text-primary">
                 {{ pricePerShare ? pricePerShare.toFixed(3) : 0.0 }} {{ collateralToken.symbol }}
@@ -212,10 +216,6 @@
             <div class="flex items-center justify-center mt-2">
               <div>Shares (receive at least)</div>
               <div class="ml-auto text-white/80">{{ returnAmount }}</div>
-            </div>
-            <div class="flex items-center justify-center mt-2">
-              <div>Potential return</div>
-              <div class="ml-auto text-statusGreen">{{ potentialReturn }} {{ collateralToken.symbol }}</div>
             </div>
           </div>
         </n-tab-pane>
@@ -245,7 +245,6 @@
               size="large"
               class="min-w-full text-center"
               type="number"
-              :precision="DISPLAY_DECIMALS"
               :show-button="true"
               button-placement="both"
               :max="sellableBalance"
@@ -295,15 +294,16 @@
           </BasicButton>
 
           <div class="text-[16px] leading-[24px] text-grey-lightest font-normal mt-6">
+            <div class="flex items-center justify-center text-lg">
+              <div>Potential return</div>
+              <div class="ml-auto text-statusGreen">{{ potentialReturn }} {{ collateralToken.symbol }}</div>
+            </div>
+            <n-divider class="!my-3" />
             <div class="flex items-center justify-center">
               <div>Avg price</div>
               <div class="ml-auto text-primary">
                 {{ pricePerShare ? pricePerShare.toFixed(3) : 0.0 }} {{ collateralToken.symbol }}
               </div>
-            </div>
-            <div class="flex items-center justify-center mt-2">
-              <div>Potential return</div>
-              <div class="ml-auto text-statusGreen">{{ potentialReturn }} {{ collateralToken.symbol }}</div>
             </div>
           </div>
         </n-tab-pane>
@@ -327,7 +327,6 @@
               class="min-w-full text-center"
               type="number"
               :show-button="true"
-              :precision="DISPLAY_DECIMALS"
               button-placement="both"
               :disabled="loading"
             >
@@ -563,6 +562,24 @@ const returnAmount = ref<string>('0.0');
 const potentialReturn = ref<string>('0.0');
 const conditionalBalance = ref(BigInt(0));
 
+function truncateToDecimals(n: number, decimals: number): number {
+  if (!Number.isFinite(n)) return 0;
+  const sign = n < 0 ? -1 : 1;
+  const abs = Math.abs(n);
+  // Use toFixed to avoid binary float issues, then hard-truncate the string
+  const s = abs.toFixed(decimals + 8); // extra precision buffer
+  const [intPart, fracPart = ''] = s.split('.');
+  const truncatedFrac = decimals > 0 ? fracPart.slice(0, decimals) : '';
+  const resultStr = decimals > 0 ? `${intPart}.${truncatedFrac}` : intPart;
+  return sign * Number(resultStr);
+}
+
+const effectiveAmount = computed<number>(() => {
+  const v = amount.value;
+  if (v == null) return 0;
+  return truncateToDecimals(v, DISPLAY_DECIMALS);
+});
+
 // Display helpers – show balances up to DISPLAY_DECIMALS digits and ignore dust
 const sellableBalance = computed<number>(() => {
   return floorNumber(bigIntToNum(conditionalBalance.value, props.collateralToken.decimals));
@@ -593,39 +610,39 @@ const openFiatBuyModal = () => {
 };
 
 const buyValidator = (x: number) => {
-  if (x > buyFundLimit.value) {
+  const tx = truncateToDecimals(x, DISPLAY_DECIMALS);
+  if (tx > buyFundLimit.value) {
     // Because input is calling -1 +1 for buttons
-    if (amount.value !== +(x - 1).toFixed(DISPLAY_DECIMALS)) {
-      console.log('buyFundLimit.value', buyFundLimit.value);
-      console.log('x', x);
-      console.log('amount.value', amount.value);
+    if (truncateToDecimals(amount.value || 0, DISPLAY_DECIMALS) !== tx - 1) {
       buyError.value = `Amount can not exceed 10% of total liquidity.`;
     }
   } else {
     buyError.value = '';
   }
 
-  return x >= 0 && x <= buyFundLimit.value;
+  return tx >= 0 && tx <= buyFundLimit.value;
 };
 
 const sellValidator = (x: number) => {
-  if (x > sellFundLimit.value) {
+  const tx = truncateToDecimals(x, DISPLAY_DECIMALS);
+  if (tx > sellFundLimit.value) {
     // Because input is calling -1 +1 for buttons
     if (amount.value !== x - 1) {
-      console.log('sellFundLimit.value validator', sellFundLimit.value);
       sellError.value = `Sell amount can not exceed 10% of total liquidity.`;
     }
   } else {
     sellError.value = '';
   }
 
-  return x >= 0 && x <= sellFundLimit.value;
+  return tx >= 0 && tx <= sellFundLimit.value;
 };
 
 const onBuyBlur = () => {
   if (buyError.value) {
     amount.value = buyFundLimit.value;
     buyError.value = '';
+  } else {
+    amount.value = effectiveAmount.value as any;
   }
 };
 
@@ -633,6 +650,8 @@ const onSellBlur = () => {
   if (sellError.value) {
     amount.value = sellFundLimit.value;
     sellError.value = '';
+  } else {
+    amount.value = effectiveAmount.value as any;
   }
 };
 
@@ -725,19 +744,14 @@ watch(
     if (!props?.outcome || !currentLiquidity.value) {
       return;
     }
-    console.log('currentLiquidity.value', currentLiquidity.value);
     const maxAmount = (BigInt(currentLiquidity.value) * 10n) / 100n;
-    console.log('maxAmount', maxAmount);
     let limit = (await calcSharesForCollateral(maxAmount, props.outcome.outcomeIndex, props.contractAddress)) || 0n;
 
-    console.log('limit', limit);
     if (conditionalBalance.value < limit || limit === -1n) {
       limit = conditionalBalance.value;
     }
     const rawLimit = Number(limit) / Math.pow(10, props.collateralToken.decimals);
-    console.log('rawLimit', rawLimit);
     sellFundLimit.value = floorNumber(rawLimit);
-    console.log('sellFundLimit.value', sellFundLimit.value);
   }
 );
 
@@ -782,26 +796,27 @@ watch(
 
 watchDebounced(
   () => [amount.value, props.outcome],
-  async () => {
-    if (amount.value === 0) {
+  async (newValue, oldValue) => {
+    const v = effectiveAmount.value;
+    // Skip if the value was only truncated
+    if (truncateToDecimals(oldValue[0] as number, DISPLAY_DECIMALS) === v) {
+      if (v !== newValue[0]) {
+        amount.value = v;
+      }
+      return;
+    }
+    if (v === 0 || !v) {
       returnAmount.value = '0.0';
       potentialReturn.value = '0.0';
       return;
     }
-
-    if (!amount.value) {
-      returnAmount.value = '0.0';
-      potentialReturn.value = '0.0';
-      return;
-    }
-
     if (selectedTab.value === TransactionType.BUY) {
       await updateBuyAmount();
     } else if (selectedTab.value === TransactionType.SELL) {
       await updateSellAmount();
     }
   },
-  { debounce: 500, maxWait: 1000 }
+  { debounce: 500 }
 );
 
 watchDebounced(
@@ -874,13 +889,14 @@ async function refreshBalances() {
 }
 
 async function updateBuyAmount() {
-  if (!amount.value) {
+  const v = effectiveAmount.value;
+  if (!v) {
     return;
   }
 
   const { minTokensToBuy, minTokensToBuyNoSlippage } = await getMinTokensToBuy(
     props.contractAddress,
-    amount.value,
+    v,
     props.outcome.outcomeIndex,
     slippage.value,
     props.collateralToken.decimals
@@ -891,12 +907,13 @@ async function updateBuyAmount() {
 }
 
 async function updateSellAmount() {
-  if (!amount.value) {
+  const v = effectiveAmount.value;
+  if (!v) {
     return;
   }
 
   const result = await calcSellAmountInCollateral(
-    amount.value,
+    v,
     props.outcome.outcomeIndex,
     props.contractAddress,
     props.outcomes.map(o => o.positionId),
