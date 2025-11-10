@@ -142,6 +142,7 @@
           <div class="mb-3">
             <div class="flex flex-row text-[12px] leading-[16px] mb-2">
               <div class="font-bold">Amount</div>
+              <div class="ml-1.5 text-grey-lightest">in {{ collateralToken.symbol }}</div>
               <div class="ml-auto flex font-medium">
                 <div class="text-grey-lightest">Balance:</div>
                 <div class="text-white/80 ml-1">{{ collateralToken.parsedBalance }} {{ collateralToken.symbol }}</div>
@@ -198,7 +199,7 @@
             :loading="loading"
             @click="buyOutcome"
           >
-            Buy
+            Buy with crypto
           </BasicButton>
 
           <div class="text-[16px] leading-[24px] text-grey-lightest font-normal mt-6">
@@ -230,6 +231,7 @@
           <div class="mb-3">
             <div class="flex flex-row text-[12px] leading-[16px] mb-2">
               <div class="font-bold">Amount</div>
+              <div class="ml-1.5 text-grey-lightest">in {{ outcome.name }} shares</div>
               <div class="ml-auto flex font-medium">
                 <div class="text-grey-lightest">Balance:</div>
                 <div class="text-white/80 ml-1">
@@ -290,7 +292,7 @@
             :loading="loading"
             @click="sellOutcome"
           >
-            Sell
+            Sell shares
           </BasicButton>
 
           <div class="text-[16px] leading-[24px] text-grey-lightest font-normal mt-6">
@@ -794,13 +796,24 @@ watch(
   }
 );
 
+watch(
+  () => props.outcome,
+  async () => {
+    if (selectedTab.value === TransactionType.BUY) {
+      await updateBuyAmount();
+    } else if (selectedTab.value === TransactionType.SELL) {
+      await updateSellAmount();
+    }
+  }
+);
+
 watchDebounced(
-  () => [amount.value, props.outcome],
+  () => amount.value,
   async (newValue, oldValue) => {
     const v = effectiveAmount.value;
     // Skip if the value was only truncated
-    if (truncateToDecimals(oldValue[0] as number, DISPLAY_DECIMALS) === v) {
-      if (v !== newValue[0]) {
+    if (truncateToDecimals(oldValue as number, DISPLAY_DECIMALS) === v) {
+      if (v !== newValue) {
         amount.value = v;
       }
       return;
@@ -908,7 +921,7 @@ async function updateBuyAmount() {
 
 async function updateSellAmount() {
   const v = effectiveAmount.value;
-  if (!v) {
+  if (!v || !isConnected.value) {
     return;
   }
 

@@ -75,7 +75,7 @@ export default function useFixedMarketMaker() {
     slippage: number,
     collateralDecimals: number
   ) {
-    const contract = await initContract(ContractType.FPMM, fpmmContractAddress);
+    const contract = await initReadContract(ContractType.FPMM, fpmmContractAddress);
 
     const scaledAmount = BigInt(Math.round(amount * 10 ** collateralDecimals));
     const minTokensToBuyNoSlippage = await contract.read.calcBuyAmount([scaledAmount, outcomeIndex]);
@@ -248,7 +248,7 @@ export default function useFixedMarketMaker() {
   ) {
     Big.DP = 90;
 
-    const ctContract = await initContract(ContractType.CONDITIONAL_TOKEN);
+    const ctContract = await initReadContract(ContractType.CONDITIONAL_TOKEN);
     const owners = positionIds.map(() => fpmmContractAddress);
     const ids = positionIds.map(positionId => BigInt(positionId));
     const marketSharesAmounts = await ctContract.read.balanceOfBatch([owners, ids]);
@@ -316,7 +316,7 @@ export default function useFixedMarketMaker() {
    * @returns Number of shares needed to sell.
    */
   async function calcSharesForCollateral(collateralAmount: bigint, outcomeIndex: number, fpmmContractAddress: Address) {
-    const contract = await initContract(ContractType.FPMM, fpmmContractAddress);
+    const contract = await initReadContract(ContractType.FPMM, fpmmContractAddress);
 
     let shares = 0n;
     try {
