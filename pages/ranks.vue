@@ -1,6 +1,6 @@
 <template>
   <Dashboard>
-    <div class="flex flex-col gap-6 max-w-[900px] mx-auto">
+    <div class="flex flex-col gap-6 max-w-[1200px] mx-auto">
       <div class="text-center">
         <h1 class="text-[24px] leading-[34px] font-bold text-white mb-6">Leaderboard</h1>
         <div class="flex justify-center gap-4">
@@ -29,19 +29,19 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div class="bg-grey rounded-lg p-3">
           <div class="flex items-center justify-between mb-4">
             <div class="flex items-center gap-2">
               <NuxtIcon name="icon/bar-chart-fill" class="text-primary text-2xl" />
               <h2 class="text-xl font-bold">Volume</h2>
             </div>
-            <button class="text-grey-lightest hover:text-white" @click="fetchLeaderboardData">
+            <button class="text-grey-lightest hover:text-white" @click="() => fetchLeaderboardData(['volume'])">
               <NuxtIcon name="icon/refresh" />
             </button>
           </div>
 
-          <div v-if="!loading && !volumeLeaders.length" class="text-center py-12">
+          <div v-if="!loading.includes('volume') && !volumeLeaders.length" class="text-center py-12">
             <n-empty description="No volume data found" />
           </div>
           <div v-else-if="volumeLeaders.length" class="flex flex-col gap-3">
@@ -72,7 +72,7 @@
               </div>
             </div>
           </div>
-          <div v-if="loading" class="flex flex-col gap-3">
+          <div v-if="loading.includes('volume') && !volumeLeaders.length" class="flex flex-col gap-3">
             <n-skeleton v-for="i in 10" :key="i" height="32px" class="rounded-[8px]" />
           </div>
         </div>
@@ -83,12 +83,12 @@
               <NuxtIcon name="icon/cash-line" class="text-primary text-2xl" />
               <h2 class="text-xl font-bold">Profit</h2>
             </div>
-            <button class="text-grey-lightest hover:text-white" @click="fetchLeaderboardData">
+            <button class="text-grey-lightest hover:text-white" @click="() => fetchLeaderboardData(['profit'])">
               <NuxtIcon name="icon/refresh" />
             </button>
           </div>
 
-          <div v-if="!loading && !earningLeaders.length" class="text-center py-12">
+          <div v-if="!loading.includes('profit') && !earningLeaders.length" class="text-center py-12">
             <n-empty description="No profit data found" />
           </div>
           <div v-else-if="earningLeaders.length" class="flex flex-col gap-3">
@@ -119,7 +119,42 @@
               </div>
             </div>
           </div>
-          <div v-if="loading" class="flex flex-col gap-3">
+          <div v-if="loading.includes('profit') && !earningLeaders.length" class="flex flex-col gap-3">
+            <n-skeleton v-for="i in 10" :key="i" height="32px" class="rounded-[8px]" />
+          </div>
+        </div>
+
+        <div class="bg-grey rounded-lg p-3">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-2">
+              <NuxtIcon name="icon/points" class="text-primary text-2xl" />
+              <h2 class="text-xl font-bold">Points</h2>
+            </div>
+            <button class="text-grey-lightest hover:text-white" @click="() => fetchLeaderboardData(['points'])">
+              <NuxtIcon name="icon/refresh" />
+            </button>
+          </div>
+
+          <div v-if="!loading.includes('points') && !pointsLeaders.length" class="text-center py-12">
+            <n-empty description="No points data found" />
+          </div>
+          <div v-else-if="pointsLeaders.length" class="flex flex-col gap-3">
+            <div v-for="(user, index) in pointsLeaders" :key="user.id" class="flex items-center gap-2">
+              <div class="w-4 text-grey-lightest text-sm">{{ index + 1 }}</div>
+              <NuxtLink :to="`/profile/${user.id}`" class="flex items-center flex-grow gap-2">
+                <div class="w-6 h-6">
+                  <jazzicon :address="user.walletAddress" :diameter="24" />
+                </div>
+                <div class="text-sm font-medium text-white/80 hover:text-primary transition-colors duration-200">
+                  {{ user.username }}
+                </div>
+              </NuxtLink>
+              <div class="text-right font-medium text-sm">
+                {{ formatNumber(user.totalRewardPoints || 0) }}
+              </div>
+            </div>
+          </div>
+          <div v-if="loading.includes('points') && !pointsLeaders.length" class="flex flex-col gap-3">
             <n-skeleton v-for="i in 10" :key="i" height="32px" class="rounded-[8px]" />
           </div>
         </div>
@@ -138,13 +173,15 @@ interface LeaderboardEntry {
   walletAddress: string;
   totalVolume?: number;
   totalProfit?: number;
+  totalRewardPoints?: number;
   collateral_token_id: number;
 }
 
 const timeFilter = ref('Day');
 const volumeLeaders = ref<LeaderboardEntry[]>([]);
 const earningLeaders = ref<LeaderboardEntry[]>([]);
-const loading = ref(false);
+const pointsLeaders = ref<LeaderboardEntry[]>([]);
+const loading = ref<string[]>([]);
 const tokensStore = useTokensStore();
 
 const collateralToken = ref<number | null>(null);
@@ -156,14 +193,11 @@ const periodMap = {
   All: 'ALL',
 };
 
-async function fetchLeaderboardData() {
-  if (loading.value) return;
+async function fetchLeaderboardData(update = ['volume', 'profit', 'points']) {
+  if (loading.value.length > 0) return;
 
   try {
-    loading.value = true;
-    /* clear user data when reloading or switching the filters */
-    volumeLeaders.value = [];
-    earningLeaders.value = [];
+    loading.value = update;
 
     const range = periodMap[timeFilter.value as keyof typeof periodMap];
 
@@ -177,17 +211,44 @@ async function fetchLeaderboardData() {
       params.collateralTokenId = collateralToken.value;
     }
 
-    const [volumeRes, earningsRes] = await Promise.all([
-      $api.get<GeneralItemsResponse<LeaderboardEntry>>(Endpoints.leaderboardVolume, params),
-      $api.get<GeneralItemsResponse<LeaderboardEntry>>(Endpoints.leaderboardProfit, params),
-    ]);
+    const requests = [] as Promise<GeneralItemsResponse<LeaderboardEntry>>[];
+    let result = {} as any;
+    if (update.includes('volume')) {
+      volumeLeaders.value = [];
+      requests.push(
+        $api.get<GeneralItemsResponse<LeaderboardEntry>>(Endpoints.leaderboardVolume, params).then(res => {
+          result.volume = res.data.items;
+          return res;
+        })
+      );
+    }
+    if (update.includes('profit')) {
+      earningLeaders.value = [];
+      requests.push(
+        $api.get<GeneralItemsResponse<LeaderboardEntry>>(Endpoints.leaderboardProfit, params).then(res => {
+          result.profit = res.data.items;
+          return res;
+        })
+      );
+    }
+    if (update.includes('points')) {
+      pointsLeaders.value = [];
+      requests.push(
+        $api.get<GeneralItemsResponse<LeaderboardEntry>>(Endpoints.leaderboardPoints, params).then(res => {
+          result.points = res.data.items;
+          return res;
+        })
+      );
+    }
 
-    volumeLeaders.value = volumeRes.data.items;
-    earningLeaders.value = earningsRes.data.items;
+    await Promise.all(requests);
+    volumeLeaders.value = result.volume || volumeLeaders.value;
+    earningLeaders.value = result.profit || earningLeaders.value;
+    pointsLeaders.value = result.points || pointsLeaders.value;
   } catch (error) {
     window.$message.error(apiError(error));
   } finally {
-    loading.value = false;
+    loading.value = [];
   }
 }
 
@@ -205,6 +266,6 @@ watch(timeFilter, () => {
 });
 
 watch(collateralToken, () => {
-  fetchLeaderboardData();
+  fetchLeaderboardData(['volume', 'profit']);
 });
 </script>

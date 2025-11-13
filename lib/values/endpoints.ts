@@ -85,6 +85,7 @@ const Endpoints = {
    */
   leaderboardVolume: '/stats/leaderboard/volume',
   leaderboardProfit: '/stats/leaderboard/profit',
+  leaderboardPoints: '/stats/leaderboard/points',
 
   /**
    * File upload
