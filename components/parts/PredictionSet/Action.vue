@@ -6,12 +6,19 @@
     :header-class="'!py-5 !px-6 bg-grey-dark !rounded-t-[8px]'"
   >
     <template #header>
-      <div v-if="selectedTab === TransactionType.FUND" class="flex items-center justify-center">
-        <div class="text-[12px] leading-[16px] pt-[19px] pb-[19px]">Fund this market</div>
-        <IconInfo
-          size="sm"
-          tooltip="Provide liquidity to earn trading fees and profit from market movement. </br> You can withdraw funding and claim rewards when the market closes.</br> Learn more about <a href='https://docs.ignitemarket.xyz/' target='_blank' class='underline'>funding the markets.</a>"
-        />
+      <div v-if="selectedTab === TransactionType.FUND" class="">
+        <div class="flex items-center justify-center">
+          <div class="text-[12px] leading-[16px] pt-[10px] pb-[10px]">Fund this market</div>
+          <IconInfo
+            size="sm"
+            tooltip="Provide liquidity to earn trading fees and profit from market movement. </br> You can withdraw funding and claim rewards when the market closes.</br> Learn more about <a href='https://docs.ignitemarket.xyz/' target='_blank' class='underline'>funding the markets.</a>"
+          />
+        </div>
+        <div class="text-[10px] text-grey-lightest leading-[16px] text-center -mb-2">
+          Funding a market presents a risk!<br />
+          Read more in the
+          <a href="https://docs.ignitemarket.xyz/docs/how-to/fund" target="_blank" class="underline">docs</a>.
+        </div>
       </div>
       <div v-else class="bg-grey-light rounded-[8px] p-3 flex flex-row items-center justify-center">
         <n-dropdown
