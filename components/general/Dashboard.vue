@@ -1,6 +1,9 @@
 <template>
-  <div>
+  <div class="relative">
     <Header ref="headerRef" class="min-h-[60px] md:min-h-[86px]" />
+    <div class="bg-primary w-full text-black text-center !leading-[22px] font-medium xs:text-sm text-xs">
+      Fully decentralized prediction market - Beta version
+    </div>
     <Navigation />
 
     <div v-if="loading">
@@ -35,6 +38,16 @@
                 </div>
                 <div>
                   <slot name="bottom" />
+                </div>
+                <div
+                  class="bg-primary w-full text-black h-[40px] mb-[23px] flex items-center justify-center gap-2.5 z-2"
+                >
+                  <a href="https://discord.gg/WSrNZTCJ" target="_blank">
+                    <Image src="/discord.png" alt="Discord" width="28" height="28" />
+                  </a>
+                  <a href="https://x.com/IgniteMarketX" target="_blank">
+                    <Image src="/twitter.png" alt="Twitter" width="28" height="28" />
+                  </a>
                 </div>
               </div>
             </n-infinite-scroll>
