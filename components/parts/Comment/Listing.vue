@@ -1,5 +1,5 @@
 <template>
-  <div class="mt-5 pb-[33vh]">
+  <div class="mt-5 pb-12">
     <n-input
       v-model:value="comment"
       placeholder="Add comment"
