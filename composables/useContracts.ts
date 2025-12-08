@@ -128,6 +128,8 @@ export default function useContracts() {
     switch (type) {
       case ContractType.CONDITIONAL_TOKEN:
         return config.public.CONDITIONAL_TOKEN_CONTRACT as Address;
+      case ContractType.ORACLE:
+        return config.public.ORACLE_CONTRACT as Address;
     }
 
     return undefined;

@@ -7,6 +7,32 @@ import {
 } from './abi';
 
 /**
+ * Oracle contract ABI (minimal - vote and hasVoted)
+ */
+export const ORACLE_ABI = [
+  {
+    inputs: [
+      { internalType: 'bytes32', name: 'questionId', type: 'bytes32' },
+      { internalType: 'uint256', name: 'outcomeIdx', type: 'uint256' },
+    ],
+    name: 'vote',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      { internalType: 'bytes32', name: '', type: 'bytes32' },
+      { internalType: 'address', name: '', type: 'address' },
+    ],
+    name: 'hasVoted',
+    outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+] as const;
+
+/**
  * Contract types.
  */
 export enum ContractType {
@@ -15,6 +41,7 @@ export enum ContractType {
   FPMM = 3,
   QUOTER = 4,
   SWAP_ROUTER = 5,
+  ORACLE = 6,
 }
 
 /**
@@ -38,6 +65,9 @@ export function getContractAbi(contractType: ContractType): any {
 
     case ContractType.SWAP_ROUTER:
       return SPARK_DEX_SWAP_ROUTER_ABI;
+
+    case ContractType.ORACLE:
+      return ORACLE_ABI;
 
     default:
       return null;
