@@ -12,7 +12,8 @@
     "preview": "nuxt preview",
     "preinstall": "npm i --prefix lib/thirdwebpay && npm run build --prefix lib/thirdwebpay",
     "postinstall": "nuxt prepare",
-    "build:thirdweb": "cd lib/thirdwebpay && npm install && npm run build"
+    "build:thirdweb": "cd lib/thirdwebpay && npm install && npm run build",
+    "install": "npm i --ignore-scripts"
   },
   "dependencies": {
     "@fvictorio/newton-raphson-method": "^1.0.5",

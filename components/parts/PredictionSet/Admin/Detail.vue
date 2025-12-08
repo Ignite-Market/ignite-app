@@ -89,6 +89,17 @@
               Chance: {{ outcome.latestChance }}%
             </div>
             <div class="text-xs text-grey-lightest">Index: {{ outcome.outcomeIndex }}</div>
+            <BasicButton
+              v-if="prediction.setStatus === PredictionSetStatus.VOTING && hasVoted !== true"
+              class="mt-3 w-full"
+              size="small"
+              @click="openVoteModal(outcome)"
+            >
+              Vote
+            </BasicButton>
+            <div v-else-if="hasVoted === true" class="mt-3 text-xs text-primary font-semibold text-center">
+              Already voted
+            </div>
           </div>
           <div
             v-if="outcome.id === prediction.winner_outcome_id"
@@ -99,24 +110,48 @@
         </div>
       </div>
     </div>
+
+    <!-- Vote Modal -->
+    <VoteOutcomeModal
+      v-if="selectedOutcome"
+      v-model:show="showVoteModal"
+      :prediction="prediction"
+      :outcome="selectedOutcome"
+      :has-voted="hasVoted"
+      @voted="handleVoted"
+    />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue';
-import type { PredictionSetInterface } from '~/lib/types/prediction-set';
+import { computed, ref, onMounted, watch } from 'vue';
+import { useAccount } from '@wagmi/vue';
+import type { PredictionSetInterface, OutcomeInterface } from '~/lib/types/prediction-set';
 import { useTokensStore } from '~/stores/collateral-tokens';
-import { formatCollateralAmount } from '~/lib/utils/numbers';
+import { formatCollateralAmount, numberToBytes32 } from '~/lib/utils/numbers';
 import { getStatusName } from '~/lib/utils/prediction-set';
 import Image from '~/components/general/Image.vue';
 import { formatDateToUTC } from '~/lib/utils/dates';
-
 import { PredictionSetStatus, ResolutionType } from '~/lib/types/prediction-set';
+import VoteOutcomeModal from '~/components/parts/PredictionSet/Admin/VoteOutcomeModal.vue';
+import useContracts from '~/composables/useContracts';
+import { ContractType } from '~/lib/config/contracts';
 
 const { prediction } = defineProps<{ prediction: PredictionSetInterface }>();
 
+const emit = defineEmits<{
+  (e: 'voted'): void;
+}>();
+
+const { address: currentAddress } = useAccount();
+const { initReadContract } = useContracts();
+
 const tokensStore = useTokensStore();
 const collateralToken = computed(() => tokensStore.getToken(prediction.collateral_token_id));
+
+const showVoteModal = ref(false);
+const selectedOutcome = ref<OutcomeInterface | null>(null);
+const hasVoted = ref<boolean | null>(null);
 
 const resolutionTypeName = computed(() => {
   switch (prediction.resolutionType) {
@@ -134,4 +169,47 @@ function localDate(date: string | Date) {
   const d = typeof date === 'string' ? new Date(date) : date;
   return 'Local: ' + d.toLocaleString();
 }
+
+function openVoteModal(outcome: OutcomeInterface) {
+  selectedOutcome.value = outcome;
+  showVoteModal.value = true;
+}
+
+function handleVoted() {
+  showVoteModal.value = false;
+  selectedOutcome.value = null;
+  hasVoted.value = true;
+  emit('voted');
+}
+
+async function fetchHasVoted() {
+  // only relevant during voting phase
+  if (prediction.setStatus !== PredictionSetStatus.VOTING) {
+    hasVoted.value = null;
+    return;
+  }
+  if (!currentAddress.value) {
+    hasVoted.value = null;
+    return;
+  }
+  try {
+    const questionId = numberToBytes32(prediction.id) as `0x${string}`;
+    const oracle = await initReadContract(ContractType.ORACLE);
+    hasVoted.value = await oracle.read.hasVoted([questionId, currentAddress.value]);
+  } catch (error) {
+    console.warn('Unable to fetch hasVoted:', error);
+    hasVoted.value = null;
+  }
+}
+
+onMounted(() => {
+  fetchHasVoted();
+});
+
+watch(
+  () => currentAddress.value,
+  () => {
+    fetchHasVoted();
+  }
+);
 </script>
