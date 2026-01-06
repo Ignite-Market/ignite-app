@@ -1,10 +1,10 @@
 <script lang="ts" setup>
 import { useConnect } from '@wagmi/vue';
-import { ProcaptchaComponent } from '@prosopo/vue-procaptcha-wrapper';
+// import { ProcaptchaComponent } from '@prosopo/vue-procaptcha-wrapper';
 
 defineProps({
   loading: { type: Boolean, default: false },
-  step: { type: Number, default: 0 },
+  step: { type: Number, default: 1 },
 });
 
 const showStrategies = ref(false);
@@ -21,7 +21,7 @@ const emit = defineEmits<{
   (e: 'step', value: number): void;
 }>();
 
-const siteKey = useRuntimeConfig().public.PROSOPO_CAPTCHA_SITEKEY as string;
+// const siteKey = useRuntimeConfig().public.PROSOPO_CAPTCHA_SITEKEY as string;
 
 function clickOnConnector(connector: (typeof connectors)[number], strategy?: { id: string; name: string }) {
   if (connector.id === 'in-app-wallet') {
@@ -60,9 +60,9 @@ function clickOnConnector(connector: (typeof connectors)[number], strategy?: { i
 }
 
 // Must be defined here, not in the template. Otherwise the captcha fails first time
-const callbacks = (token: string) => {
-  emit('step', token ? 1 : 0);
-};
+// const callbacks = (token: string) => {
+//   emit('step', token ? 1 : 0);
+// };
 </script>
 
 <template>
@@ -97,9 +97,9 @@ const callbacks = (token: string) => {
       <div class="flex flex-col items-center justify-center">
         <!-- Wallets (metamask, coinbase, etc) -->
         <n-space v-if="!showStrategies" :size="8" vertical class="w-full">
-          <form @submit.prevent>
+          <!-- <form @submit.prevent>
             <ProcaptchaComponent :site-key="siteKey" :callback="callbacks" theme="dark" />
-          </form>
+          </form> -->
 
           <BasicButton
             v-for="(connector, key) in connectors"

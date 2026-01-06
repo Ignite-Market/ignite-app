@@ -16,7 +16,7 @@ const { connectExternalWallet } = useThirdweb();
 
 const loadingWallet = ref<boolean>(false);
 const modalWalletSelectVisible = ref<boolean>(false);
-const step = ref(0); // 0 - captcha, 1 - connect wallet, 2 - sign message
+const step = ref(1); // 0 - captcha, 1 - connect wallet, 2 - sign message
 
 useAccountEffect({
   onConnect: data => evmWalletLogin(data),
