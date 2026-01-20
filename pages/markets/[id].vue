@@ -404,6 +404,7 @@
               :is-initial-funding="
                 predictionSet.setStatus === PredictionSetStatus.FUNDING && predictionSet.fundingVolume === '0'
               "
+              :market-cap-percent="predictionSet.marketCapPercent"
               @action-changed="(action: TransactionType) => (selectedAction = action)"
               @transaction-successful="
                 (transactionType: TransactionType) =>
@@ -463,6 +464,7 @@
         :is-initial-funding="
           predictionSet.setStatus === PredictionSetStatus.FUNDING && predictionSet.fundingVolume === '0'
         "
+        :market-cap-percent="predictionSet.marketCapPercent"
         show-select-outcome
         @outcome-selected="
           (outcomeId: number) => (selectedOutcome = predictionSet?.outcomes.find(o => o.id === outcomeId))

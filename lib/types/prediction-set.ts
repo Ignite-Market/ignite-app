@@ -90,6 +90,7 @@ export interface PredictionSetInterface extends GeneralInterface {
   transactionsVolume?: string;
   positions?: any[];
   fundingPositions?: string;
+  marketCapPercent?: number;
 }
 export interface PredictionSetResponse extends GeneralResponse<PredictionSetInterface> {}
 export interface PredictionSetsResponse extends GeneralItemsResponse<any> {}

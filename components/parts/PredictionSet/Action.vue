@@ -539,6 +539,7 @@ const props = defineProps({
   collateralToken: { type: Object as PropType<CollateralToken>, default: () => {}, required: true },
   isInitialFunding: { type: Boolean, default: false },
   showSelectOutcome: { type: Boolean, default: false },
+  marketCapPercent: { type: Number, default: 10 },
 });
 
 const emit = defineEmits(['actionChanged', 'transactionSuccessful', 'outcomeSelected']);
@@ -623,7 +624,8 @@ const buyValidator = (x: number) => {
   if (tx > buyFundLimit.value) {
     // Because input is calling -1 +1 for buttons
     if (truncateToDecimals(amount.value || 0, DISPLAY_DECIMALS) !== tx - 1) {
-      buyError.value = `Amount can not exceed 10% of total liquidity.`;
+      const marketCapPercent = props.marketCapPercent || 10;
+      buyError.value = `Amount can not exceed ${marketCapPercent}% of total liquidity.`;
     }
   } else {
     buyError.value = '';
@@ -637,7 +639,8 @@ const sellValidator = (x: number) => {
   if (tx > sellFundLimit.value) {
     // Because input is calling -1 +1 for buttons
     if (amount.value !== x - 1) {
-      sellError.value = `Sell amount can not exceed 10% of total liquidity.`;
+      const marketCapPercent = props.marketCapPercent || 10;
+      sellError.value = `Sell amount can not exceed ${marketCapPercent}% of total liquidity.`;
     }
   } else {
     sellError.value = '';
@@ -743,7 +746,8 @@ const enoughCollateralBalance = computed(() => {
 });
 
 const buyFundLimit = computed(() => {
-  const max = (BigInt(currentLiquidity.value) * 10n) / 100n;
+  const marketCapPercent = props.marketCapPercent || 10;
+  const max = (BigInt(currentLiquidity.value) * BigInt(Math.round(marketCapPercent))) / 100n;
   return floorNumber(bigIntToNum(max, props.collateralToken.decimals || 6));
 });
 
@@ -753,7 +757,8 @@ watch(
     if (!props?.outcome || !currentLiquidity.value) {
       return;
     }
-    const maxAmount = (BigInt(currentLiquidity.value) * 10n) / 100n;
+    const marketCapPercent = props.marketCapPercent || 10;
+    const maxAmount = (BigInt(currentLiquidity.value) * BigInt(Math.round(marketCapPercent))) / 100n;
     let limit = (await calcSharesForCollateral(maxAmount, props.outcome.outcomeIndex, props.contractAddress)) || 0n;
 
     if (conditionalBalance.value < limit || limit === -1n) {
