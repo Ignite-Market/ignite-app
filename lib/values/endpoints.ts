@@ -52,6 +52,19 @@ const Endpoints = {
   predictionSetsSuggestions: '/prediction-sets/generate-suggestions',
 
   /**
+   * Data sources
+   */
+  dataSources: '/data-sources',
+  testJqQuery: '/data-sources/test-jq',
+
+  /**
+   * Prediction templates
+   */
+  predictionTemplates: '/prediction-templates',
+  predictionTemplateById: (id: string) => `/prediction-templates/${id}`,
+  generateFromTemplate: (id: string) => `/prediction-templates/${id}/generate`,
+
+  /**
    * Banners
    */
   banners: '/banners',

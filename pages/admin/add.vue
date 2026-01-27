@@ -58,6 +58,129 @@
                   size="large"
                 />
               </n-form-item>
+              <n-form-item path="resolutionType" label="Resolution Type" class="mb-3">
+                <n-radio-group v-model:value="form.resolutionType">
+                  <n-radio :value="ResolutionType.MANUAL">Manual</n-radio>
+                  <n-radio :value="ResolutionType.AUTOMATIC">Automatic</n-radio>
+                </n-radio-group>
+              </n-form-item>
+              <div v-if="form.resolutionType === ResolutionType.AUTOMATIC">
+                <div class="mb-8">
+                  <div class="text-white/80 text-[14px] leading-[20px] mb-4 font-medium">
+                    Data Sources (Minimum 3 required) - {{ form.dataSources.length }}
+                  </div>
+                  <n-collapse v-if="form.dataSources.length > 0" class="mb-4">
+                    <n-collapse-item
+                      v-for="(dataSource, idx) in form.dataSources"
+                      :key="idx"
+                      :title="`Data Source ${idx + 1}`"
+                      :name="idx"
+                    >
+                      <template #header-extra>
+                        <BasicButton type="gradient" size="small" @click="removeDataSource(idx)">
+                          <div class="flex items-center gap-2">Remove <NuxtIcon name="icon/close" /></div>
+                        </BasicButton>
+                      </template>
+                      <div class="space-y-3 pt-2">
+                        <n-form-item :path="`dataSources.${idx}.endpoint`" label="Endpoint" class="mb-3">
+                          <div class="flex items-center gap-2 w-full">
+                            <div class="text-white/60 text-[14px] min-w-[200px]">{{ apiProxyPrefix }}</div>
+                            <n-input
+                              v-model:value="dataSource.endpoint"
+                              placeholder="coingecko/api/v3/coins/bitcoin/market_chart"
+                              size="large"
+                              class="flex-1"
+                            />
+                          </div>
+                        </n-form-item>
+                        <n-form-item :path="`dataSources.${idx}.httpMethod`" label="HTTP Method" class="mb-3">
+                          <n-select
+                            v-model:value="dataSource.httpMethod"
+                            :options="httpMethodOptions"
+                            placeholder="Select HTTP method"
+                            default-value="GET"
+                          />
+                        </n-form-item>
+                        <n-form-item
+                          :path="`dataSources.${idx}.queryParams`"
+                          label="Query Parameters (JSON)"
+                          class="mb-3"
+                        >
+                          <n-input
+                            v-model:value="dataSource.queryParams"
+                            type="textarea"
+                            placeholder='{"key": "value"}'
+                            :autosize="{ minRows: 2, maxRows: 4 }"
+                          />
+                        </n-form-item>
+                        <n-form-item :path="`dataSources.${idx}.headers`" label="Headers (JSON)" class="mb-3">
+                          <n-input
+                            v-model:value="dataSource.headers"
+                            type="textarea"
+                            placeholder='{"Authorization": "Bearer token"}'
+                            :autosize="{ minRows: 2, maxRows: 4 }"
+                          />
+                        </n-form-item>
+                        <n-form-item
+                          v-if="
+                            dataSource.httpMethod === 'POST' ||
+                            dataSource.httpMethod === 'PUT' ||
+                            dataSource.httpMethod === 'PATCH'
+                          "
+                          :path="`dataSources.${idx}.body`"
+                          label="Body (JSON)"
+                          class="mb-3"
+                        >
+                          <n-input
+                            v-model:value="dataSource.body"
+                            type="textarea"
+                            placeholder='{"key": "value"}'
+                            :autosize="{ minRows: 2, maxRows: 4 }"
+                          />
+                        </n-form-item>
+                        <n-form-item
+                          :path="`dataSources.${idx}.jqQuery`"
+                          label="JQ Query"
+                          class="mb-3"
+                          :feedback="
+                            dataSource?.jqTestResult?.error
+                              ? dataSource?.jqTestResult?.error
+                              : dataSource?.jqTestResult?.success
+                                ? 'Success! (JSON response: ' +
+                                  JSON.stringify(dataSource?.jqTestResult?.data, null, 2) +
+                                  ')'
+                                : ''
+                          "
+                        >
+                          <div class="flex gap-2 w-full">
+                            <n-input
+                              v-model:value="dataSource.jqQuery"
+                              type="textarea"
+                              placeholder='{ "outcomeIdx": .result }'
+                              :autosize="{ minRows: 2, maxRows: 4 }"
+                              class="flex-1"
+                            />
+                            <BasicButton type="secondary" :loading="dataSource.testingJq" @click="testJqQuery(idx)">
+                              Test JQ
+                            </BasicButton>
+                          </div>
+                        </n-form-item>
+                        <n-form-item :path="`dataSources.${idx}.abi`" label="ABI (JSON)" class="mb-3">
+                          <n-input
+                            v-model:value="dataSource.abi"
+                            type="textarea"
+                            placeholder='{"components": [{"internalType": "uint256", "name": "outcomeIdx", "type": "uint256"}], "type": "tuple"}'
+                            :autosize="{ minRows: 3, maxRows: 6 }"
+                          />
+                        </n-form-item>
+                      </div>
+                    </n-collapse-item>
+                  </n-collapse>
+                  <BasicButton type="secondary" inner-class="flex-cc" @click="addDataSource">
+                    <NuxtIcon name="icon/plus" /> Add Data Source
+                  </BasicButton>
+                </div>
+              </div>
               <div class="flex gap-4 flex-wrap">
                 <n-form-item path="startTime" label="Start Time (UTC)" class="mb-3">
                   <n-date-picker
@@ -98,6 +221,25 @@
                   >
                     <template #now>
                       <n-button size="small" @click="onNow('resolutionTime')">Now</n-button>
+                    </template>
+                  </n-date-picker>
+                </n-form-item>
+                <n-form-item
+                  v-if="form.resolutionType === ResolutionType.AUTOMATIC"
+                  path="attestationTime"
+                  label="Attestation Time (UTC)"
+                  class="mb-3"
+                >
+                  <n-date-picker
+                    v-model:value="attestationTimeDisplay"
+                    type="datetime"
+                    placeholder="Select attestation time (UTC)"
+                    update-value-on-close
+                    default-time="00:00:00"
+                    style="width: 100%"
+                  >
+                    <template #now>
+                      <n-button size="tiny" @click="onNow('attestationTime')">Now</n-button>
                     </template>
                   </n-date-picker>
                 </n-form-item>
@@ -175,7 +317,7 @@
           </div>
         </div>
         <div class="md:sticky top-6 self-start md:ml-8 lg:ml-24 w-full min-w-[260px] md:w-[409px] mb-6">
-          <div class="border-1 border-grey-lighter rounded-lg p-6">
+          <div class="border-1 border-grey-lighter rounded-lg p-6 mb-6">
             <div class="font-medium leading-[20px] mb-6 text-white/80">
               <h3 class="font-bold text-[16px] leading-[22px] mb-2 text-white">Generate prediction suggestions:</h3>
               <n-input
@@ -213,6 +355,71 @@
               </div>
             </div>
           </div>
+          <div
+            v-if="form.resolutionType === ResolutionType.AUTOMATIC"
+            class="border-1 border-grey-lighter rounded-lg p-6"
+          >
+            <h3 class="font-bold text-[16px] leading-[22px] mb-2 text-white">Generate from Template:</h3>
+            <n-select
+              v-model:value="selectedTemplateId"
+              :options="templateOptions"
+              placeholder="Select a template (optional)"
+              clearable
+              @update:value="onTemplateSelected"
+            />
+            <div
+              v-if="selectedTemplate && selectedTemplate.variables"
+              class="mt-4 p-4 border-1 border-grey-lighter rounded-lg"
+            >
+              <div class="text-white/80 text-[14px] leading-[20px] mb-3 font-medium">Template Variables</div>
+              <div class="space-y-3">
+                <template v-for="(varDef, varKey) in selectedTemplate.variables" :key="String(varKey)">
+                  <n-form-item v-if="varDef.type === 'number'" :label="varDef.label" class="mb-3">
+                    <n-input-number
+                      :model-value="templateVariables[String(varKey)]"
+                      @update:value="val => (templateVariables[String(varKey)] = val)"
+                      :placeholder="`Enter ${varDef.label.toLowerCase()}`"
+                      :min="0"
+                      :precision="2"
+                      style="width: 100%"
+                    />
+                  </n-form-item>
+                  <n-form-item
+                    v-else-if="varDef.type === 'select'"
+                    :label="varDef.label || String(varKey)"
+                    class="mb-3"
+                  >
+                    <n-select
+                      :model-value="templateVariables[String(varKey)]"
+                      @update:value="val => (templateVariables[String(varKey)] = val)"
+                      :options="varDef.options"
+                      :placeholder="varDef.label ? `Select ${varDef.label.toLowerCase()}` : `Select ${String(varKey)}`"
+                    />
+                  </n-form-item>
+                  <n-form-item v-else-if="varDef.type === 'datetime'" :label="varDef.label" class="mb-3">
+                    <n-date-picker
+                      :model-value="getTemplateDateValue(varKey as string)"
+                      type="datetime"
+                      :placeholder="`Select ${varDef.label.toLowerCase()}`"
+                      update-value-on-close
+                      default-time="00:00:00"
+                      style="width: 100%"
+                      @update:value="val => setTemplateDateValue(varKey as string, val)"
+                    />
+                  </n-form-item>
+                </template>
+                <BasicButton
+                  type="primary"
+                  :disabled="!canGenerateFromTemplate"
+                  :loading="generatingFromTemplate"
+                  @click="generateFromTemplate"
+                  style="width: 100%"
+                >
+                  Generate from Template
+                </BasicButton>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -239,6 +446,62 @@ const suggestionPrompt = ref('');
 const loadingSuggestions = ref(false);
 const showCopyNotification = ref(false);
 
+// Template-related state
+const selectedTemplateId = ref<string | null>(null);
+const selectedTemplate = ref<any>(null);
+const templates = ref<any[]>([]);
+const templateVariables = ref<any>({});
+const generatingFromTemplate = ref(false);
+
+// API Proxy prefix based on environment
+const apiProxyPrefix = computed(() => {
+  const isDev = process.env.NODE_ENV === 'development';
+  return isDev ? 'https://api-proxy-dev.ignitemarket.xyz/' : 'https://api-proxy.ignitemarket.xyz/';
+});
+
+// Template options for select
+const templateOptions = computed(() => {
+  if (!templates.value) return [];
+  console.log(templates.value);
+  return templates.value?.map(t => ({
+    label: t.name,
+    value: t.id,
+  }));
+});
+
+// Check if template can be generated
+const canGenerateFromTemplate = computed(() => {
+  if (!selectedTemplate.value || !selectedTemplate.value.variables) return false;
+
+  const vars = selectedTemplate.value.variables;
+  for (const [key, varDef] of Object.entries(vars)) {
+    const varDefTyped = varDef as any;
+    if (varDefTyped.required && !templateVariables.value[key]) {
+      return false;
+    }
+  }
+
+  return true;
+});
+
+// Helper functions for dynamic date handling
+function getTemplateDateValue(varKey: string): number | null {
+  if (!templateVariables.value[varKey]) return null;
+  const utcDate = new Date(templateVariables.value[varKey]);
+  return utcDate.getTime() + utcDate.getTimezoneOffset() * 60000;
+}
+
+function setTemplateDateValue(varKey: string, value: number | null) {
+  if (value) {
+    const displayDate = new Date(value);
+    templateVariables.value[varKey] = new Date(
+      displayDate.getTime() - displayDate.getTimezoneOffset() * 60000
+    ).toISOString();
+  } else {
+    templateVariables.value[varKey] = null;
+  }
+}
+
 useLoggedIn(onInit);
 
 function onInit(loggedIn: boolean, isAdmin: boolean) {
@@ -254,9 +517,22 @@ const initialForm = {
   startTime: getCurrentUTCTimestamp() + 1000 * 60 * 60, // 1 hour from now in UTC
   endTime: null as number | null,
   resolutionTime: null as number | null,
+  attestationTime: null as number | null,
   imgUrl: '',
   predictionOutcomes: [] as Array<{ name: string; imgUrl: string }>,
   categories: [] as string[],
+  resolutionType: ResolutionType.MANUAL,
+  dataSources: [] as Array<{
+    endpoint: string;
+    httpMethod: string;
+    queryParams: string;
+    headers: string;
+    body: string;
+    jqQuery: string;
+    abi: string;
+    testingJq?: boolean;
+    jqTestResult?: { success: boolean; error?: string; data?: any };
+  }>,
 };
 
 const form = ref(initialForm);
@@ -328,6 +604,22 @@ const resolutionTimeDisplay = computed({
   },
 });
 
+const attestationTimeDisplay = computed({
+  get: () => {
+    if (!form.value.attestationTime) return null;
+    // Convert UTC timestamp to display format for the picker
+    return utcToDisplay(form.value.attestationTime);
+  },
+  set: (value: number | null) => {
+    if (value) {
+      // Convert display format to UTC timestamp
+      form.value.attestationTime = displayToUtc(value);
+    } else {
+      form.value.attestationTime = null as any;
+    }
+  },
+});
+
 const rules: FormRules = {
   collateral_token_id: { required: true, message: 'Please select a collateral token.' },
   question: { required: true, message: 'Please enter a market question.' },
@@ -372,10 +664,35 @@ const rules: FormRules = {
       message: 'Each outcome must have an image.',
     },
   ],
+  resolutionType: { required: true, message: 'Please select a resolution type.' },
+  dataSources: [
+    {
+      validator: () => {
+        if (form.value.resolutionType === ResolutionType.AUTOMATIC) {
+          if (form.value.dataSources.length < 3) {
+            return false;
+          }
+          return form.value.dataSources.every(ds => ds.endpoint && ds.jqQuery && ds.abi);
+        }
+        return true;
+      },
+      message:
+        'Automatic predictions require at least 3 data sources. Each data source must have endpoint, JQ query, and ABI.',
+      trigger: 'change',
+    },
+  ],
 };
 
 onMounted(async () => {
   await tokensStore.ensureLoaded();
+
+  // Load templates
+  try {
+    const templatesResponse = await $api.get<GeneralResponse<any[]>>(Endpoints.predictionTemplates);
+    templates.value = templatesResponse?.data || [];
+  } catch (error) {
+    console.error('Failed to load templates:', error);
+  }
 
   // Check for copied prediction data from store
   if (predictionStore.copiedPrediction) {
@@ -393,6 +710,8 @@ onMounted(async () => {
         startTime: copiedData.startTime || getCurrentUTCTimestamp() + 1000 * 60 * 60,
         endTime: copiedData.endTime || null,
         resolutionTime: copiedData.resolutionTime || null,
+        resolutionType: (copiedData as any).resolutionType || ResolutionType.MANUAL,
+        dataSources: (copiedData as any).dataSources || [],
       };
 
       // Clear the copied data from store
@@ -411,6 +730,14 @@ onMounted(async () => {
 const categoryOptions = Object.values(PredictionSetCategory)
   .filter(x => x !== 'All')
   .map(cat => ({ label: cat, value: cat }));
+
+const httpMethodOptions = [
+  { label: 'GET', value: 'GET' },
+  { label: 'POST', value: 'POST' },
+  { label: 'PUT', value: 'PUT' },
+  { label: 'PATCH', value: 'PATCH' },
+  { label: 'DELETE', value: 'DELETE' },
+];
 
 const startDateDisabled = (ts: number, format = true) => {
   const utcTs = format ? displayToUtc(ts) : ts;
@@ -433,7 +760,7 @@ const resolutionDateDisabled = (ts: number, format = true) => {
   return utcTs <= Date.now();
 };
 
-const onNow = (date: 'endTime' | 'resolutionTime' | 'startTime') => {
+const onNow = (date: 'endTime' | 'resolutionTime' | 'startTime' | 'attestationTime') => {
   const currentUtcTimestamp = getCurrentUTCTimestamp();
   form.value[date] = currentUtcTimestamp;
 };
@@ -446,19 +773,183 @@ function removeOutcome(idx: number) {
   form.value.predictionOutcomes.splice(idx, 1);
 }
 
+function addDataSource() {
+  form.value.dataSources.push({
+    endpoint: '',
+    httpMethod: 'GET',
+    queryParams: '',
+    headers: '',
+    body: '',
+    jqQuery: '',
+    abi: '',
+  });
+}
+
+function removeDataSource(idx: number) {
+  form.value.dataSources.splice(idx, 1);
+}
+
+async function testJqQuery(idx: number) {
+  const dataSource = form.value.dataSources[idx];
+  if (!dataSource.jqQuery) {
+    message.warning('Please enter a JQ query first');
+    return;
+  }
+
+  dataSource.testingJq = true;
+  dataSource.jqTestResult = undefined;
+
+  try {
+    // Parse JSON fields if they're strings
+    let queryParams: any = null;
+    let headers: any = null;
+    let body: any = null;
+
+    if (dataSource.queryParams) {
+      try {
+        queryParams =
+          typeof dataSource.queryParams === 'string' ? JSON.parse(dataSource.queryParams) : dataSource.queryParams;
+      } catch (e) {
+        // Invalid JSON, will be handled by backend
+      }
+    }
+
+    if (dataSource.headers) {
+      try {
+        headers = typeof dataSource.headers === 'string' ? JSON.parse(dataSource.headers) : dataSource.headers;
+      } catch (e) {
+        // Invalid JSON, will be handled by backend
+      }
+    }
+
+    if (dataSource.body) {
+      try {
+        body = typeof dataSource.body === 'string' ? JSON.parse(dataSource.body) : dataSource.body;
+      } catch (e) {
+        // Invalid JSON, will be handled by backend
+      }
+    }
+
+    // Add prefix to endpoint if it doesn't already have it
+    let fullEndpoint = dataSource.endpoint || '';
+    if (fullEndpoint && !fullEndpoint.startsWith('http')) {
+      fullEndpoint = apiProxyPrefix.value + fullEndpoint;
+    }
+
+    const response = await $api.post<GeneralResponse<{ success: boolean; error?: string; data?: any }>>(
+      Endpoints.testJqQuery,
+      {
+        jqQuery: dataSource.jqQuery,
+        endpoint: fullEndpoint || undefined,
+        httpMethod: dataSource.httpMethod || 'GET',
+        queryParams: queryParams || undefined,
+        headers: headers || undefined,
+        body: body || undefined,
+      }
+    );
+
+    dataSource.jqTestResult = response.data;
+    if (response.data.success) {
+      message.success('JQ query test successful!');
+    } else {
+      message.error(`JQ query test failed: ${response.data.error}`);
+    }
+  } catch (error: any) {
+    dataSource.jqTestResult = {
+      success: false,
+      error: error.response?.data?.message || error.message || 'Failed to test JQ query',
+    };
+    message.error('Failed to test JQ query');
+  } finally {
+    dataSource.testingJq = false;
+  }
+}
+
 async function submit() {
   await formRef.value?.validate();
   try {
     loading.value = true;
+
+    let dataSourceIds: number[] = [];
+
+    // If automatic resolution, create data sources first
+    if (form.value.resolutionType === ResolutionType.AUTOMATIC) {
+      if (form.value.dataSources.length < 3) {
+        message.error('Automatic predictions require at least 3 data sources.');
+        return;
+      }
+
+      // Create each data source
+      for (const dataSource of form.value.dataSources) {
+        if (!dataSource.endpoint || !dataSource.jqQuery || !dataSource.abi) {
+          message.error('All data sources must have endpoint, JQ query, and ABI.');
+          return;
+        }
+
+        // Parse JSON fields
+        let queryParams: any = null;
+        let headers: any = null;
+        let body: any = null;
+        let abi: any = null;
+
+        try {
+          if (dataSource.queryParams) {
+            queryParams =
+              typeof dataSource.queryParams === 'string' ? JSON.parse(dataSource.queryParams) : dataSource.queryParams;
+          }
+          if (dataSource.headers) {
+            headers = typeof dataSource.headers === 'string' ? JSON.parse(dataSource.headers) : dataSource.headers;
+          }
+          if (dataSource.body) {
+            body = typeof dataSource.body === 'string' ? JSON.parse(dataSource.body) : dataSource.body;
+          }
+          if (dataSource.abi) {
+            abi = typeof dataSource.abi === 'string' ? JSON.parse(dataSource.abi) : dataSource.abi;
+            // Stringify ABI for storage
+            abi = JSON.stringify(abi);
+          }
+        } catch (e: any) {
+          message.error(`Invalid JSON in data source: ${e?.message || 'Invalid JSON'}`);
+          return;
+        }
+
+        try {
+          // Add prefix to endpoint if it doesn't already have it
+          let fullEndpoint = dataSource.endpoint || '';
+          if (fullEndpoint && !fullEndpoint.startsWith('http')) {
+            fullEndpoint = apiProxyPrefix.value + fullEndpoint;
+          }
+
+          const dataSourceResponse = await $api.post<GeneralResponse<{ id: number }>>(Endpoints.dataSources, {
+            endpoint: fullEndpoint,
+            httpMethod: dataSource.httpMethod || 'GET',
+            queryParams: queryParams,
+            headers: headers,
+            body: body,
+            jqQuery: dataSource.jqQuery,
+            abi: abi,
+          });
+
+          dataSourceIds.push(dataSourceResponse.data.id);
+        } catch (error: any) {
+          message.error(`Failed to create data source: ${error.response?.data?.message || error.message}`);
+          return;
+        }
+      }
+    }
+
+    // Create prediction set
     await $api.post(Endpoints.predictionSets, {
       ...form.value,
       consensusThreshold: 60,
-      resolutionType: ResolutionType.MANUAL,
+      resolutionType: form.value.resolutionType,
+      dataSourceIds: dataSourceIds.length > 0 ? dataSourceIds : undefined,
     });
-    form.value = initialForm;
+
+    form.value = { ...initialForm };
     message.success('Prediction created');
-  } catch (error) {
-    message.error('Failed to create prediction.');
+  } catch (error: any) {
+    message.error(error.response?.data?.message || 'Failed to create prediction.');
     console.error(error);
   } finally {
     loading.value = false;
@@ -483,5 +974,118 @@ async function generateSuggestions() {
 
 function useSuggestion(suggestion: any) {
   form.value = JSON.parse(JSON.stringify(suggestion));
+}
+
+async function onTemplateSelected(templateId: string | null) {
+  if (!templateId) {
+    selectedTemplate.value = null;
+    templateVariables.value = {};
+    return;
+  }
+
+  try {
+    const template = await $api.get<GeneralResponse<any>>(Endpoints.predictionTemplateById(templateId));
+    selectedTemplate.value = template.data;
+
+    // Dynamically initialize variables based on template definition
+    const vars: any = {};
+    if (template.data?.variables) {
+      for (const [key, varDef] of Object.entries(template.data.variables)) {
+        const varDefTyped = varDef as any;
+        if (varDefTyped.default !== undefined) {
+          vars[key] = varDefTyped.default;
+        } else {
+          vars[key] = null;
+        }
+      }
+    }
+    templateVariables.value = vars;
+  } catch (error) {
+    console.error('Failed to load template:', error);
+    message.error('Failed to load template details');
+  }
+}
+
+async function generateFromTemplate() {
+  if (!selectedTemplateId.value || !canGenerateFromTemplate.value) {
+    return;
+  }
+
+  try {
+    generatingFromTemplate.value = true;
+
+    // Dynamically build variables object from templateVariables
+    const variables: any = {};
+    for (const [key, value] of Object.entries(templateVariables.value)) {
+      if (value !== null && value !== undefined && value !== '') {
+        variables[key] = value;
+      }
+    }
+
+    const res = await $api.post<
+      GeneralResponse<{
+        question: string;
+        outcomeResolutionDef: string;
+        dataSources: any[];
+        defaults: any;
+      }>
+    >(Endpoints.generateFromTemplate(selectedTemplateId.value), variables);
+
+    const result = res.data;
+
+    // Populate form with generated data
+    form.value.question = result.question;
+    form.value.outcomeResolutionDef = result.outcomeResolutionDef;
+
+    // Set defaults
+    if (result.defaults) {
+      if (result.defaults.collateral_token_id) {
+        form.value.collateral_token_id = result.defaults.collateral_token_id;
+      }
+      if (result.defaults.outcomes) {
+        form.value.predictionOutcomes = result.defaults.outcomes;
+      }
+    }
+
+    // Set attestation time and end time from template variable if available
+    if (templateVariables.value.attestationTime) {
+      // Convert ISO string to UTC timestamp (milliseconds)
+      const attestationDate = new Date(templateVariables.value.attestationTime);
+      const attestationTimestamp = attestationDate.getTime();
+
+      // Set attestationTime
+      form.value.attestationTime = attestationTimestamp;
+
+      // Set endTime (market close) only if attestation time is in the future
+      if (attestationTimestamp > Date.now()) {
+        form.value.endTime = attestationTimestamp;
+      }
+    }
+
+    // Process data sources - remove prefix from endpoint for display
+    form.value.dataSources = result.dataSources.map(ds => {
+      const endpoint = ds.endpoint || '';
+      const endpointPath = endpoint.replace(apiProxyPrefix.value, '');
+
+      return {
+        endpoint: endpointPath,
+        httpMethod: ds.httpMethod || 'GET',
+        queryParams: ds.queryParams ? JSON.stringify(ds.queryParams) : '',
+        headers: ds.headers ? JSON.stringify(ds.headers) : '',
+        body: ds.body ? JSON.stringify(ds.body) : '',
+        jqQuery: ds.jqQuery || '',
+        abi: ds.abi || '',
+        testingJq: false,
+        jqTestResult: undefined,
+      };
+    });
+
+    message.success('Template generated successfully!');
+  } catch (error: any) {
+    message.error(error.response?.data?.message || 'Failed to generate from template');
+    console.error(error);
+  } finally {
+    generatingFromTemplate.value = false;
+  }
 }
 </script>

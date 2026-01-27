@@ -65,6 +65,7 @@ export interface ChainDataInterface extends GeneralInterface {
   conditionId: string;
   txHash: string;
   contractAddress: Address;
+  oracleContract?: Address;
   lastProcessedBlock: number;
   parseBlockSize: number;
 }
