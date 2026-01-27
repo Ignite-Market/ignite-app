@@ -722,6 +722,7 @@ onMounted(async () => {
         startTime: copiedData.startTime || getCurrentUTCTimestamp() + 1000 * 60 * 60,
         endTime: copiedData.endTime || null,
         resolutionTime: copiedData.resolutionTime || null,
+        attestationTime: copiedData.attestationTime || null,
         resolutionType: (copiedData as any).resolutionType || ResolutionType.MANUAL,
         dataSources: (copiedData as any).dataSources || [],
       };
