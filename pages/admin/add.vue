@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/html-quotes -->
 <template>
   <Dashboard>
     <div class="px-4 max-w-[1241px] m-auto">
@@ -373,30 +374,41 @@
             >
               <div class="text-white/80 text-[14px] leading-[20px] mb-3 font-medium">Template Variables</div>
               <div class="space-y-3">
-                <template v-for="(varDef, varKey) in selectedTemplate.variables" :key="String(varKey)">
-                  <n-form-item v-if="varDef.type === 'number'" :label="varDef.label" class="mb-3">
+                <template v-for="(varDef, varKey) in selectedTemplate.variables">
+                  <n-form-item
+                    v-if="varDef.type === 'number'"
+                    :key="'number-' + String(varKey)"
+                    :label="varDef.label"
+                    class="mb-3"
+                  >
                     <n-input-number
                       :model-value="templateVariables[String(varKey)]"
-                      @update:value="val => (templateVariables[String(varKey)] = val)"
                       :placeholder="`Enter ${varDef.label.toLowerCase()}`"
                       :min="0"
                       :precision="2"
                       style="width: 100%"
+                      @update:value="val => (templateVariables[String(varKey)] = val)"
                     />
                   </n-form-item>
                   <n-form-item
                     v-else-if="varDef.type === 'select'"
+                    :key="'select-' + String(varKey)"
                     :label="varDef.label || String(varKey)"
                     class="mb-3"
                   >
                     <n-select
                       :model-value="templateVariables[String(varKey)]"
-                      @update:value="val => (templateVariables[String(varKey)] = val)"
                       :options="varDef.options"
                       :placeholder="varDef.label ? `Select ${varDef.label.toLowerCase()}` : `Select ${String(varKey)}`"
+                      @update:value="val => (templateVariables[String(varKey)] = val)"
                     />
                   </n-form-item>
-                  <n-form-item v-else-if="varDef.type === 'datetime'" :label="varDef.label" class="mb-3">
+                  <n-form-item
+                    v-else-if="varDef.type === 'datetime'"
+                    :key="'datetime-' + String(varKey)"
+                    :label="varDef.label"
+                    class="mb-3"
+                  >
                     <n-date-picker
                       :model-value="getTemplateDateValue(varKey as string)"
                       type="datetime"
@@ -412,8 +424,8 @@
                   type="primary"
                   :disabled="!canGenerateFromTemplate"
                   :loading="generatingFromTemplate"
-                  @click="generateFromTemplate"
                   style="width: 100%"
+                  @click="generateFromTemplate"
                 >
                   Generate from Template
                 </BasicButton>
@@ -669,7 +681,7 @@ const rules: FormRules = {
     {
       validator: () => {
         if (form.value.resolutionType === ResolutionType.AUTOMATIC) {
-          if (form.value.dataSources.length < 3) {
+          if (form.value.dataSources.length < 2) {
             return false;
           }
           return form.value.dataSources.every(ds => ds.endpoint && ds.jqQuery && ds.abi);
@@ -677,7 +689,7 @@ const rules: FormRules = {
         return true;
       },
       message:
-        'Automatic predictions require at least 3 data sources. Each data source must have endpoint, JQ query, and ABI.',
+        'Automatic predictions require at least 2 data sources. Each data source must have endpoint, JQ query, and ABI.',
       trigger: 'change',
     },
   ],
@@ -870,12 +882,12 @@ async function submit() {
   try {
     loading.value = true;
 
-    let dataSourceIds: number[] = [];
+    const dataSourceIds: number[] = [];
 
     // If automatic resolution, create data sources first
     if (form.value.resolutionType === ResolutionType.AUTOMATIC) {
-      if (form.value.dataSources.length < 3) {
-        message.error('Automatic predictions require at least 3 data sources.');
+      if (form.value.dataSources.length < 2) {
+        message.error('Automatic predictions require at least 2 data sources.');
         return;
       }
 
@@ -923,11 +935,11 @@ async function submit() {
           const dataSourceResponse = await $api.post<GeneralResponse<{ id: number }>>(Endpoints.dataSources, {
             endpoint: fullEndpoint,
             httpMethod: dataSource.httpMethod || 'GET',
-            queryParams: queryParams,
-            headers: headers,
-            body: body,
+            queryParams,
+            headers,
+            body,
             jqQuery: dataSource.jqQuery,
-            abi: abi,
+            abi,
           });
 
           dataSourceIds.push(dataSourceResponse.data.id);
