@@ -65,6 +65,7 @@ export interface ChainDataInterface extends GeneralInterface {
   conditionId: string;
   txHash: string;
   contractAddress: Address;
+  oracleContract?: Address;
   lastProcessedBlock: number;
   parseBlockSize: number;
 }
@@ -79,6 +80,7 @@ export interface PredictionSetInterface extends GeneralInterface {
   endTime: Date;
   resolutionTime: Date;
   resolutionType: ResolutionType;
+  attestationTime?: Date;
   consensusThreshold: number;
   setStatus: PredictionSetStatus;
   imgUrl: string;
@@ -91,6 +93,16 @@ export interface PredictionSetInterface extends GeneralInterface {
   positions?: any[];
   fundingPositions?: string;
   marketCapPercent?: number;
+  hide?: boolean;
+  dataSources?: {
+    endpoint: string;
+    httpMethod: string;
+    queryParams: string;
+    headers: string;
+    body: string;
+    jqQuery: string;
+    abi: string;
+  }[];
 }
 export interface PredictionSetResponse extends GeneralResponse<PredictionSetInterface> {}
 export interface PredictionSetsResponse extends GeneralItemsResponse<any> {}

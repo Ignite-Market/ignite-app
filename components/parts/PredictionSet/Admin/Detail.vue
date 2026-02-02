@@ -22,6 +22,12 @@
         <div class="text-[14px] text-white font-semibold">Status</div>
         <div class="text-[14px] text-grey-lightest">{{ getStatusName(prediction.setStatus, prediction.endTime) }}</div>
       </div>
+      <div>
+        <div class="text-[14px] text-white font-semibold">Visibility</div>
+        <div class="text-[14px]" :class="prediction.hide ? 'text-red-400' : 'text-green-400'">
+          {{ prediction.hide ? 'Hidden' : 'Visible' }}
+        </div>
+      </div>
       <div :title="localDate(prediction.startTime)">
         <div class="text-[14px] text-white font-semibold">Start Time (UTC)</div>
         <div class="text-[14px] text-grey-lightest">{{ formatDateToUTC(prediction.startTime) }}</div>

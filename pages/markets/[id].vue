@@ -351,14 +351,14 @@
               <div class="flex items-center">
                 <div
                   class="ml-auto font-bol hover:text-primary-bright cursor-pointer"
-                  @click="openExplorer(config.public.ORACLE_CONTRACT)"
+                  @click="openExplorer(predictionSet.chainData?.oracleContract || config.public.ORACLE_CONTRACT)"
                 >
-                  {{ shortenAddress(config.public.ORACLE_CONTRACT) }}
+                  {{ shortenAddress(predictionSet.chainData?.oracleContract || config.public.ORACLE_CONTRACT) }}
                 </div>
                 <NuxtIcon
                   class="ml-2 text-white cursor-pointer hover:text-primary-bright"
                   name="icon/copy"
-                  @click="copyToClipboard(config.public.ORACLE_CONTRACT)"
+                  @click="copyToClipboard(predictionSet.chainData?.oracleContract || config.public.ORACLE_CONTRACT)"
                 />
               </div>
             </div>

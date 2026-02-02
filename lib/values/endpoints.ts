@@ -34,6 +34,8 @@ const Endpoints = {
   predictionSetFundingPositions: (id: number) => `/prediction-sets/${id}/funding-positions`,
   predictionSetRemovedFunding: (id: number) => `/prediction-sets/${id}/removed-funding`,
   predictionSetsProcess: (id: number) => `/prediction-sets/${id}/process`,
+  predictionSetsHide: (id: number) => `/prediction-sets/${id}/hide`,
+  predictionSetDataSources: (id: number) => `/prediction-sets/${id}/data-sources`,
 
   /**
    * Prediction set comments
@@ -50,6 +52,19 @@ const Endpoints = {
    * Prediction set suggestions
    */
   predictionSetsSuggestions: '/prediction-sets/generate-suggestions',
+
+  /**
+   * Data sources
+   */
+  dataSources: '/data-sources',
+  testJqQuery: '/data-sources/test-jq',
+
+  /**
+   * Prediction templates
+   */
+  predictionTemplates: '/prediction-templates',
+  predictionTemplateById: (id: string) => `/prediction-templates/${id}`,
+  generateFromTemplate: (id: string) => `/prediction-templates/${id}/generate`,
 
   /**
    * Banners

@@ -12,8 +12,19 @@ interface CopiedPredictionData {
   startTime: number;
   endTime: number;
   resolutionTime: number;
+  attestationTime?: number | null;
   collateral_token_id: number;
   categories: string[];
+  resolutionType?: number;
+  dataSources?: Array<{
+    endpoint: string;
+    httpMethod: string;
+    queryParams: string;
+    headers: string;
+    body: string;
+    jqQuery: string;
+    abi: string;
+  }>;
 }
 
 export const usePredictionStore = defineStore('prediction', {
@@ -184,8 +195,21 @@ export const usePredictionStore = defineStore('prediction', {
         startTime: new Date(prediction.startTime).getTime(),
         endTime: new Date(prediction.endTime).getTime(),
         resolutionTime: new Date(prediction.resolutionTime).getTime(),
+        attestationTime: prediction?.attestationTime ? new Date(prediction.attestationTime).getTime() : null,
         collateral_token_id: prediction.collateral_token_id,
         categories: [],
+        resolutionType: prediction.resolutionType,
+        dataSources: prediction.dataSources
+          ? prediction.dataSources.map((ds: any) => ({
+              endpoint: ds.endpoint || '',
+              httpMethod: ds.httpMethod || 'GET',
+              queryParams: ds.queryParams || '',
+              headers: ds.headers || '',
+              body: ds.body || '',
+              jqQuery: ds.jqQuery || '',
+              abi: ds.abi || '',
+            }))
+          : undefined,
       };
     },
 
