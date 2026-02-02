@@ -30,6 +30,10 @@ const options = [
     label: 'Copy',
     key: 'copy',
   },
+  {
+    label: prediction.hide ? 'Unhide' : 'Hide',
+    key: 'toggleHide',
+  },
   ...(prediction.setStatus === PredictionSetStatus.INITIALIZED || prediction.setStatus === PredictionSetStatus.ERROR
     ? [
         {
@@ -65,6 +69,19 @@ async function deletePrediction() {
   try {
     loading.value = true;
     await $api.delete(Endpoints.predictionSetsById(prediction.id));
+    emit('refresh');
+  } catch (error) {
+    console.error(error);
+  } finally {
+    loading.value = false;
+  }
+}
+
+async function toggleHide() {
+  try {
+    loading.value = true;
+    const newHideState = !prediction.hide;
+    await $api.patch(Endpoints.predictionSetsHide(prediction.id), { hide: newHideState });
     emit('refresh');
   } catch (error) {
     console.error(error);
@@ -138,6 +155,8 @@ async function handleSelect(key: string | number) {
   } else if (key === 'delete') {
     // Delete prediction
     await deletePrediction();
+  } else if (key === 'toggleHide') {
+    await toggleHide();
   }
 }
 </script>

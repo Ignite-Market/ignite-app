@@ -34,6 +34,7 @@ const Endpoints = {
   predictionSetFundingPositions: (id: number) => `/prediction-sets/${id}/funding-positions`,
   predictionSetRemovedFunding: (id: number) => `/prediction-sets/${id}/removed-funding`,
   predictionSetsProcess: (id: number) => `/prediction-sets/${id}/process`,
+  predictionSetsHide: (id: number) => `/prediction-sets/${id}/hide`,
   predictionSetDataSources: (id: number) => `/prediction-sets/${id}/data-sources`,
 
   /**

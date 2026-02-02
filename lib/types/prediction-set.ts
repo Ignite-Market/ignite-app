@@ -93,6 +93,7 @@ export interface PredictionSetInterface extends GeneralInterface {
   positions?: any[];
   fundingPositions?: string;
   marketCapPercent?: number;
+  hide?: boolean;
   dataSources?: {
     endpoint: string;
     httpMethod: string;

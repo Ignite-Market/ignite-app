@@ -526,7 +526,7 @@ const initialForm = {
   collateral_token_id: null as number | null,
   question: '',
   outcomeResolutionDef: '',
-  startTime: getCurrentUTCTimestamp() + 1000 * 60 * 60, // 1 hour from now in UTC
+  startTime: getCurrentUTCTimestamp(),
   endTime: null as number | null,
   resolutionTime: null as number | null,
   attestationTime: null as number | null,
@@ -1072,6 +1072,11 @@ async function generateFromTemplate() {
       // Set endTime (market close) only if attestation time is in the future
       if (attestationTimestamp > Date.now()) {
         form.value.endTime = attestationTimestamp;
+
+        // Set resolutionTime to 1 hour after endTime if endTime is set
+        if (form.value.endTime) {
+          form.value.resolutionTime = form.value.endTime + 60 * 60 * 1000; // Add 1 hour in milliseconds
+        }
       }
     }
 
