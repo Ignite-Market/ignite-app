@@ -147,9 +147,7 @@
                             dataSource?.jqTestResult?.error
                               ? dataSource?.jqTestResult?.error
                               : dataSource?.jqTestResult?.success
-                                ? 'Success! (JSON response: ' +
-                                  JSON.stringify(dataSource?.jqTestResult?.data, null, 2) +
-                                  ')'
+                                ? 'Success! (JSON response: ' + JSON.stringify(dataSource?.jqTestResult?.data) + ')'
                                 : ''
                           "
                         >
@@ -381,11 +379,36 @@
                     :label="varDef.label"
                     class="mb-3"
                   >
+                    <template v-if="varDef.link" #label>
+                      <div class="flex items-center gap-1">
+                        {{ varDef.label }}
+                        <a :href="varDef.link" target="_blank"> <NuxtIcon name="icon/external-link" /> </a>
+                      </div>
+                    </template>
                     <n-input-number
                       :model-value="templateVariables[String(varKey)]"
                       :placeholder="`Enter ${varDef.label.toLowerCase()}`"
                       :min="0"
-                      :precision="2"
+                      :precision="varDef.precision ?? 2"
+                      style="width: 100%"
+                      @update:value="val => (templateVariables[String(varKey)] = val)"
+                    />
+                  </n-form-item>
+                  <n-form-item
+                    v-if="varDef.type === 'string'"
+                    :key="'string-' + String(varKey)"
+                    :label="varDef.label"
+                    class="mb-3"
+                  >
+                    <template v-if="varDef.link" #label>
+                      <div class="flex items-center gap-1">
+                        {{ varDef.label }}
+                        <a :href="varDef.link" target="_blank"> <NuxtIcon name="icon/external-link" /> </a>
+                      </div>
+                    </template>
+                    <n-input
+                      :model-value="templateVariables[String(varKey)]"
+                      :placeholder="`Enter ${varDef.label.toLowerCase()}`"
                       style="width: 100%"
                       @update:value="val => (templateVariables[String(varKey)] = val)"
                     />
@@ -399,6 +422,7 @@
                     <n-select
                       :model-value="templateVariables[String(varKey)]"
                       :options="varDef.options"
+                      :default-value="varDef.default"
                       :placeholder="varDef.label ? `Select ${varDef.label.toLowerCase()}` : `Select ${String(varKey)}`"
                       @update:value="val => (templateVariables[String(varKey)] = val)"
                     />
