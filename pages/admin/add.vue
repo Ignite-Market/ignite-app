@@ -683,6 +683,19 @@ const rules: FormRules = {
       message: 'Resolution time must be after end time.',
       trigger: 'change',
     },
+    {
+      validator: () => {
+        if (form.value.resolutionType !== ResolutionType.AUTOMATIC) return true;
+        const attestation = form.value.attestationTime;
+        const resolution = form.value.resolutionTime;
+        console.log(attestation, resolution);
+        if (!attestation || !resolution) return true;
+        const minResolution = attestation + 15 * 60 * 1000; // 15 min in ms
+        return resolution >= minResolution;
+      },
+      message: 'For automatic resolution, resolution time must be at least 15 minutes after attestation time.',
+      trigger: 'change',
+    },
   ],
   imgUrl: { required: true, message: 'Please insert an image URL.' },
   predictionOutcomes: [
