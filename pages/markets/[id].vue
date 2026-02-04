@@ -87,6 +87,14 @@
                     </div>
                   </div>
                 </n-popover>
+
+                <div
+                  v-if="predictionSet?.resolutionType === ResolutionType.AUTOMATIC"
+                  class="flex items-center gap-2 sm:gap-4"
+                >
+                  <div class="border-r-1 border-r-white/25 h-[14px] sm:block hidden"></div>
+                  <div class="text-white/80 text-[14px] leading-[20px]">FDC</div>
+                </div>
               </div>
             </div>
           </div>
@@ -487,6 +495,7 @@ import {
   type PredictionSetInterface,
   type PredictionSetResponse,
   PredictionSetStatus,
+  ResolutionType,
   TransactionType,
 } from '~/lib/types/prediction-set';
 import Endpoints from '~/lib/values/endpoints';
