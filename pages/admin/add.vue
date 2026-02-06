@@ -65,6 +65,9 @@
                   <n-radio :value="ResolutionType.AUTOMATIC">Automatic</n-radio>
                 </n-radio-group>
               </n-form-item>
+              <n-form-item path="consensusThreshold" label="Consensus threshold (%)" class="mb-3">
+                <n-input-number v-model:value="form.consensusThreshold" :min="1" :max="100" placeholder="60" />
+              </n-form-item>
               <div v-if="form.resolutionType === ResolutionType.AUTOMATIC">
                 <div class="mb-8">
                   <div class="text-white/80 text-[14px] leading-[20px] mb-4 font-medium">
@@ -209,20 +212,6 @@
                     </template>
                   </n-date-picker>
                 </n-form-item>
-                <n-form-item path="resolutionTime" label="Resolution Time (UTC)" class="mb-3" update-value-on-close>
-                  <n-date-picker
-                    v-model:value="resolutionTimeDisplay"
-                    type="datetime"
-                    placeholder="Select resolution time (UTC)"
-                    update-value-on-close
-                    :is-date-disabled="(ts: number) => resolutionDateDisabled(ts, true)"
-                    default-time="00:00:00"
-                  >
-                    <template #now>
-                      <n-button size="small" @click="onNow('resolutionTime')">Now</n-button>
-                    </template>
-                  </n-date-picker>
-                </n-form-item>
                 <n-form-item
                   v-if="form.resolutionType === ResolutionType.AUTOMATIC"
                   path="attestationTime"
@@ -239,6 +228,20 @@
                   >
                     <template #now>
                       <n-button size="tiny" @click="onNow('attestationTime')">Now</n-button>
+                    </template>
+                  </n-date-picker>
+                </n-form-item>
+                <n-form-item path="resolutionTime" label="Resolution Time (UTC)" class="mb-3" update-value-on-close>
+                  <n-date-picker
+                    v-model:value="resolutionTimeDisplay"
+                    type="datetime"
+                    placeholder="Select resolution time (UTC)"
+                    update-value-on-close
+                    :is-date-disabled="(ts: number) => resolutionDateDisabled(ts, true)"
+                    default-time="00:00:00"
+                  >
+                    <template #now>
+                      <n-button size="small" @click="onNow('resolutionTime')">Now</n-button>
                     </template>
                   </n-date-picker>
                 </n-form-item>
@@ -558,6 +561,7 @@ const initialForm = {
   predictionOutcomes: [] as Array<{ name: string; imgUrl: string }>,
   categories: [] as string[],
   resolutionType: ResolutionType.MANUAL,
+  consensusThreshold: 60,
   dataSources: [] as Array<{
     endpoint: string;
     httpMethod: string;
@@ -761,6 +765,7 @@ onMounted(async () => {
         resolutionTime: copiedData.resolutionTime || null,
         attestationTime: copiedData.attestationTime || null,
         resolutionType: (copiedData as any).resolutionType || ResolutionType.MANUAL,
+        consensusThreshold: (copiedData as any).consensusThreshold ?? 60,
         dataSources: (copiedData as any).dataSources || [],
       };
 
@@ -991,7 +996,7 @@ async function submit() {
     // Create prediction set
     await $api.post(Endpoints.predictionSets, {
       ...form.value,
-      consensusThreshold: 60,
+      consensusThreshold: form.value.consensusThreshold,
       resolutionType: form.value.resolutionType,
       dataSourceIds: dataSourceIds.length > 0 ? dataSourceIds : undefined,
     });
