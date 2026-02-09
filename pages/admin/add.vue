@@ -718,6 +718,13 @@ const rules: FormRules = {
     },
   ],
   resolutionType: { required: true, message: 'Please select a resolution type.' },
+  consensusThreshold: {
+    required: true,
+    type: 'number',
+    validator: (_rule: any, value: number | null) => value != null && value >= 1 && value <= 100,
+    message: 'Consensus threshold is required (1–100%).',
+    trigger: 'blur',
+  },
   dataSources: [
     {
       validator: () => {
@@ -996,7 +1003,7 @@ async function submit() {
     // Create prediction set
     await $api.post(Endpoints.predictionSets, {
       ...form.value,
-      consensusThreshold: form.value.consensusThreshold,
+      consensusThreshold: form.value.consensusThreshold ?? 60,
       resolutionType: form.value.resolutionType,
       dataSourceIds: dataSourceIds.length > 0 ? dataSourceIds : undefined,
     });
