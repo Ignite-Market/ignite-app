@@ -26,6 +26,7 @@ const Endpoints = {
    */
   predictionSets: '/prediction-sets',
   predictionSetsAdmin: '/prediction-sets/admin',
+  predictionSetsSocialPost: '/prediction-sets/social-post',
   predictionSetsById: (id: number) => `/prediction-sets/${id}`,
   predictionSetChanceHistory: (id: number) => `/prediction-sets/${id}/chance-history`,
   predictionSetActivity: `/prediction-sets/activity`,

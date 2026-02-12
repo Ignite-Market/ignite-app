@@ -2,12 +2,15 @@
   <n-card
     v-if="predictionSet?.id"
     class="max-w-[360px] max-h-[220px] bg-grey-light border-1 !border-grey-light hover:!border-primary"
-    :class="{ '!bg-grey-lightDark': !actionsEnabled(predictionSet.setStatus, predictionSet.endTime) }"
+    :class="{
+      '!bg-grey-lightDark': !actionsEnabled(predictionSet.setStatus, predictionSet.endTime),
+      '!max-h-fit': isScreenshot,
+    }"
     :content-class="'!p-3 !pb-2 !rounded-[8px]'"
   >
     <div class="flex border-b border-white/10 pb-3 cursor-pointer" @click="openDetails()">
       <div class="w-[38px] h-[38px] flex-shrink-0">
-        <Image :src="predictionSet.imgUrl" class="rounded-[8px] w-full h-full object-cover" />
+        <Image :src="predictionSet.imgUrl" :eager="isScreenshot" class="rounded-[8px] w-full h-full object-cover" />
       </div>
       <div
         class="ml-4 text-[14px] leading-[20px] font-medium line-clamp-2 text-white/80"
@@ -18,7 +21,10 @@
     </div>
 
     <div class="relative">
-      <div class="flex flex-col border-b border-white/10 pb-2 scroll-container h-[110px] overflow-y-scroll">
+      <div
+        class="flex flex-col border-b border-white/10 pb-2 scroll-container h-[110px] overflow-y-scroll"
+        :class="{ '!h-auto': isScreenshot }"
+      >
         <div v-if="!predictionSet.winner_outcome_id" class="h-full">
           <div
             v-if="isBinaryPrediction(predictionSet) && tradeEnabled(predictionSet.setStatus, predictionSet.endTime)"
@@ -39,7 +45,7 @@
               <div class="text-[12px]">{{ (outcome.latestChance * 100).toFixed(0) }}%</div>
             </div>
           </div>
-          <div v-else class="pb-[20px]">
+          <div v-else class="pb-[20px]" :class="{ '!pb-2': isScreenshot }">
             <div
               v-for="outcome of predictionSet.outcomes"
               :key="outcome.id"
@@ -67,7 +73,11 @@
             class="flex items-center gap-3 border-1 rounded-[8px] bg-grey-light border-grey-lighter p-3 justify-center h-[54px]"
           >
             <div class="w-[30px] h-[30px] flex-shrink-0">
-              <Image :src="winnerOutcome.imgUrl" class="rounded-full w-full h-full object-cover" />
+              <Image
+                :src="winnerOutcome.imgUrl"
+                :eager="isScreenshot"
+                class="rounded-full w-full h-full object-cover"
+              />
             </div>
             <div class="flex items-center justify-between font-medium" :class="{ 'flex-1': canClaim }">
               <span class="text-[14px] leading-[20px]">{{ winnerOutcome.name }}</span>
@@ -86,13 +96,18 @@
         </div>
       </div>
       <div
-        v-if="!isBinaryPrediction(predictionSet) && actionsEnabled(predictionSet.setStatus, predictionSet.endTime)"
+        v-if="
+          !isBinaryPrediction(predictionSet) &&
+          actionsEnabled(predictionSet.setStatus, predictionSet.endTime) &&
+          !isScreenshot
+        "
         class="absolute bottom-[1px] left-0 right-0 h-[45px] pointer-events-none font-medium"
         style="background: linear-gradient(0deg, #292929 22.08%, rgba(41, 41, 41, 0) 100.08%)"
       ></div>
       <div
         v-else-if="
           !isBinaryPrediction(predictionSet) &&
+          !isScreenshot &&
           (predictionSet.setStatus === PredictionSetStatus.VOTING ||
             predictionSet.setStatus === PredictionSetStatus.ACTIVE)
         "
@@ -131,6 +146,7 @@
               <Image
                 :src="collateralToken.imgUrl"
                 :title="collateralToken.name"
+                :eager="isScreenshot"
                 class="rounded-full w-[16px] h-[16px] object-cover mr-1"
               />
             </div>
@@ -155,8 +171,8 @@ import useLoggedIn from '~/composables/useLoggedIn';
 
 const props = defineProps({
   predictionSet: { type: Object as PropType<PredictionSetInterface>, default: () => {}, required: true },
+  isScreenshot: { type: Boolean, default: false },
 });
-
 const router = useRouter();
 const tokensStore = useTokensStore();
 const collateralToken = ref();
