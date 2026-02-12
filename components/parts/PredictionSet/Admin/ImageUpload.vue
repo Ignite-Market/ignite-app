@@ -48,7 +48,7 @@
 
 <script lang="ts" setup>
 import type { UploadCustomRequestOptions, UploadFileInfo } from 'naive-ui';
-import Endpoints from '~/lib/values/endpoints';
+import { uploadFileToS3 } from '~/lib/utils/upload';
 
 const props = defineProps({
   defaultValue: { type: String, default: undefined },
@@ -139,20 +139,6 @@ function handleChange(data: { fileList: UploadFileInfo[] }) {
   file.value = data.fileList[0].file;
 }
 
-async function uploadFile(file: File, onUrlCreated?: () => void) {
-  if (!file) return;
-
-  const res = await $api.post<any>(Endpoints.imageUpload, { fileName: props.folder + '/' + file.name });
-  onUrlCreated?.();
-  await fetch(res.data.uploadUrl, {
-    method: 'PUT',
-    body: file,
-    headers: {
-      'Content-Type': file.type,
-    },
-  });
-}
-
 async function customUpload({ file, onFinish, onError, onProgress }: UploadCustomRequestOptions) {
   // const formData = new FormData();
   // if (data) {
@@ -164,11 +150,11 @@ async function customUpload({ file, onFinish, onError, onProgress }: UploadCusto
 
   if (!file.file) return;
   try {
-    await uploadFile(file.file, () => onProgress({ percent: 50 }));
+    await uploadFileToS3(file.file, props.folder, file.file.name);
+    onProgress({ percent: 90 });
     onFinish();
-    refreshImages();
+    await refreshImages();
     selectedImage.value = file.file.name;
-    await sleep(500);
     emit('update:modelValue', IMAGE_URL + selectedImage.value);
     showModal.value = false;
   } catch (error) {

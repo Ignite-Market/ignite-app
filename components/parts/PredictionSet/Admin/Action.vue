@@ -18,7 +18,7 @@ import { usePredictionStore } from '~/stores/prediction';
 
 const { prediction } = defineProps<{ prediction: PredictionSetInterface }>();
 
-const emit = defineEmits(['refresh']);
+const emit = defineEmits(['refresh', 'share']);
 
 const router = useRouter();
 const predictionStore = usePredictionStore();
@@ -34,6 +34,14 @@ const options = [
     label: prediction.hide ? 'Unhide' : 'Hide',
     key: 'toggleHide',
   },
+  ...(prediction.setStatus === PredictionSetStatus.ACTIVE
+    ? [
+        {
+          label: 'Share',
+          key: 'share',
+        },
+      ]
+    : []),
   ...(prediction.setStatus === PredictionSetStatus.INITIALIZED || prediction.setStatus === PredictionSetStatus.ERROR
     ? [
         {
@@ -152,6 +160,8 @@ async function handleSelect(key: string | number) {
     } finally {
       loading.value = false;
     }
+  } else if (key === 'share') {
+    emit('share', prediction);
   } else if (key === 'delete') {
     // Delete prediction
     await deletePrediction();
