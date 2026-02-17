@@ -2,7 +2,7 @@
   <div class="relative">
     <Header ref="headerRef" class="min-h-[60px] md:min-h-[86px]" />
     <div class="bg-primary w-full text-black text-center !leading-[22px] font-medium xs:text-sm text-xs">
-      Fully decentralized prediction market - Beta version
+      Fully decentralized prediction market - Flare FDC supported
     </div>
     <Navigation />
 
