@@ -90,6 +90,7 @@ import Endpoints from '~/lib/values/endpoints';
 import { uploadDataUrlToS3 } from '~/lib/utils/upload';
 
 const message = useMessage();
+const config = useRuntimeConfig();
 const isOpen = ref(false);
 const prediction = ref<PredictionSetInterface | null>(null);
 const previewUrl = ref('');
@@ -211,7 +212,7 @@ async function sendPost() {
       message.info(summaries.join(' | '));
     }
     message.success('Post request sent.');
-    // emit('sent');
+    emit('sent');
     // closeModal();
   } catch (error) {
     console.error('Failed to send post', error);
@@ -232,6 +233,12 @@ function closeModal() {
   messageText.value = '';
 }
 
+function getQuestionUrl(pred: PredictionSetInterface): string {
+  const base = (config.public.url as string) || '';
+  if (!base) return '';
+  return `${base.replace(/\/$/, '')}/markets/${pred.id}`;
+}
+
 function openModal(pred: PredictionSetInterface) {
   const changed = !prediction.value || prediction.value?.id !== pred.id;
 
@@ -241,7 +248,9 @@ function openModal(pred: PredictionSetInterface) {
     uploadedUrl.value = '';
     step.value = 1;
     selectedMedia.value = ['x', 'discord'];
-    messageText.value = '';
+    const questionUrl = getQuestionUrl(pred);
+    messageText.value =
+      'New market is up on IgniteMarket 🚀' + '\n\n' + (pred.question || '') + (questionUrl ? `\n${questionUrl}` : '');
   }
   prediction.value = pred;
   isOpen.value = true;

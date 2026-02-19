@@ -24,7 +24,7 @@
           @click="openFiatBuyModal"
         >
           <NuxtIcon class="text-[16px] text-white group-hover:text-primary" name="icon/coins" />
-          <div class="text-[14px] leading-[20px] !text-white">Fund</div>
+          <div class="text-[14px] leading-[20px] !text-white">Swap</div>
         </div>
 
         <div
