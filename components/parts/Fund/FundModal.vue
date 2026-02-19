@@ -170,18 +170,15 @@ defineExpose({
     @update:show="isOpen = $event"
   >
     <div v-if="step === Steps.ENTER_AMOUNT">
-      <h2 class="text-xl font-bold text-center mb-2">Fund your wallet</h2>
-
-      <p class="text-sm text-grey-lightest text-center mb-4">
-        Select the token you want to buy with your card or crypto assets.
-      </p>
+      <h2 class="text-xl font-bold text-center mb-2">Swap FLR for:</h2>
+      <p class="text-sm text-grey-lightest text-center mb-2">Select the token you want to swap to.</p>
       <CollateralSelect
         class="w-full mb-4"
         :default-value="selectedCollateralToken?.id"
         @update:value="value => (selectedCollateralToken = value ? tokenStore.items[value] : undefined)"
       />
       <div v-if="selectedCollateralToken">
-        <p class="text-sm text-grey-lightest text-center mb-4">Enter the amount you want to buy.</p>
+        <p class="text-sm text-grey-lightest text-center mb-2">Enter the amount you want to swap for.</p>
         <n-input-number
           v-model:value="amount"
           placeholder="0"
@@ -213,6 +210,7 @@ defineExpose({
             </div>
           </template>
         </n-input-number>
+        <p class="text-xs text-grey-lightest text-center mt-4">(No FLR? - continue and buy with credit card)</p>
 
         <BasicButton
           class="w-full mt-3"
@@ -221,7 +219,7 @@ defineExpose({
           :disabled="amount <= 0"
           @click="enterAmount()"
         >
-          Buy
+          Continue
         </BasicButton>
       </div>
     </div>

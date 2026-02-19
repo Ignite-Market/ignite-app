@@ -72,6 +72,8 @@
 
     <!-- Banner Modal -->
     <BannerAdminModal ref="bannerModalRef" @refresh="refreshBanners" @close="closeBannerModal" />
+    <!-- Share Modal -->
+    <PredictionSetAdminShareModal ref="shareModalRef" />
   </Dashboard>
 </template>
 
@@ -192,6 +194,7 @@ const predictionColumns = [
       return h(resolveComponent('PredictionSetAdminAction'), {
         prediction: row,
         onRefresh: refreshPredictions,
+        onShare: () => openShareModal(row),
       });
     },
   },
@@ -319,6 +322,7 @@ const bannerSorter = { columnKey: 'id', order: 'descend', sorter: 'default' } as
 // Banner modal functionality
 const bannerModalRef = ref();
 const selectedBanner = ref<BannerInterface | null>(null);
+const shareModalRef = ref();
 
 function openBannerModal(banner?: BannerInterface | null) {
   selectedBanner.value = banner || null;
@@ -327,6 +331,10 @@ function openBannerModal(banner?: BannerInterface | null) {
 
 function closeBannerModal() {
   selectedBanner.value = null;
+}
+
+function openShareModal(prediction: PredictionSetInterface) {
+  shareModalRef.value?.openModal(prediction);
 }
 
 function localDate(date: string | Date) {
