@@ -2,7 +2,7 @@ import packageConfig from '../../package.json';
 
 const config: ConfigInterface = {
   VERSION: packageConfig.version || '1.0.0',
-  url: 'https://app.ignitemarket.xyz/',
+  url: 'https://ignitemarket.xyz/',
   apiUrl: 'https://api.ignitemarket.xyz',
   CONDITIONAL_TOKEN_CONTRACT: '0xC3C077A248e36418eA9CC23A684aBf8677C09B58',
   ORACLE_CONTRACT: '0xdDd3124827802A8f848dbFd993fB4eb2b36ab487',
