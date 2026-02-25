@@ -389,7 +389,7 @@
                       </div>
                     </template>
                     <n-input-number
-                      :model-value="templateVariables[String(varKey)]"
+                      :value="templateVariables[String(varKey)]"
                       :placeholder="`Enter ${varDef.label.toLowerCase()}`"
                       :min="0"
                       :precision="varDef.precision ?? 2"
@@ -410,20 +410,20 @@
                       </div>
                     </template>
                     <n-input
-                      :model-value="templateVariables[String(varKey)]"
+                      :value="templateVariables[String(varKey)]"
                       :placeholder="`Enter ${varDef.label.toLowerCase()}`"
                       style="width: 100%"
                       @update:value="val => (templateVariables[String(varKey)] = val)"
                     />
                   </n-form-item>
                   <n-form-item
-                    v-else-if="varDef.type === 'select'"
+                    v-if="varDef.type === 'select'"
                     :key="'select-' + String(varKey)"
                     :label="varDef.label || String(varKey)"
                     class="mb-3"
                   >
                     <n-select
-                      :model-value="templateVariables[String(varKey)]"
+                      :value="templateVariables[String(varKey)]"
                       :options="varDef.options"
                       :default-value="varDef.default"
                       :placeholder="varDef.label ? `Select ${varDef.label.toLowerCase()}` : `Select ${String(varKey)}`"
@@ -431,19 +431,31 @@
                     />
                   </n-form-item>
                   <n-form-item
-                    v-else-if="varDef.type === 'datetime'"
+                    v-if="varDef.type === 'datetime'"
                     :key="'datetime-' + String(varKey)"
                     :label="varDef.label"
                     class="mb-3"
                   >
                     <n-date-picker
-                      :model-value="getTemplateDateValue(varKey as string)"
+                      :value="getTemplateDateValue(varKey as string)"
                       type="datetime"
                       :placeholder="`Select ${varDef.label.toLowerCase()}`"
                       update-value-on-close
                       default-time="00:00:00"
                       style="width: 100%"
                       @update:value="val => setTemplateDateValue(varKey as string, val)"
+                    />
+                  </n-form-item>
+                  <n-form-item
+                    v-if="varDef.type === 'pandascore-match'"
+                    :key="'pandascore-' + String(varKey)"
+                    :label="varDef.label"
+                    class="mb-3"
+                  >
+                    <PredictionSetAdminPandascoreMatchSearch
+                      :value="templateVariables[String(varKey)]"
+                      @update:value="val => (templateVariables[String(varKey)] = val)"
+                      @match-selected="match => onPandascoreMatchSelected(match)"
                     />
                   </n-form-item>
                 </template>
@@ -1036,6 +1048,26 @@ async function generateSuggestions() {
 
 function useSuggestion(suggestion: any) {
   form.value = JSON.parse(JSON.stringify(suggestion));
+}
+
+function onPandascoreMatchSelected(match: any) {
+  if (!match) return;
+
+  let homeTeam = '';
+  let awayTeam = '';
+
+  if (match.opponents && match.opponents.length >= 2) {
+    homeTeam = match.opponents[0]?.opponent?.name || '';
+    awayTeam = match.opponents[1]?.opponent?.name || '';
+  }
+
+  templateVariables.value = {
+    ...templateVariables.value,
+    homeTeamName: homeTeam,
+    awayTeamName: awayTeam,
+    sofascoreMatchId: null,
+    ...(match.begin_at ? { attestationTime: match.begin_at } : {}),
+  };
 }
 
 async function onTemplateSelected(templateId: string | null) {
