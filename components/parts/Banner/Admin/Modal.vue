@@ -88,7 +88,7 @@ const rules: FormRules = {
     trigger: 'blur',
   },
   button: {
-    required: true,
+    required: false,
     message: 'Please enter button text',
     trigger: 'blur',
   },
@@ -98,11 +98,10 @@ const rules: FormRules = {
     trigger: 'blur',
   },
   prediction_set_id: {
-    required: true,
-    message: 'Please enter a prediction set ID',
+    required: false,
     trigger: 'blur',
     validator: (_rule, value) => {
-      if (!value || value <= 0) {
+      if (value && value <= 0) {
         return new Error('Please enter a valid prediction set ID');
       }
       return true;
